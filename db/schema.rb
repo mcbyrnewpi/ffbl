@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150817184855) do
+ActiveRecord::Schema.define(version: 20150817191713) do
 
   create_table "levels", force: :cascade do |t|
     t.string   "league"
@@ -19,6 +19,30 @@ ActiveRecord::Schema.define(version: 20150817184855) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
+
+  create_table "player_types", force: :cascade do |t|
+    t.string   "type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "players", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "level_id"
+    t.integer  "player_type_id"
+    t.string   "last_name"
+    t.string   "first_name"
+    t.string   "position"
+    t.date     "dob"
+    t.date     "retro"
+    t.date     "activate"
+    t.datetime "created_at",     null: false
+    t.datetime "updated_at",     null: false
+  end
+
+  add_index "players", ["level_id"], name: "index_players_on_level_id"
+  add_index "players", ["player_type_id"], name: "index_players_on_player_type_id"
+  add_index "players", ["user_id"], name: "index_players_on_user_id"
 
   create_table "users", force: :cascade do |t|
     t.string   "name"
@@ -28,5 +52,7 @@ ActiveRecord::Schema.define(version: 20150817184855) do
     t.datetime "created_at",      null: false
     t.datetime "updated_at",      null: false
   end
+
+  add_index "users", ["team"], name: "index_users_on_team"
 
 end
