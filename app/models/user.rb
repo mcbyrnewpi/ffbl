@@ -1,5 +1,6 @@
 class User < ActiveRecord::Base
   has_many :players
+  has_many :levels
 
   before_save { self.email = email.downcase }
 
