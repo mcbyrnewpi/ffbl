@@ -1,0 +1,23 @@
+Franklin Fantasy Baseball Website:
+
+  The goal of this project is to create a new website for the Franklin Fantasy Baseball League.
+
+
+
+Their main needs are:
+
+  1. Static pages for general content, ie. rules, history, etc.
+  2. Dynamic pages for users to display team, info, etc.
+  3. Dynamic pages to display players.
+  4. Ability to add and drop players from MLB, 60 Day DL, AAA, AA, and A
+  5. Ability to search DB of owned players
+
+
+
+Once these are functional, additional "wants":
+
+  1. Display most recent transactions and page with "all" transactions
+  2. Display user posts to alert league of trades, etc.
+  3. Hidden/protected pages for GLCTAC members
+  4. Forum-like ability to have discussions
+
