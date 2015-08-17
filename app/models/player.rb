@@ -1,7 +1,7 @@
 class Player < ActiveRecord::Base
   belongs_to :user
   belongs_to :level
-  belongs_to :player_type
+  has_one    :player_type
 
   validates :user_id,         presence: true
   validates :level_id,        presence: true
