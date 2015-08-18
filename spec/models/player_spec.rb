@@ -6,8 +6,8 @@ RSpec.describe Player, type: :model do
     expect(FactoryGirl.create(:player)).to be_valid
   end
 
-  it "is invalid with no user_id" do
-    expect(FactoryGirl.build(:player, user_id: nil)).to_not be_valid
+  it "is valid with no user_id" do
+    expect(FactoryGirl.build(:player, user_id: nil)).to be_valid
   end
 
   it "is invalid with no level_id" do
@@ -27,7 +27,7 @@ RSpec.describe Player, type: :model do
   end
 
   it "is invalid with no position" do
-    expect(FactoryGirl.build(:player, position: nil)).to_not be_valid
+    expect(FactoryGirl.build(:player, position_id: nil)).to_not be_valid
   end
 
   it "is valid with no date of birth" do
