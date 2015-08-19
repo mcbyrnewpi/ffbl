@@ -3,6 +3,7 @@
 <h1>FFBL Sign Up Page</h1>
 
 <%= simple_form_for @user do |f| %>
+  <%= render 'shared/user_error_messages' %>
   <%= f.input :name, label: "Full Name" %>
   <%= f.input :email %>
   <%= f.input :team, label: "FFBL Team Name" %>
