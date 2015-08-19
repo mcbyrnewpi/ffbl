@@ -1,5 +1,11 @@
 Rails.application.routes.draw do
   root 'static_pages#home'
+  get  'about'              => 'static_pages#about'
+  get  'rules'              => 'static_pages#rules'
+  get  'documents'          => 'static_pages#documents'
+  get  'champions'          => 'static_pages#champions'
+  get  'player_records'     => 'static_pages#player_records'
+  get  'team_records'       => 'static_pages#team_records'
 
   resources :users
   resources :players
