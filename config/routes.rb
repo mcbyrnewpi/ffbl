@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   get  'champions'          => 'static_pages#champions'
   get  'player_records'     => 'static_pages#player_records'
   get  'team_records'       => 'static_pages#team_records'
+  get  'signup'             => 'users#new'
 
   resources :users
   resources :players
