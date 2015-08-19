@@ -1,7 +1,12 @@
 class UsersController < ApplicationController
 
   
+  def index
+    @users = User.all.order(:team)
+  end
+
   def show
+    @user = User.find(params[:id])
   end
 
   def new
@@ -21,8 +26,7 @@ class UsersController < ApplicationController
   private
 
     def user_params
-      params.require(:user).permit(:name, :email, :team, :password,
-                                   :password_confirmation)
+      params.require(:user).permit(:name, :email, :team, :password, :password_confirmation)
     end
 
 end
