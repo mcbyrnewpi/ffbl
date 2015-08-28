@@ -1,0 +1,13 @@
+<% provide(:title, "Update Team") %>
+
+<h1>Update your team's info</h1>
+
+<%= simple_form_for @user do |f| %>
+  <%= render 'shared/user_error_messages' %>
+  <%= f.input :name, label: "Full Name" %>
+  <%= f.input :email %>
+  <%= f.input :team, label: "FFBL Team Name" %>
+  <%= f.input :password %>
+  <%= f.input :password_confirmation %>
+  <%= f.submit "Save Changes", class: "btn btn-primary" %>
+<% end %>
