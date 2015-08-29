@@ -3,7 +3,6 @@ class CreatePlayers < ActiveRecord::Migration
     create_table :players do |t|
       t.references  :user,        index: true, foreign_key: true
       t.references  :level,       index: true, foreign_key: true
-      t.references  :player_type, index: true, foreign_key: true
 
       t.string      :last_name
       t.string      :first_name
