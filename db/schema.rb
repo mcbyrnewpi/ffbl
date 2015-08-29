@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150828163130) do
+ActiveRecord::Schema.define(version: 20150829161928) do
 
   create_table "levels", force: :cascade do |t|
     t.string   "league"
@@ -58,13 +58,14 @@ ActiveRecord::Schema.define(version: 20150828163130) do
     t.string   "email"
     t.string   "team"
     t.string   "password_digest"
-    t.datetime "created_at",      null: false
-    t.datetime "updated_at",      null: false
+    t.datetime "created_at",                      null: false
+    t.datetime "updated_at",                      null: false
     t.string   "remember_digest"
     t.string   "a"
     t.string   "aa"
     t.string   "aaa"
     t.text     "about"
+    t.boolean  "admin",           default: false
   end
 
   add_index "users", ["team"], name: "index_users_on_team"
