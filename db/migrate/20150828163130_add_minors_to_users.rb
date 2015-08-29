@@ -1,4 +1,4 @@
-bclass AddMinorsToUsers < ActiveRecord::Migration
+class AddMinorsToUsers < ActiveRecord::Migration
   def change
     add_column :users, :a, :string
     add_column :users, :aa, :string
