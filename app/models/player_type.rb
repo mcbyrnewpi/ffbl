@@ -1,5 +1,5 @@
 class PlayerType < ActiveRecord::Base
-  belongs_to :player
+  has_many :players
   
   validates :type, presence: true
 end
