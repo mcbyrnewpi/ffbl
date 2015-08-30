@@ -1,5 +1,5 @@
 class PositionsController < ApplicationController
-	before_action :admin_user, only: [:index, :new, :create]
+	before_action :admin_user, only: [:index, :new, :create, :destroy]
 
 	def index
 		@positions = Position.all
@@ -14,7 +14,7 @@ class PositionsController < ApplicationController
 		@position = Position.new(position_params)
 		if @position.save
 			flash.now[:success] = "New Position Created"
-			redirect_to all_positions_path
+			redirect_to positions_path
 		else
 			flash[:danger] = "Could not create position"
 			render 'new'
@@ -24,7 +24,7 @@ class PositionsController < ApplicationController
 	def destroy
 		Position.find(params[:id]).destroy
 		flash[:success] = "Position deleted"
-		redirect_to all_positions_path
+		redirect_to positions_path
 	end
 
 	private
@@ -34,7 +34,7 @@ class PositionsController < ApplicationController
     end
 
 		def admin_user
-      redirect_to(root_url) unless current_user.admin?
+      redirect_to(root_url) unless logged_in? && current_user.admin?
     end
 
 end

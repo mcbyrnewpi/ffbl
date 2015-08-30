@@ -1,0 +1,6 @@
+<%= provide(:title, "Create New Level") %>
+
+<%= simple_form_for @level do |f| %>
+	<%= f.input :league, label: "Player Level" %>
+  <%= f.button :submit, class: "btn btn-primary" %>
+<% end %>
