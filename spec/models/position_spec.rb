@@ -9,9 +9,4 @@ RSpec.describe Position, type: :model do
     expect(FactoryGirl.build(:position, spot: nil)).to_not be_valid
   end
 
-  it "is invalid witout a player id" do
-    expect(FactoryGirl.build(:position, player_id: nil)).to_not be_valid
-  end
-
-
 end

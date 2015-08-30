@@ -1,0 +1,9 @@
+<%= provide(:title, "All Positions") %>
+
+<h1>All Positions</h1>
+
+<ul>
+	<% @positions.each do |position| %>
+		<li><h3><%= position.id %>: <%= position.spot %></h3></li>
+	<% end %>
+</ul>

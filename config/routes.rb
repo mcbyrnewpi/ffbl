@@ -12,9 +12,13 @@ Rails.application.routes.draw do
   get  'login'              => 'sessions#new'
   post 'login'              => 'sessions#create'
   delete 'logout'           => 'sessions#destroy'
+  get  'add_position'       => 'positions#new'
+  post 'add_position'       => 'positions#create'
+  get  'all_positions'      => 'positions#index'
 
   resources :users
   resources :players
+  resources :positions
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

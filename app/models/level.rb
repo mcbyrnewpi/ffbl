@@ -3,5 +3,4 @@ class Level < ActiveRecord::Base
   belongs_to :user
 
   validates :league,    presence: true
-  validates :player_id, presence: true
 end

@@ -6,14 +6,6 @@ RSpec.describe Player, type: :model do
     expect(FactoryGirl.create(:player)).to be_valid
   end
 
-  it "is valid with no user_id" do
-    expect(FactoryGirl.build(:player, user_id: nil)).to be_valid
-  end
-
-  it "is invalid with no level_id" do
-    expect(FactoryGirl.build(:player, level_id: nil)).to_not be_valid    
-  end
-
   it "is invalid with no player_type_id" do
     expect(FactoryGirl.build(:player, player_type_id: nil)).to_not be_valid
   end
