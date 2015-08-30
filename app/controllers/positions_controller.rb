@@ -1,5 +1,5 @@
 class PositionsController < ApplicationController
-	#before_action :admin_user, only: [:index, :new, :create]
+	before_action :admin_user, only: [:index, :new, :create]
 
 	def index
 		@positions = Position.all
