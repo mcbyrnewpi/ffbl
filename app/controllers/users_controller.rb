@@ -18,7 +18,6 @@ class UsersController < ApplicationController
   def create
     @user = User.new(user_params)
     if @user.save
-      log_in @user
       flash[:success] = "Team Successfully Created!"
       redirect_to @user
     else
@@ -43,7 +42,7 @@ class UsersController < ApplicationController
   private
 
     def user_params
-      params.require(:user).permit(:name, :email, :team, :password, :password_confirmation, :a, :aa, :aaa, :about)
+      params.require(:user).permit(:name, :email, :team, :password, :password_confirmation, :a, :aa, :aaa, :about, :admin)
     end
 
     def logged_in_user

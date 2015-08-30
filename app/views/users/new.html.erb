@@ -9,5 +9,6 @@
   <%= f.input :team, label: "FFBL Team Name" %>
   <%= f.input :password %>
   <%= f.input :password_confirmation %>
+  <%= f.input :admin, label: "Admin user", as: :boolean, checked_value: true, unchecked_value: false %>
   <%= f.button :submit, class: "btn btn-primary" %>
 <% end %>
