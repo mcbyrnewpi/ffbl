@@ -1,0 +1,10 @@
+<%= provide(:title, "All Player Categories") %>
+
+<h1>All Player Categories</h1>
+<h4>Remove delete links once in full production</h4>
+
+<ul>
+	<% @player_types.each do |player_type| %>
+		<li><h3><%= player_type.id %> ==> <%= player_type.kind %>  |  <%= link_to "Delete category", player_type, method: :delete, data: { confirm: "Delete this category?" } %></h3></li>
+	<% end %>
+</ul>

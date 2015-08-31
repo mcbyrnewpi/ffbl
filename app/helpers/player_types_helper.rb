@@ -1,0 +1,2 @@
+module PlayerTypesHelper
+end
