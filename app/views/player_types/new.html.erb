@@ -1,6 +1,6 @@
 <%= provide(:title, "Create New Player Type") %>
 
 <%= simple_form_for @player_type do |f| %>
-	<%= f.input :kind, label: "Player Type" %>
+	<%= f.input :kind, label: "Player Category" %>
   <%= f.button :submit, class: "btn btn-primary" %>
 <% end %>
