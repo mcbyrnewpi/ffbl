@@ -18,6 +18,7 @@ Rails.application.routes.draw do
   resources :positions
   resources :levels
   resources :player_types
+  resources :players
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

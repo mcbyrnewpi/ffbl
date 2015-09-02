@@ -30,7 +30,7 @@ class LevelsController < ApplicationController
 	private
 
 		def level_params
-      params.require(:level).permit(:league)
+      params.require(:level).permit(:league, :user_id)
     end
 
 		def admin_user
