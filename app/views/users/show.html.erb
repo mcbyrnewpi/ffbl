@@ -1,3 +1,9 @@
 <%= provide(:title, @user.team) %>
 
 <h1>Page to display each individual team</h1>
+
+<ul>
+	<%= @user.players.all.order(:last_name).each do |player| %>
+		<li><%= player.position.spot + player.last_name + ", " + player.first_name %></li>
+	<% end %>
+</ul>

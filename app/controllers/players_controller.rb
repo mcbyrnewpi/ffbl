@@ -20,7 +20,7 @@ before_action :admin_user, only: [:new, :create, :edit, :update]
 			flash[:success] = "Player Successfully Created!"
 			redirect_to new_player_path
 		else
-			flash.now[:danger] = "Could not create player"
+			flash[:danger] = "Could not create player"
 			redirect_to new_player_path
 		end
 	end
