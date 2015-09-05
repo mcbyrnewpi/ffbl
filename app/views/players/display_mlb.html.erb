@@ -1,16 +1,13 @@
-<%= provide(:title, "All Players") %>
+<%= provide(:title, "MLB Database") %>
 
-<h1>All Players</h1>
+<h1>All MLB Players</h1>
 
 <ul>
-	<% @players.each do |player| %>
+	<% @players.where(level_id: 1).each do |player| %>
 	<li>
 		<%= player.last_name + ", " + player.first_name + "  --  " + player.position.spot %>
 		<% if player.user %>
 			<%= link_to player.user.team, user_path(player.user) %>
-			<% if player.level %>
-				<%= player.level.league %>
-			<% end %>
 		<% end %>
 	</li>
 	<% end %>

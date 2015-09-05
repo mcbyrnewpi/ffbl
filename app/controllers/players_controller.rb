@@ -39,10 +39,22 @@ before_action :admin_user, only: [:new, :create, :edit, :update]
     end
   end
 
+  def display_mlb
+  	@players = Player.all.order(:last_name)
+  end
+
+  def display_milb
+  	@players = Player.all.order(:last_name)
+  end
+
+  def display_sixtyday
+  	@players = Player.all.order(:last_name)
+  end
+
 	private
 
 		def player_params
-      params.require(:player).permit(:first_name, :last_name, :dob, :retro, :activate, :user_id, :position_id, :level_id, :player_type_id)
+      params.require(:player).permit(:first_name, :last_name, :dob, :retro, :activate, :user_id, :position_id, :level_id)
     end
 
 		def admin_user

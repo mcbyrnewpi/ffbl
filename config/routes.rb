@@ -12,12 +12,14 @@ Rails.application.routes.draw do
   get  'login'              => 'sessions#new'
   post 'login'              => 'sessions#create'
   delete 'logout'           => 'sessions#destroy'
+  get  'all_mlb'            => 'players#display_mlb'
+  get  'all_milb'           => 'players#display_milb'
+  get  'all_sixtyday'       => 'players#display_sixtyday'
 
   resources :users
   resources :players
   resources :positions
   resources :levels
-  resources :player_types
   resources :players
 
   # The priority is based upon order of creation: first created -> highest priority.

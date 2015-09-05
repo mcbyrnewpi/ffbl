@@ -2,8 +2,37 @@
 
 <h1>Page to display each individual team</h1>
 
+<h3>MLB Team</h3>
 <ul>
-	<%= @user.players.all.order(:last_name).each do |player| %>
-		<li><%= player.position.spot + player.last_name + ", " + player.first_name %></li>
+	<% @players.where(level_id: 1).each do |player| %>
+		<li><%= player.last_name + ", " + player.first_name + "  --  " + player.position.spot %></li>
+	<% end %>
+</ul>
+
+<h3>60 Day DL</h3>
+<ul>
+	<% @players.where(level_id: 2).each do |player| %>
+		<li><%= player.last_name + ", " + player.first_name + "  --  " + player.position.spot %></li>
+	<% end %>
+</ul>
+
+<h3>A Team</h3>
+<ul>
+	<% @user.players.where(level_id: 3).each do |player| %>
+		<li><%= player.last_name + ", " + player.first_name + "  --  " + player.position.spot %></li>
+	<% end %>
+</ul>
+
+<h3>AA Team</h3>
+<ul>
+	<% @user.players.where(level_id: 4).each do |player| %>
+		<li><%= player.last_name + ", " + player.first_name + "  --  " + player.position.spot %></li>
+	<% end %>
+</ul>
+
+<h3>AAA Team</h3>
+<ul>
+	<% @user.players.where(level_id: 5).each do |player| %>
+		<li><%= player.last_name + ", " + player.first_name + "  --  " + player.position.spot %></li>
 	<% end %>
 </ul>
