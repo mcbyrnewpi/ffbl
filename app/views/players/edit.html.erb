@@ -1,0 +1,15 @@
+<% if @player.user_id %>
+	<% provide(:title, "#{@player.first_name} #{@player.last_name}") %>
+	<% if @player.user_id == current_user.id %>
+		<h2>You can edit and update your player</h2>
+		<%= render 'edit_player_form' %>
+		
+	<% else %>
+		<h1>Player is owned by <%= @player.user.team %>... trade for him or PISS OFF!!</h1>
+	<% end %>
+
+<% else %>
+	<%provide(:title, "Add #{@player.first_name} #{@player.last_name}") %>
+	<h1>Add <%= @player.first_name %> <%= @player.last_name %></h1>
+	<%= render 'add_player_form' %>
+<% end %>

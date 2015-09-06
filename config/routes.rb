@@ -15,6 +15,7 @@ Rails.application.routes.draw do
   get  'all_mlb'            => 'players#display_mlb'
   get  'all_milb'           => 'players#display_milb'
   get  'all_sixtyday'       => 'players#display_sixtyday'
+  get  'drop_player'        => 'players#drop_player'
 
   resources :users
   resources :players

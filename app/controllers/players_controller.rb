@@ -1,5 +1,6 @@
 class PlayersController < ApplicationController
-before_action :admin_user, only: [:new, :create, :edit, :update]
+before_action :logged_in_user, only: [:edit, :update]
+before_action :admin_user, only: [:new, :create]
 
 
 	def index
@@ -33,7 +34,7 @@ before_action :admin_user, only: [:new, :create, :edit, :update]
     @player = Player.find(params[:id])
     if @player.update_attributes(player_params)
       flash[:success] = "Player successfully updated"
-      redirect_to @player
+      redirect_to @player.user
     else
       render 'edit'
     end
@@ -51,6 +52,11 @@ before_action :admin_user, only: [:new, :create, :edit, :update]
   	@players = Player.all.order(:last_name)
   end
 
+  def drop_player
+  	@player = Player.find(params[:id])
+  end
+
+
 	private
 
 		def player_params
@@ -59,5 +65,13 @@ before_action :admin_user, only: [:new, :create, :edit, :update]
 
 		def admin_user
       redirect_to(root_url) unless logged_in? && current_user.admin?
+    end
+
+    def logged_in_user
+      unless logged_in?
+        store_location
+        flash[:danger] = "Please log in."
+        redirect_to login_url
+      end
     end
 end

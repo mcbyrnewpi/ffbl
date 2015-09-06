@@ -6,7 +6,7 @@
 	<% @players.each do |player| %>
 	<li>
 		<%= player.last_name + ", " + player.first_name + "  --  " + player.position.spot %>
-		<% if player.user %>
+		<% if player.user_id %>
 			<%= link_to player.user.team, user_path(player.user) %>
 			<% if player.level %>
 				<%= player.level.league %>
