@@ -5,9 +5,9 @@
 <ul>
 	<% @players.where(level_id: 3...6).each do |player| %>
 	<li>
-		<%= player.last_name + ", " + player.first_name + "  --  " + player.position.spot %>
+		<%= player.last_name + ", " + player.first_name + "  |  " + player.position.spot %>
 		<% if player.user %>
-			<%= link_to player.user.team, user_path(player.user) %>
+			<%= link_to "  |  #{player.user.team}", user_path(player.user) %>
 			<% if player.level %>
 				<%= player.level.league %>
 			<% end %>
