@@ -1,5 +1,7 @@
 <%= simple_form_for @player do |f| %>
 	<%= f.input :user_id, :as => :hidden, :input_html => { :value => nil } %>
 	<%= f.input :level_id, :as => :hidden, :input_html => { :value => nil } %>
+	<%= f.input :retro, :as => :hidden, :input_html => { :value => nil } %>
+	<%= f.input :activate, :as => :hidden, :input_html => { :value => nil } %>
 	<%= f.button :submit, "Drop #{@player.first_name} #{@player.last_name}?", class: "btn btn-danger", data: { confirm: "Drop this player?" } %>
 <% end %>

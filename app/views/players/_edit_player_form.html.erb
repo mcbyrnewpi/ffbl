@@ -7,14 +7,19 @@
 		<%= f.input :user_id, :as => :hidden, :input_html => { :value => current_user.id } %>
 	<% end %>
 	
-	<%= f.association :level, as: :radio_buttons, :label_method => lambda { |level| "#{level.league}" }, label: "Promote or Demote to which level?" %>
-	
 	<% if !@player.retro %>
+		<%= f.association :level, as: :radio_buttons, :label_method => lambda { |level| "#{level.league}" }, label: "Promote or Demote to which level?" %>
 		<%= f.input :retro, :include_blank => true, :discard_year => true, :order => [:month, :day], label: "If 60 Day DL, date added:" %>
 		<%= f.input :activate, :include_blank => true, :discard_year => true, :order => [:month, :day], label: "If 60 Day DL, activation date:" %>
+		<%= f.button :submit, class: "btn btn-primary" %>
 	<% else %>
-		<h4><%= "Player was added to DL on #{@player.retro.strftime("%B %d")}, and needs to be activated on, or after #{@player.activate.strftime("%B %d")}" %></h4>
+		<h4><%= "Player was added to DL on #{@player.retro.strftime("%B %d")}, and should be activated on, or after #{@player.activate.strftime("%B %d")}." %></h4>
+		<%= f.input :level_id, :as => :hidden, :input_html => { :value => 1 } %>
+		<%= f.input :retro, :as => :hidden, :input_html => { :value => nil } %>
+		<%= f.input :activate, :as => :hidden, :input_html => { :value => nil } %>
+		<%= f.button :submit, "Activate #{@player.first_name} #{@player.last_name}?", class: "btn btn-primary" %>
+
 	<% end %>
 
-	<%= f.button :submit, class: "btn btn-primary" %>
+	
 	<% end %>
