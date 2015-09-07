@@ -1,7 +1,7 @@
 <% if @player.user_id %>
 	<% provide(:title, "Update #{@player.first_name} #{@player.last_name}") %>
-	<% if @player.user_id == current_user.id %>
-		<h2>You can edit and update your player</h2>
+	<% if (@player.user_id == current_user.id) || current_user.admin? %>
+		<h2><%= "Update #{@player.first_name} #{@player.last_name}'s Status" %></h2>
 		<%= render 'edit_player_form' %>
 		
 	<% else %>

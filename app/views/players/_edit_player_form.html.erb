@@ -1,5 +1,20 @@
 <%= simple_form_for @player do |f| %>
+	<% if current_user.admin? %>
+		<%= f.input :first_name, label: "First Name", :required => false %>
+		<%= f.input :last_name, label: "Last Name", :required => false %>
+		<%= f.association :user, :label_method => lambda { |user| "#{user.team}" }, label: "Team (if owned)" %>
+	<% else %>
 		<%= f.input :user_id, :as => :hidden, :input_html => { :value => current_user.id } %>
-		<%= f.association :level, as: :radio_buttons, :label_method => lambda { |level| "#{level.league}" }, label: "Promote or Demote to which level?" %>
-		<%= f.button :submit, class: "btn btn-primary" %>
+	<% end %>
+	
+	<%= f.association :level, as: :radio_buttons, :label_method => lambda { |level| "#{level.league}" }, label: "Promote or Demote to which level?" %>
+	
+	<% if !@player.retro %>
+		<%= f.input :retro, :include_blank => true, :discard_year => true, :order => [:month, :day], label: "If 60 Day DL, date added:" %>
+		<%= f.input :activate, :include_blank => true, :discard_year => true, :order => [:month, :day], label: "If 60 Day DL, activation date:" %>
+	<% else %>
+		<h4><%= "Player was added to DL on #{@player.retro.strftime("%B %d")}, and needs to be activated on, or after #{@player.activate.strftime("%B %d")}" %></h4>
+	<% end %>
+
+	<%= f.button :submit, class: "btn btn-primary" %>
 	<% end %>

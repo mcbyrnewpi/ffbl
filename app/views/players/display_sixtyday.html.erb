@@ -11,6 +11,9 @@
 		<% else %>
 			<%= link_to "  |  Add Player", add_player_path(player) %>
 		<% end %>
+		<% if player.retro && player.activate %>
+			<%= "  |  Added #{player.retro.strftime("%B %d")}  |  Activate ON or AFTER #{player.activate.strftime("%B %d")}" %>
+		<% end %>
 	</li>
 	<% end %>
 </ul>
