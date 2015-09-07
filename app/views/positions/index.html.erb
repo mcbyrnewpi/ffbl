@@ -1,10 +1,9 @@
 <%= provide(:title, "All Positions") %>
 
 <h1>All Positions</h1>
-<h4>Remove delete links once in full production</h4>
 
 <ul>
 	<% @positions.each do |position| %>
-		<li><h3><%= position.id %> ==> <%= position.spot %>  |  <%= link_to "Delete position", position, method: :delete, data: { confirm: "Delete this position?" } %></h3></li>
+		<li><h3><%= position.id %>:  <%= position.spot %></h3></li>
 	<% end %>
 </ul>

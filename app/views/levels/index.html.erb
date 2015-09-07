@@ -1,10 +1,9 @@
 <%= provide(:title, "All Levels") %>
 
 <h1>All Levels</h1>
-<h4>Remove delete links once in full production</h4>
 
 <ul>
 	<% @levels.each do |level| %>
-		<li><h3><%= level.id %> ==> <%= level.league %>  |  <%= link_to "Delete level", level, method: :delete, data: { confirm: "Delete this level?" } %></h3></li>
+		<li><h3><%= level.id %>:  <%= level.league %></h3></li>
 	<% end %>
 </ul>
