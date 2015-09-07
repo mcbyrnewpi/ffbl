@@ -3,7 +3,7 @@
 <h1>All Owned MLB Players</h1>
 
 <ul>
-	<% @players.where(level_id: 1).each do |player| %>
+	<% @players.where("level_id = 1 OR level_id = 2").each do |player| %>
 	<li>
 		<%= player.last_name + ", " + player.first_name + "  --  " + player.position.spot %>
 		<% if player.user %>
