@@ -7,10 +7,12 @@
 	<li>
 		<%= player.last_name + ", " + player.first_name + "  --  " + player.position.spot %>
 		<% if player.user_id %>
-			<%= link_to player.user.team, user_path(player.user) %>
+			<%= link_to "  |  #{player.user.team}", user_path(player.user) %>
 			<% if player.level %>
-				<%= player.level.league %>
+				<%= "  |  #{player.level.league}" %>
 			<% end %>
+		<% else %>
+			<%= link_to "  |  Add Player", add_player_path(player) %>
 		<% end %>
 	</li>
 	<% end %>

@@ -18,7 +18,7 @@ before_action :admin_user, only: [:new, :create]
 	def create
 		@player = Player.new(player_params)
 		if @player.save
-			flash[:success] = "Player Successfully Created!"
+			flash[:success] = "#{@player.first_name} #{@player.last_name} Successfully Created!"
 			redirect_to new_player_path
 		else
 			flash[:danger] = "Could not create player"
@@ -33,8 +33,8 @@ before_action :admin_user, only: [:new, :create]
 	def update
     @player = Player.find(params[:id])
     if @player.update_attributes(player_params)
-      flash[:success] = "Player successfully updated"
-      redirect_to @player.user
+      flash[:success] = "#{@player.first_name} #{@player.last_name} has been changed forever, due to your actions..."
+      redirect_to current_user
     else
       render 'edit'
     end
@@ -53,6 +53,10 @@ before_action :admin_user, only: [:new, :create]
   end
 
   def drop_player
+  	@player = Player.find(params[:id])
+  end
+
+  def add_player
   	@player = Player.find(params[:id])
   end
 

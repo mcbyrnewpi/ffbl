@@ -7,7 +7,7 @@
 <h3>MLB Team</h3>
 <ul>
 	<% @players.where(level_id: 1).each do |player| %>
-		<li><p><%= player.last_name + ", " + player.first_name + "  --  " + player.position.spot %><% if logged_in? && @user.id == current_user.id %>  |  <%= link_to "Promote/Demote", edit_player_path(player) %><% end %></p></li>
+		<li><p><%= player.last_name + ", " + player.first_name + "  --  " + player.position.spot %><% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>  |  <%= link_to "Promote/Demote", edit_player_path(player) %>  |  <%= link_to "Drop", drop_player_path(player) %><% end %></p></li>
 	<% end %>
 </ul>
 
@@ -15,27 +15,27 @@
 <h3>60 Day DL</h3>
 <ul>
 	<% @players.where(level_id: 2).each do |player| %>
-		<li><p><%= player.last_name + ", " + player.first_name + "  --  " + player.position.spot %><% if logged_in? && @user.id == current_user.id %>  |  <%= link_to "Promote/Demote", edit_player_path(player) %><% end %></p></li>
+		<li><p><%= player.last_name + ", " + player.first_name + "  --  " + player.position.spot %><% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>  |  <%= link_to "Promote/Demote", edit_player_path(player) %>  |  <%= link_to "Drop", drop_player_path(player) %><% end %></p></li>
 	<% end %>
 </ul>
 
 <h3>A Team</h3>
 <ul>
 	<% @user.players.where(level_id: 3).each do |player| %>
-		<li><p><%= player.last_name + ", " + player.first_name + "  --  " + player.position.spot %><% if logged_in? && @user.id == current_user.id %>  |  <%= link_to "Promote/Demote", edit_player_path(player) %><% end %></p></li>
+		<li><p><%= player.last_name + ", " + player.first_name + "  --  " + player.position.spot %><% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>  |  <%= link_to "Promote/Demote", edit_player_path(player) %>  |  <%= link_to "Drop", drop_player_path(player) %><% end %></p></li>
 	<% end %>
 </ul>
 
 <h3>AA Team</h3>
 <ul>
 	<% @user.players.where(level_id: 4).each do |player| %>
-		<li><p><%= player.last_name + ", " + player.first_name + "  --  " + player.position.spot %><% if logged_in? && @user.id == current_user.id %>  |  <%= link_to "Promote/Demote", edit_player_path(player) %><% end %></p></li>
+		<li><p><%= player.last_name + ", " + player.first_name + "  --  " + player.position.spot %><% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>  |  <%= link_to "Promote/Demote", edit_player_path(player) %>  |  <%= link_to "Drop", drop_player_path(player) %><% end %></p></li>
 	<% end %>
 </ul>
 
 <h3>AAA Team</h3>
 <ul>
 	<% @user.players.where(level_id: 5).each do |player| %>
-		<li><p><%= player.last_name + ", " + player.first_name + "  --  " + player.position.spot %><% if logged_in? && @user.id == current_user.id %>  |  <%= link_to "Promote/Demote", edit_player_path(player) %><% end %></p></li>
+		<li><p><%= player.last_name + ", " + player.first_name + "  --  " + player.position.spot %><% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>  |  <%= link_to "Promote/Demote", edit_player_path(player) %>  |  <%= link_to "Drop", drop_player_path(player) %><% end %></p></li>
 	<% end %>
 </ul>

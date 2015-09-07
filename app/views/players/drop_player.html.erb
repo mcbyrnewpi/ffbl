@@ -1,0 +1,10 @@
+<%= provide(:title, "Drop #{@player.first_name} #{@player.last_name}") %>
+
+<% if @player.user_id == current_user.id %>
+		<h2>Click to Confirm</h2>
+		<%= render 'drop_player_form' %>
+		<h4><%= link_to "Cancel Transaction", user_path(current_user) %></h4>
+		
+<% else %>
+	<h1>Player is owned by <%= @player.user.team %>... trade for him or PISS OFF!!</h1>
+<% end %>
