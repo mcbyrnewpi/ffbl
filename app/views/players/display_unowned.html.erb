@@ -1,0 +1,12 @@
+<%= provide(:title, "Available Player Database") %>
+
+<h1>All Available Players</h1>
+
+<ul>
+	<% @players.where(user_id: nil).each do |player| %>
+	<li>
+		<%= player.last_name + ", " + player.first_name + "  |  " + player.position.spot %>
+		<%= link_to "  |  Add Player", add_player_path(player) %>
+	</li>
+	<% end %>
+</ul>

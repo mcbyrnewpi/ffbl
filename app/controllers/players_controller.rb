@@ -52,6 +52,10 @@ before_action :admin_user, only: [:new, :create]
   	@players = Player.all.order(:last_name)
   end
 
+  def display_unowned
+  	@players = Player.all.order(:last_name)
+  end
+
   def drop_player
   	@player = Player.find(params[:id])
   end
