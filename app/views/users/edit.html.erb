@@ -4,10 +4,10 @@
 
 <%= simple_form_for @user do |f| %>
   <%= render 'shared/user_error_messages' %>
-  <%= f.input :name, label: "Full Name" %>
-  <%= f.input :email %>
-  <%= f.input :team, label: "FFBL Team Name" %>
-  <%= f.input :password %>
+  <%= f.input :name, label: "Full Name", :required => false %>
+  <%= f.input :email, :required => false %>
+  <%= f.input :team, label: "FFBL Team Name", :required => false %>
+  <%= f.input :password, :required => false %>
   <%= f.input :password_confirmation %>
   <%= f.input :a, label: "A Team Name" %>
   <%= f.input :aa, label: "AA Team Name" %>
