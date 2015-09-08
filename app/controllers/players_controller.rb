@@ -4,7 +4,11 @@ before_action :admin_user, only: [:new, :create]
 
 
 	def index
-		@players = Player.all.order(:last_name)
+		if params[:search]
+			@players = Player.where("last_name LIKE ?", "%#{params[:search]}%").order(:last_name)
+		else
+			@players = Player.all.order(:last_name)
+		end
 	end
 
 	def show

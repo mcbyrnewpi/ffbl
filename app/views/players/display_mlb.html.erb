@@ -8,7 +8,7 @@
 		<%= player.last_name + ", " + player.first_name + "  |  " + player.position.spot %>
 		<% if player.user %>
 			<%= link_to "  |  #{player.user.team}", user_path(player.user) %>
-		<% else %>
+		<% elsif logged_in? %>
 			<%= link_to "  |  Add Player", add_player_path(player) %>
 		<% end %>
 	</li>

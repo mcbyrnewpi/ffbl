@@ -6,7 +6,9 @@
 	<% @players.where(user_id: nil).each do |player| %>
 	<li>
 		<%= player.last_name + ", " + player.first_name + "  |  " + player.position.spot %>
-		<%= link_to "  |  Add Player", add_player_path(player) %>
+		<% if logged_in? %>
+			<%= link_to "  |  Add Player", add_player_path(player) %>
+		<% end %>
 	</li>
 	<% end %>
 </ul>

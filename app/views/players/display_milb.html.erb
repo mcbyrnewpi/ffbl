@@ -11,7 +11,7 @@
 			<% if player.level %>
 				<%= player.level.league %>
 			<% end %>
-		<% else %>
+		<% elsif logged_in? %>
 			<%= link_to "  |  Add Player", add_player_path(player) %>
 		<% end %>
 	</li>

@@ -1,5 +1,6 @@
 <% if logged_in? %>
-<h1>Hey there, Mr. Logged in user!</h1>
+<h1><%= "Oh Hai, #{current_user.name}!!" %></h1>
+<h3>You're officially logged in :-)</h3>
 <% else %>
   <div class="center jumbotron">
     <h1>Welcome to the Franklin Fantasy Baseball League</h1>
@@ -10,4 +11,10 @@
     
   </div>
 <% end %>
+
+<div>
+	<%= render 'players/player_search_form' %>
+</div>
+
+
 

@@ -6,4 +6,5 @@ class Player < ActiveRecord::Base
   validates :last_name,       presence: true
   validates :first_name,      presence: true
   validates :position_id,     presence: true
+
 end
