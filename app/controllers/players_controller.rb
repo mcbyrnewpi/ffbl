@@ -5,7 +5,7 @@ before_action :admin_user, only: [:new, :create]
 
 	def index
 		if params[:search]
-			@players = Player.where("last_name ILIKE ?", "%#{params[:search]}%").order(:last_name)
+			@players = Player.where("last_name ILIKE ?", "%#{(params[:search]).strip}%").order(:last_name)
 		else
 			@players = Player.all.order(:last_name)
 		end
