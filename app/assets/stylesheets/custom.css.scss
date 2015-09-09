@@ -4,6 +4,26 @@
 
 body {
   padding-top: 60px;
+  color: #cce6cc;
+}
+
+section {
+  overflow: auto;
+}
+
+.center {
+  text-align: center;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.content-container {
+  background: linear-gradient(#1919ff, #000, #1919ff);
+  border-radius: 10px;
+  border-top: 1px solid #cce6cc;
+  border-left: 2px solid #cce6cc;
 }
 
 
@@ -23,3 +43,6 @@ body {
     color: #a94442;
   }
 }
+
+/****** TABLE ******/
+
