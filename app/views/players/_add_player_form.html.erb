@@ -1,5 +1,5 @@
 <%= simple_form_for @player do |f| %>
-		<%= f.input :user_id, :as => :hidden, :input_html => { :value => current_user.id } %>
-		<%= f.association :level, as: :radio_buttons, :label_method => lambda { |level| "#{level.league}" }, label: "Add player to which level?" %>
-		<%= f.button :submit, class: "btn btn-primary" %>
-	<% end %>
+	<%= f.input :user_id, :as => :hidden, :input_html => { :value => current_user.id } %>
+	<%= f.association :level, as: :radio_buttons, :label_method => lambda { |level| "#{level.league}" }, label: "Add player to which level?" %>
+	<%= f.button :submit, class: "btn btn-primary" %>
+<% end %>
