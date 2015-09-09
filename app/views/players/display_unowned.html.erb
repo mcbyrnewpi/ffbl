@@ -1,14 +1,31 @@
 <%= provide(:title, "Available Player Database") %>
 
-<h1>All Available Players</h1>
+<div class="row center">
+	<div class="col-sm-12">
+		<h1>Available Players</h1>
+	</div>
+	<div class="col-sm-4">
+		<%= render 'players/player_search_form' %>
+	</div>
 
-<ul>
-	<% @players.where(user_id: nil).each do |player| %>
-	<li>
-		<%= player.last_name + ", " + player.first_name + "  |  " + player.position.spot %>
-		<% if logged_in? %>
-			<%= link_to "  |  Add Player", add_player_path(player) %>
+	<div class="col-sm-8">
+		<% if @players.count == 0 %>
+			<h3>There are no players matching your search.</h3>
+			<% if logged_in? %>  
+				<p>Check your spelling and try again, or email mcbyrnewpi@yahoo.com to request this player be added to your team and/or the player database.</p>
+			<% end %>
+		<% else %>
+			<table class="table table-bordered">
+				<% @players.where(user_id: nil).each do |player| %>
+					<tr>
+						<td><%= "#{player.last_name}, #{player.first_name}" %></td>
+						<td><%= player.position.spot %></td>
+						<% if logged_in? %>
+							<td><%= link_to "Add Player", add_player_path(player) %>
+						<% end %>
+					</tr>
+				<% end %>
+			</table>
 		<% end %>
-	</li>
-	<% end %>
-</ul>
+	</div>
+</div>
