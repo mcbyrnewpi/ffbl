@@ -1,3 +1,11 @@
 <%provide(:title, "Add #{@player.first_name} #{@player.last_name}") %>
-	<h1>Add <%= @player.first_name %> <%= @player.last_name %></h1>
-	<%= render 'add_player_form' %>
+<div class="container content-container">	
+	<div class="row center">
+		<div class="col-sm-12">
+			<h1>Add <%= @player.first_name %> <%= @player.last_name %>?</h1>
+		</div>
+		<div class="col-sm-6 col-sm-offset-3">
+			<%= render 'add_player_form' %>
+		</div>
+	</div>
+</div>

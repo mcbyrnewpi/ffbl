@@ -1,9 +1,17 @@
 <%= provide(:title, "All Positions") %>
-
-<h1>All Positions</h1>
-
-<ul>
-	<% @positions.each do |position| %>
-		<li><h3><%= position.id %>:  <%= position.spot %></h3></li>
-	<% end %>
-</ul>
+<div class="container content-container">
+	<div class="row center">
+		<div class="col-sm-12">
+			<h1>All Positions</h1>
+		</div>
+		<div class="col-sm-4 col-sm-offset-4">
+			<table class="table">
+				<% @positions.each do |position| %>
+				<tr>
+					<td><h3><%= position.id %>:  <%= position.spot %></h3></td>
+				</tr>
+				<% end %>
+			</table>
+		</div>
+	</div>
+</div>

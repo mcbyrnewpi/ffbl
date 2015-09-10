@@ -1,10 +1,14 @@
 <%= provide(:title, "Drop #{@player.first_name} #{@player.last_name}") %>
 
-<% if @player.user_id == current_user.id %>
-		<h2>Click to Confirm</h2>
-		<%= render 'drop_player_form' %>
-		<h4><%= link_to "Cancel Transaction", user_path(current_user) %></h4>
-		
-<% else %>
-	<h1>Player is owned by <%= @player.user.team %>... trade for him or PISS OFF!!</h1>
-<% end %>
+<div class="row content-container">
+	<% if @player.user_id == current_user.id %>
+		<div class="col-sm-12 center give-me-top-padding">
+			<h1>Choose His Destiny...</h1>
+		</div>
+		<div class="col-sm-12">
+			<%= render 'drop_player_form' %>
+		</div>		
+	<% else %>
+			<h1>Player is owned by <%= @player.user.team %>... trade for him or PISS OFF!!</h1>
+	<% end %>
+</div>

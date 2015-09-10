@@ -1,9 +1,18 @@
 <%= provide(:title, "All Teams") %>
 
-<h1>All FFBL Teams</h1>
-
-<ul>
-	<% @users.each do |user| %>
-	<li><%= link_to user.team, user_path(user) %></li>
-	<% end %>
-</ul>
+<div class= "container content-container center">
+	<div class="row">
+		<div class="col-sm-12">
+			<h1>All FFBL Teams</h1>
+		</div>
+		<div class="col-sm-4 col-sm-offset-4">
+			<table class="table">
+				<% @users.each do |user| %>
+				<tr>
+					<td><h3><%= link_to user.team, user_path(user), class: "team-link" %></h3></td>
+				</tr>
+				<% end %>
+			</table>
+		</div>
+	</div>
+</div>

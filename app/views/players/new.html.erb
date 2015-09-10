@@ -1,13 +1,14 @@
 <%= provide(:title, "Create New Player") %>
+<div class="container content-container">
+	<h1>Page to add players to DB</h1>
 
-<h1>Page to add players to DB</h1>
-
-<%= simple_form_for @player do |f| %>
-	<%= f.input :first_name, label: "First Name", :required => false %>
-	<%= f.input :last_name, label: "Last Name", :required => false %>
-	<%= f.association :position, as: :radio_buttons, :label_method => lambda { |position| "#{position.spot}" }, label: "Position (primary)", :required => false %>
-	<%= f.input :dob, :include_blank => true, :start_year => 1985, :end_year => 2015, :order => [:month, :day, :year], label: "Date of Birth (if MiLB)" %>
-	<%= f.association :user, :label_method => lambda { |user| "#{user.team}" }, label: "Team (if owned)" %>
-	<%= f.association :level, as: :radio_buttons, :label_method => lambda { |level| "#{level.league}" }, label: "League (if owned)" %>
-	<%= f.button :submit, class: "btn btn-primary" %>
-<% end %>
+	<%= simple_form_for @player do |f| %>
+		<%= f.input :first_name, label: "First Name", :required => false %>
+		<%= f.input :last_name, label: "Last Name", :required => false %>
+		<%= f.association :position, as: :radio_buttons, :label_method => lambda { |position| "#{position.spot}" }, label: "Position (primary)", :required => false %>
+		<%= f.input :dob, :include_blank => true, :start_year => 1985, :end_year => 2015, :order => [:month, :day, :year], label: "Date of Birth (if MiLB)" %>
+		<%= f.association :user, :label_method => lambda { |user| "#{user.team}" }, label: "Team (if owned)" %>
+		<%= f.association :level, as: :radio_buttons, :label_method => lambda { |level| "#{level.league}" }, label: "League (if owned)" %>
+		<%= f.button :submit, class: "btn btn-primary" %>
+	<% end %>
+</div>

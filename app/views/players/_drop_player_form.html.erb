@@ -3,5 +3,12 @@
 	<%= f.input :level_id, :as => :hidden, :input_html => { :value => nil } %>
 	<%= f.input :retro, :as => :hidden, :input_html => { :value => nil } %>
 	<%= f.input :activate, :as => :hidden, :input_html => { :value => nil } %>
-	<%= f.button :submit, "Drop #{@player.first_name} #{@player.last_name}?", class: "btn btn-danger", data: { confirm: "Drop this player?" } %>
+	<div class="row">
+		<div class="col-sm-4 col-sm-offset-2 center give-me-top-margin">
+			<%= f.button :submit, "Drop #{@player.first_name} #{@player.last_name}?", class: "btn btn-danger", data: { confirm: "Drop this player" } %>
+		</div>
+		<div class="col-sm-4 center give-me-top-margin">
+			<%= button_to "Keep #{@player.first_name} #{@player.last_name}", user_path(current_user), class: "btn btn-cancel", :method => :get %>
+		</div>
+	</div>
 <% end %>

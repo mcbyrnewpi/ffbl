@@ -1,42 +1,43 @@
 <%= provide(:title, "60 Day DL") %>
+<div class="container content-container">
+	<div class="row center">
+		<div class="col-sm-12">
+			<h1>Players on 60 Day DL</h1>
+		</div>
+		<div class="col-sm-4">
+			<%= render 'players/player_search_form' %>
+		</div>
 
-<div class="row center">
-	<div class="col-sm-12">
-		<h1>Players on 60 Day DL</h1>
-	</div>
-	<div class="col-sm-4">
-		<%= render 'players/player_search_form' %>
-	</div>
-
-	<div class="col-sm-8">
-		<% if @players.count == 0 %>
-			<h3>There are no players matching your search.</h3>
-			<% if logged_in? %>  
-				<p>Check your spelling and try again, or email mcbyrnewpi@yahoo.com to request this player be added to your team and/or the player database.</p>
-			<% end %>
-		<% else %>
-			<table class="table table-bordered">
-				<% @players.where(level_id: 2).each do |player| %>
-					<tr>
-						<td><%= "#{player.last_name}, #{player.first_name}" %></td>
-						<td><%= player.position.spot %></td>
-						<% if player.user_id %>
-							<td><%= link_to "#{player.user.team}", user_path(player.user) %></td>
-							<% if player.level %>
-								<td><%= "#{player.level.league}" %></td>
+		<div class="col-sm-8">
+			<% if @players.count == 0 %>
+				<h3>There are no players matching your search.</h3>
+				<% if logged_in? %>  
+					<p>Check your spelling and try again, or email mcbyrnewpi@yahoo.com to request this player be added to your team and/or the player database.</p>
+				<% end %>
+			<% else %>
+				<table class="table">
+					<% @players.where(level_id: 2).each do |player| %>
+						<tr>
+							<td><%= "#{player.last_name}, #{player.first_name}" %></td>
+							<td><%= player.position.spot %></td>
+							<% if player.user_id %>
+								<td><%= link_to "#{player.user.team}", user_path(player.user), class: "team-link" %></td>
+								<% if player.level %>
+									<td><%= "#{player.level.league}" %></td>
+								<% else %>
+									<td></td>
+								<% end %>
+							<% elsif logged_in? %>
+								<td><%= button_to "Add Player", add_player_path(player), class: "btn btn-add", :method => :get %>
+								<td></td>	
 							<% else %>
 								<td></td>
+								<td></td>
 							<% end %>
-						<% elsif logged_in? %>
-							<td><%= link_to "Add Player", add_player_path(player) %>
-							<td></td>	
-						<% else %>
-							<td></td>
-							<td></td>
-						<% end %>
-					</tr>
-				<% end %>
-			</table>
-		<% end %>
+						</tr>
+					<% end %>
+				</table>
+			<% end %>
+		</div>
 	</div>
 </div>

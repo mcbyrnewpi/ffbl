@@ -1,9 +1,17 @@
 <%= provide(:title, "All Levels") %>
-
-<h1>All Levels</h1>
-
-<ul>
-	<% @levels.each do |level| %>
-		<li><h3><%= level.id %>:  <%= level.league %></h3></li>
-	<% end %>
-</ul>
+<div class="container content-container">
+	<div class="row center">
+		<div class="col-sm-12">
+			<h1>All Levels</h1>
+		</div>
+		<div class="col-sm-4 col-sm-offset-4">
+			<table class="table">
+				<% @levels.each do |level| %>
+				<tr>
+					<td><h3><%= level.id %>:  <%= level.league %></h3></td>
+				</tr>
+				<% end %>
+			</table>
+		</div>
+	</div>
+</div>

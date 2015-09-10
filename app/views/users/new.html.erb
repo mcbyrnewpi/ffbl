@@ -1,5 +1,5 @@
 <% provide(:title, "Sign Up") %>
-
+<div class="container content-container">
 <h1>FFBL Sign Up Page</h1>
 
 <%= simple_form_for @user do |f| %>
@@ -12,3 +12,4 @@
   <%= f.input :admin, label: "Admin user", as: :boolean, checked_value: true, unchecked_value: false %>
   <%= f.button :submit, class: "btn btn-primary" %>
 <% end %>
+</div>

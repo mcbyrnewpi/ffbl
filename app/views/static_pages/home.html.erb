@@ -1,22 +1,30 @@
 <% if logged_in? %>
-	<div class="center jumbotron">
-		<h1><%= "Oh Hai, #{current_user.name}!!" %></h1>
-		<h3>You're officially logged in :-)</h3>
+	<div class="container content-container">
+		<div class="row">
+			<div class="center jumbotron">
+				<h1><%= "Oh Hai, #{current_user.name}!!" %></h1>
+				<h3>You're officially logged in :-)</h3>
+			</div>
+		</div>
 	</div>
 <% else %>
-  <div class="center jumbotron">
-    <h1>Welcome to the Franklin Fantasy Baseball League</h1>
-
-    <h3>Your home for competitive Fantasy Baseball</h3>
-
-    <%= link_to "Log In", login_path, class: "btn btn-lg btn-primary" %>
-    
-  </div>
+	<div class="container content-container">
+		<div class="row">
+		  <div class="center jumbotron">
+		    <h1>Welcome to the Franklin Fantasy Baseball League</h1>
+		    <h3>Your home for competitive Fantasy Baseball</h3>
+		    <%= link_to "Log In", login_path, class: "btn btn-lg btn-primary" %>
+		    
+		  </div>
+		</div>
+	</div>
 <% end %>
 
-<div class="center col-sm-12">
-	<%= render 'players/player_search_form' %>
+<div class="container content-container">
+	<div class="row">
+		<div class="center col-sm-12">
+			<%= render 'players/player_search_form' %>
+		</div>
+	</div>
 </div>
-
-
 

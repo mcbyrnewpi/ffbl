@@ -1,17 +1,18 @@
 <% provide(:title, "Update Team") %>
+<div class="container content-container">
+  <h1>Update your team's info</h1>
 
-<h1>Update your team's info</h1>
-
-<%= simple_form_for @user do |f| %>
-  <%= render 'shared/user_error_messages' %>
-  <%= f.input :name, label: "Full Name", :required => false %>
-  <%= f.input :email, :required => false %>
-  <%= f.input :team, label: "FFBL Team Name", :required => false %>
-  <%= f.input :password, :required => false %>
-  <%= f.input :password_confirmation %>
-  <%= f.input :a, label: "A Team Name" %>
-  <%= f.input :aa, label: "AA Team Name" %>
-  <%= f.input :aaa, label: "AAA Team Name" %>
-  <%= f.input :about, label: "About My Team" %>
-  <%= f.submit "Save Changes", class: "btn btn-primary" %>
-<% end %>
+  <%= simple_form_for @user do |f| %>
+    <%= render 'shared/user_error_messages' %>
+    <%= f.input :name, label: "Full Name", :required => false %>
+    <%= f.input :email, :required => false %>
+    <%= f.input :team, label: "FFBL Team Name", :required => false %>
+    <%= f.input :password, :required => false %>
+    <%= f.input :password_confirmation %>
+    <%= f.input :a, label: "A Team Name" %>
+    <%= f.input :aa, label: "AA Team Name" %>
+    <%= f.input :aaa, label: "AAA Team Name" %>
+    <%= f.input :about, label: "About My Team" %>
+    <%= f.submit "Save Changes", class: "btn btn-primary" %>
+  <% end %>
+</div>
