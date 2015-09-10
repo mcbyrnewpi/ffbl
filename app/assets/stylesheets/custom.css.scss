@@ -21,6 +21,9 @@ textarea {
 
 .content-container {
   background: linear-gradient(#1919ff, #000, #1919ff);
+  background: -webkit-linear-gradient(#1919ff, #000, #1919ff);
+  background: -o-linear-gradient(#1919ff, #000, #1919ff);
+  background: -moz-linear-gradient(#1919ff, #000, #1919ff);
   border-radius: 10px;
   border-top: 1px solid #cce6cc;
   border-left: 2px solid #cce6cc;

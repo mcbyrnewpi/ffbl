@@ -3586,6 +3586,9 @@ tbody.collapse.in {
   text-align: left;
   list-style: none;
   background: linear-gradient(#34282c, #3c3cff, #34282c);
+  background: -webkit-linear-gradient(#34282c, #3c3cff, #34282c);
+  background: -o-linear-gradient(#34282c, #3c3cff, #34282c);
+  background: -moz-linear-gradient(#34282c, #3c3cff, #34282c);
   -webkit-background-clip: padding-box;
           background-clip: padding-box;
   border: 1px solid #ccc;
@@ -3619,6 +3622,9 @@ tbody.collapse.in {
   color: #fff;
   text-decoration: none;
   background: linear-gradient(#34282c, #3c3cff, #34282c);
+  background: -webkit-linear-gradient(#34282c, #3c3cff, #34282c);
+  background: -o-linear-gradient(#34282c, #3c3cff, #34282c);
+  background: -moz-linear-gradient(#34282c, #3c3cff, #34282c);
 }
 .dropdown-menu > .active > a,
 .dropdown-menu > .active > a:hover,
@@ -4641,6 +4647,9 @@ fieldset[disabled] .navbar-default .btn-link:focus {
 }
 .navbar-inverse {
   background: linear-gradient(#000, #1919ff, #000);
+  background: -webkit-linear-gradient(#000, #1919ff, #000);
+  background: -o-linear-gradient(#000, #1919ff, #000);
+  background: -moz-linear-gradient(#000, #1919ff, #000);
   border-color: #080808;
 }
 .navbar-inverse .navbar-brand {
@@ -4687,6 +4696,9 @@ fieldset[disabled] .navbar-default .btn-link:focus {
 .navbar-inverse .navbar-toggle:hover,
 .navbar-inverse .navbar-toggle:focus {
   background: linear-gradient(#34282c, #3c3cff, #34282c);
+  background: -webkit-linear-gradient(#34282c, #3c3cff, #34282c);
+  background: -o-linear-gradient(#34282c, #3c3cff, #34282c);
+  background: -moz-linear-gradient(#34282c, #3c3cff, #34282c);
 }
 .navbar-inverse .navbar-toggle .icon-bar {
   background-color: #fff;
@@ -4700,6 +4712,9 @@ fieldset[disabled] .navbar-default .btn-link:focus {
 .navbar-inverse .navbar-nav > .open > a:focus {
   color: #fff;
   background: linear-gradient(#34282c, #3c3cff, #34282c);
+  background: -webkit-linear-gradient(#34282c, #3c3cff, #34282c);
+  background: -o-linear-gradient(#34282c, #3c3cff, #34282c);
+  background: -moz-linear-gradient(#34282c, #3c3cff, #34282c);
 }
 @media (max-width: 767px) {
   .navbar-inverse .navbar-nav .open .dropdown-menu > .dropdown-header {
