@@ -1,3 +1,5 @@
+
+<div class="container content-container">
 <% if @player.user_id %>
 	<% provide(:title, "Update #{@player.first_name} #{@player.last_name}") %>
 	<% if (@player.user_id == current_user.id) || current_user.admin? %>
@@ -8,3 +10,4 @@
 		<h1>Player is owned by <%= @player.user.team %>... trade for him or PISS OFF!!</h1>
 	<% end %>
 <% end %>
+</div>
