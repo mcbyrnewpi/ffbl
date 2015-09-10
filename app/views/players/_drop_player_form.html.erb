@@ -8,7 +8,7 @@
 			<%= f.button :submit, "Drop #{@player.first_name} #{@player.last_name}?", class: "btn btn-danger", data: { confirm: "Drop this player" } %>
 		</div>
 		<div class="col-sm-4 center give-me-top-margin">
-			<%= button_to "Keep #{@player.first_name} #{@player.last_name}", user_path(current_user), class: "btn btn-cancel", :method => :get %>
+			<%= link_to "Keep #{@player.first_name} #{@player.last_name}", user_path(current_user), class: "btn btn-cancel", :method => :get %>
 		</div>
 	</div>
 <% end %>
