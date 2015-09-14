@@ -1,10 +1,13 @@
 @import "bootstrap";
 
+
+
 /****** UNIVERSAL ******/
 
 body {
   padding-top: 60px;
   color: #cce6cc;
+  background: #191919;
 }
 
 section {
@@ -32,6 +35,9 @@ textarea {
 }
 
 
+
+
+
 /****** LAYOUT ******/
 
 .jumbotron {
@@ -57,7 +63,24 @@ textarea {
 
 .main-footer {
   margin-top: 10px;
+  padding-top: 25px;
+  li {
+    list-style-type: none;
+  }
+  a {
+    color: #cce6cc;
+    font-style: italic;
+    &:hover {
+      text-decoration: none;
+      color: #fff;
+      background: #3c3cff;
+    }
+  }
 }
+
+
+
+
 
 /****** BUTTONS ******/
 
@@ -95,6 +118,9 @@ textarea {
 }
 
 
+
+
+
 /****** LINKS ******/
 
 .team-link {
@@ -106,6 +132,10 @@ textarea {
     background: #3c3cff;
   }
 }
+
+
+
+
 
 /****** FORM ******/
 
@@ -128,9 +158,21 @@ textarea {
   color: #000;
 }
 
+
+
+
 /****** TABLE ******/
 
 .table {
   margin-top: 15px;
 }
 
+
+
+/****** CLEARFIX ******/
+
+.clearfix:after {
+  content: "";
+  display: table;
+  clear: both;
+}
