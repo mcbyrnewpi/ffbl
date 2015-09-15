@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150831160346) do
+ActiveRecord::Schema.define(version: 20150915165541) do
 
   create_table "levels", force: :cascade do |t|
     t.string   "league"
@@ -53,6 +53,20 @@ ActiveRecord::Schema.define(version: 20150831160346) do
   end
 
   add_index "positions", ["player_id"], name: "index_positions_on_player_id"
+
+  create_table "transactions", force: :cascade do |t|
+    t.string   "team_after"
+    t.string   "league_after"
+    t.integer  "user_id"
+    t.integer  "player_id"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+    t.string   "league_before"
+    t.string   "team_before"
+  end
+
+  add_index "transactions", ["player_id"], name: "index_transactions_on_player_id"
+  add_index "transactions", ["user_id"], name: "index_transactions_on_user_id"
 
   create_table "users", force: :cascade do |t|
     t.string   "name"

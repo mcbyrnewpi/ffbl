@@ -3,6 +3,7 @@ class User < ActiveRecord::Base
 
   has_many :players
   has_many :levels
+  has_many :transactions
 
   before_save { self.email = email.downcase }
 

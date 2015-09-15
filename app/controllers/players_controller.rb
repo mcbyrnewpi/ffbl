@@ -2,10 +2,9 @@ class PlayersController < ApplicationController
 before_action :logged_in_user, only: [:edit, :update]
 before_action :admin_user, only: [:new, :create]
 
-
 	def index
 		if params[:search]
-			@players = Player.where("last_name ILIKE ?", "%#{(params[:search]).strip}%").order(:last_name)
+			@players = Player.where("last_name LIKE ?", "%#{(params[:search]).strip}%").order(:last_name)
 		else
 			@players = Player.all.order(:last_name)
 		end
@@ -36,7 +35,35 @@ before_action :admin_user, only: [:new, :create]
 
 	def update
     @player = Player.find(params[:id])
+    
+    if @player.user
+    	@team_before = @player.user.team
+    else
+    	@team_before = nil
+    end
+
+    if @player.level
+    	@league_before = @player.level.league
+    else
+    	@league_before = nil
+    end
+
+
     if @player.update_attributes(player_params)
+    	if @player.user
+    		@team_after = @player.user.team
+    	else
+    		@team_after = nil
+    	end
+
+    	if @player.level
+    		@league_after = @player.level.league
+    	else
+    		@league_after = nil
+    	end
+    	
+    	@transaction = Transaction.create(:player_id => @player.id, :user_id => current_user.id, :team_before => @team_before, :team_after => @team_after, :league_before => @league_before, :league_after => @league_after)
+      
       flash[:success] = "#{@player.first_name} #{@player.last_name} has been changed forever, due to your actions..."
       redirect_to current_user
     else
