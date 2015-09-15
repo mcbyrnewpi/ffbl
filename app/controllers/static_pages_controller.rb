@@ -1,6 +1,7 @@
 class StaticPagesController < ApplicationController
   
   def home
+    @transactions = Transaction.all.order("id DESC")
   end
 
   def about

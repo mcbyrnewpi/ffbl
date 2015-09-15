@@ -50,6 +50,7 @@ before_action :admin_user, only: [:new, :create]
 
 
     if @player.update_attributes(player_params)
+    	
     	if @player.user
     		@team_after = @player.user.team
     	else

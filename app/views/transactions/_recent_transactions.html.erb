@@ -1,0 +1,5 @@
+<% @transactions.limit(25).each do |transaction| %>
+	<tr>
+		<td><%= time_ago_in_words(transaction.created_at) %>: <%= transaction.player.first_name %> <%= transaction.player.last_name %></td>
+	</tr>
+<% end %>

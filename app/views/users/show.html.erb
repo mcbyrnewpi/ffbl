@@ -1,89 +1,107 @@
 <%= provide(:title, @user.team) %>
 <div class="container">
-<div class="row content-container">
-	<div class="col-sm-8 col-sm-offset-2 center">
-		<h1><%= @user.team %></h1>
-		<h4>Managed by: <%= @user.name %></h4>
+	<div class="row content-container">
+		<div class="col-sm-8 col-sm-offset-2 center">
+			<h1><%= @user.team %></h1>
+			<h4>Managed by: <%= @user.name %></h4>
+		</div>
 	</div>
-</div>
 
-<div class="row center content-container">
-	<div class="col-sm-7">
-		<h3>MLB Roster</h3>
-		<table class="table">
-			<% @players.where(level_id: 1).order(:position_id).each do |player| %>
-				<tr>
-					<td><%= player.position.spot %></td>
-					<td><%= "#{player.first_name} #{player.last_name}" %></td>
-					<% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>
-						<td><%= button_to "Demote or DL", edit_player_path(player), :method => :get, class: "btn btn-add" %></td>
-						<td><%= button_to "Drop", drop_player_path(player), :method => :get, class: "btn btn-drop" %></td>
-					<% end %>
-				</tr>
-			<% end %>
-		</table>
+	<div class="row center content-container">
+		<div class="col-sm-7">
+			<h3>MLB Roster</h3>
+			<table class="table">
+				<% @players.where(level_id: 1).order(:position_id).each do |player| %>
+					<tr>
+						<td><%= player.position.spot %></td>
+						<td><%= "#{player.first_name} #{player.last_name}" %></td>
+						<% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>
+							<td><%= button_to "Demote or DL", edit_player_path(player), :method => :get, class: "btn btn-add" %></td>
+							<td><%= button_to "Drop", drop_player_path(player), :method => :get, class: "btn btn-drop" %></td>
+						<% end %>
+					</tr>
+				<% end %>
+			</table>
+		</div>
+		<div class="col-sm-5">
+			<h3>60 Day DL</h3>
+			<table class="table">
+				<% @players.where(level_id: 2).order(:position_id).each do |player| %>
+					<tr>
+						<td><%= player.position.spot %></td>
+						<td><%= "#{player.first_name} #{player.last_name}" %></td>
+						<% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>
+							<td><%= button_to "Demote or DL", edit_player_path(player), :method => :get, class: "btn btn-add" %></td>
+						<% end %>
+					</tr>
+				<% end %>
+			</table>
+		</div>
 	</div>
-	<div class="col-sm-5">
-		<h3>60 Day DL</h3>
-		<table class="table">
-			<% @players.where(level_id: 2).order(:position_id).each do |player| %>
-				<tr>
-					<td><%= player.position.spot %></td>
-					<td><%= "#{player.first_name} #{player.last_name}" %></td>
-					<% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>
-						<td><%= button_to "Demote or DL", edit_player_path(player), :method => :get, class: "btn btn-add" %></td>
-					<% end %>
-				</tr>
-			<% end %>
-		</table>
-	</div>
-</div>
 
-<div class="row center content-container">
-	<div class="col-sm-4">
-		<h3>A Team</h3>
-		<table class="table table-condensed">
-			<% @players.where(level_id: 3).order(:position_id).each do |player| %>
-				<tr>
-					<td><%= player.position.spot %></td>
-					<td><%= "#{player.first_name} #{player.last_name}" %></td>
-					<% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>
-						<td><%= button_to "Promote", edit_player_path(player), :method => :get, class: "btn btn-add" %></td>
-						<td><%= button_to "Drop", drop_player_path(player), :method => :get, class: "btn btn-drop" %></td>
-					<% end %>
-				</tr>
-			<% end %>
-		</table>
+	<div class="row center content-container">
+		<div class="col-sm-4">
+			<h3>A Team</h3>
+			<table class="table table-condensed">
+				<% @players.where(level_id: 3).order(:position_id).each do |player| %>
+					<tr>
+						<td><%= player.position.spot %></td>
+						<td><%= "#{player.first_name} #{player.last_name}" %></td>
+						<% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>
+							<td><%= button_to "Promote", edit_player_path(player), :method => :get, class: "btn btn-add" %></td>
+							<td><%= button_to "Drop", drop_player_path(player), :method => :get, class: "btn btn-drop" %></td>
+						<% end %>
+					</tr>
+				<% end %>
+			</table>
+		</div>
+		<div class="col-sm-4">
+			<h3>AA Team</h3>
+			<table class="table">
+				<% @players.where(level_id: 4).order(:position_id).each do |player| %>
+					<tr>
+						<td><%= player.position.spot %></td>
+						<td><%= "#{player.first_name} #{player.last_name}" %></td>
+						<% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>
+							<td><%= button_to "Promote", edit_player_path(player), :method => :get, class: "btn btn-add" %></td>
+							<td><%= button_to "Drop", drop_player_path(player), :method => :get, class: "btn btn-drop" %></td>
+						<% end %>
+					</tr>
+				<% end %>
+			</table>
+		</div>
+		<div class="col-sm-4">
+			<h3>AAA Team</h3>
+			<table class="table">
+				<% @players.where(level_id: 5).order(:position_id).each do |player| %>
+					<tr>
+						<td><%= player.position.spot %></td>
+						<td><%= "#{player.first_name} #{player.last_name}" %></td>
+						<% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>
+							<td><%= button_to "Promote", edit_player_path(player), :method => :get, class: "btn btn-add" %></td>
+							<td><%= button_to "Drop", drop_player_path(player), :method => :get, class: "btn btn-drop" %></td>
+						<% end %>
+					</tr>
+				<% end %>
+			</table>
+		</div>
 	</div>
-	<div class="col-sm-4">
-		<h3>AA Team</h3>
-		<table class="table">
-			<% @players.where(level_id: 4).order(:position_id).each do |player| %>
-				<tr>
-					<td><%= player.position.spot %></td>
-					<td><%= "#{player.first_name} #{player.last_name}" %></td>
-					<% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>
-						<td><%= button_to "Promote", edit_player_path(player), :method => :get, class: "btn btn-add" %></td>
-						<td><%= button_to "Drop", drop_player_path(player), :method => :get, class: "btn btn-drop" %></td>
+
+	<% if @transactions.count == 0 %>
+	<% else %>
+		<div class="row content-container">
+			<div class="col-sm-12 center">
+				<h1>Recent Transactions</h1>
+			</div>
+			<div class="col-sm-8 col-sm-offset-2 center">
+				<table class="table">
+					<% @transactions.limit(10).each do |transaction| %>
+						<tr>
+							<td><%= time_ago_in_words(transaction.created_at) %>: <%= transaction.player.first_name %> <%= transaction.player.last_name %></td>
+						</tr>
 					<% end %>
-				</tr>
-			<% end %>
-		</table>
-	</div>
-	<div class="col-sm-4">
-		<h3>AAA Team</h3>
-		<table class="table">
-			<% @players.where(level_id: 5).order(:position_id).each do |player| %>
-				<tr>
-					<td><%= player.position.spot %></td>
-					<td><%= "#{player.first_name} #{player.last_name}" %></td>
-					<% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>
-						<td><%= button_to "Promote", edit_player_path(player), :method => :get, class: "btn btn-add" %></td>
-						<td><%= button_to "Drop", drop_player_path(player), :method => :get, class: "btn btn-drop" %></td>
-					<% end %>
-				</tr>
-			<% end %>
-		</table>
-	</div>
-</div>
+				</table>
+			</div>
+		</div>
+	<% end %>
 </div>

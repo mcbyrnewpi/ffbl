@@ -1,0 +1,18 @@
+<%= provide(:title, "All Transactions") %>
+
+<div class= "container content-container center">
+	<div class="row">
+		<div class="col-sm-12">
+			<h1>All FFBL Website Transactions</h1>
+		</div>
+		<div class="col-sm-4 col-sm-offset-4">
+			<table class="table">
+				<% @transactions.each do |transaction| %>
+				<tr>
+					<td><%= time_ago_in_words(transaction.created_at) %> ago: <%= transaction.player.first_name %> <%= transaction.player.last_name %></td>
+				</tr>
+				<% end %>
+			</table>
+		</div>
+	</div>
+</div>
