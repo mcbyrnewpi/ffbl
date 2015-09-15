@@ -97,11 +97,7 @@
 			</div>
 			<div class="col-sm-8 col-sm-offset-2 center">
 				<table class="table">
-					<% @transactions.limit(10).each do |transaction| %>
-						<tr>
-							<td><%= time_ago_in_words(transaction.created_at) %>: <%= transaction.player.first_name %> <%= transaction.player.last_name %></td>
-						</tr>
-					<% end %>
+					<%= render 'transactions/conditional_transaction' %>
 				</table>
 			</div>
 		</div>

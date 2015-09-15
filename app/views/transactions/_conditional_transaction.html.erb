@@ -1,0 +1,14 @@
+<% @transactions.limit(10).each do |transaction| %>
+	<tr>
+		<td><%= "#{transaction.player.first_name} #{transaction.player.last_name}" %></td>
+		<% if transaction.team_before == nil && transaction.team_after != nil %>
+			<td><%= "added to #{transaction.team_after} #{transaction.league_after}" %></td>
+		<% end %>
+
+		<% if transaction.team_before != nil && transaction.team_after == nil %>
+			<td><%= "dropped by #{transaction.team_before}" %></td>
+		<% end %>
+		<td><%= time_ago_in_words(transaction.created_at) %> ago</td>
+	</tr>
+<% end %>
+
