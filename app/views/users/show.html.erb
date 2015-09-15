@@ -41,9 +41,9 @@
 
 	<div class="row center content-container">
 		<div class="col-sm-4">
-			<h3>A Team</h3>
-			<table class="table table-condensed">
-				<% @players.where(level_id: 3).order(:position_id).each do |player| %>
+			<h3>AAA Team</h3>
+			<table class="table">
+				<% @players.where(level_id: 5).order(:position_id).each do |player| %>
 					<tr>
 						<td><%= player.position.spot %></td>
 						<td><%= "#{player.first_name} #{player.last_name}" %></td>
@@ -55,6 +55,7 @@
 				<% end %>
 			</table>
 		</div>
+	
 		<div class="col-sm-4">
 			<h3>AA Team</h3>
 			<table class="table">
@@ -70,10 +71,11 @@
 				<% end %>
 			</table>
 		</div>
+		
 		<div class="col-sm-4">
-			<h3>AAA Team</h3>
-			<table class="table">
-				<% @players.where(level_id: 5).order(:position_id).each do |player| %>
+			<h3>A Team</h3>
+			<table class="table table-condensed">
+				<% @players.where(level_id: 3).order(:position_id).each do |player| %>
 					<tr>
 						<td><%= player.position.spot %></td>
 						<td><%= "#{player.first_name} #{player.last_name}" %></td>
