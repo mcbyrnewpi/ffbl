@@ -5,14 +5,42 @@
 		<div class="col-sm-12">
 			<h1>All FFBL Website Transactions</h1>
 		</div>
-		<div class="col-sm-4 col-sm-offset-4">
+		<div class="col-sm-10 col-sm-offset-1">
 			<table class="table">
 				<% @transactions.each do |transaction| %>
 				<tr>
-					<td><%= time_ago_in_words(transaction.created_at) %> ago: <%= transaction.player.first_name %> <%= transaction.player.last_name %></td>
+					<td><%= "#{transaction.player.first_name} #{transaction.player.last_name}" %></td>
+					
+					<% if transaction.team_before == nil && (transaction.league_after == "MLB" || transaction.league_after == "AAA" || transaction.league_after == "AA" || transaction.league_after == "A") %>
+						<td><%= "#{transaction.team_after}" %></td>
+						<td>ADD</td>
+						<td><%= "to #{transaction.league_after}" %></td>
+					<% end %>
+
+					<% if transaction.team_before != nil && transaction.team_after == nil %>
+						<td><%= "#{transaction.team_before}" %></td>
+						<td>DROP</td>
+						<td><%= "to FA" %></td>
+					<% end %>
+
+					<% if (transaction.league_before == "MLB" && (transaction.league_after == "AAA" || transaction.league_after == "AA" || transaction.league_after == "A")) %>
+						<td><%= "#{transaction.team_after}" %></td>
+						<td>DEMOTE</td>
+						<td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
+					<% end %>
+
+					<% if ((transaction.league_before == "A" && (transaction.league_after == "AA" || transaction.league_after == "AAA" || transaction.league_after == "MLB")) || (transaction.league_before == "AA" && (transaction.league_after == "AAA" || transaction.league_after == "MLB")) || (transaction.league_before == "AAA" && transaction.league_after == "MLB")) %>
+						<td><%= "#{transaction.team_after}" %></td>
+						<td>PROMOTE</td>
+						<td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
+					<% end %>
+
+					<td><%= time_ago_in_words(transaction.created_at) %> ago</td>
 				</tr>
 				<% end %>
+				<%= will_paginate @transactions %>
 			</table>
+			<%= will_paginate @transactions %>
 		</div>
 	</div>
 </div>
