@@ -20,6 +20,12 @@
 						<td><%= "to #{transaction.league_after}" %></td>
 					<% end %>
 
+					<% if transaction.team_before == nil && transaction.league_after == "60 Day DL" %>
+						<td><%= "#{transaction.user.name} CHEATS" %></td>
+						<td>Can't pickup and immediately 60 Day DL...</td>
+						<td>FIX IT NOW</td>
+					<% end %>
+
 					<% if transaction.team_before != nil && transaction.team_after == nil %>
 						<td><%= "#{transaction.team_before}" %></td>
 						<td>DROP</td>
