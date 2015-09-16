@@ -31,7 +31,8 @@
 						<td><%= player.position.spot %></td>
 						<td><%= "#{player.first_name} #{player.last_name}" %></td>
 						<% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>
-							<td><%= button_to "Demote or DL", edit_player_path(player), :method => :get, class: "btn btn-add" %></td>
+							<td><%= button_to "Activate", edit_player_path(player), :method => :get, class: "btn btn-add" %></td>
+							<td><%= button_to "Drop", drop_player_path(player), :method => :get, class: "btn btn-drop" %></td>
 						<% end %>
 					</tr>
 				<% end %>

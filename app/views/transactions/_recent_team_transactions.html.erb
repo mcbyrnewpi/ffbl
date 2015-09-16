@@ -7,10 +7,9 @@
 			<td><%= "to #{transaction.league_after}" %></td>
 		<% end %>
 
-		<% if transaction.team_before == nil && transaction.league_after == "60 Day DL" %>
+		<% if (transaction.team_before == nil || transaction.league_before == "A" || transaction.league_before == "AA" || transaction.league_before == "AAA") && transaction.league_after == "60 Day DL" %>
 			<td>CHEATER</td>
-			<td>Can't pickup and immediately 60 Day DL...</td>
-			<td>FIX IT NOW</td>
+			<td>Can't pickup or promote, then immediately DL...</td>
 		<% end %>
 
 		<% if transaction.team_before != nil && transaction.team_after == nil %>
@@ -18,7 +17,21 @@
 			<td><%= "to FA" %></td>
 		<% end %>
 
-		<% if (transaction.league_before == "MLB" && (transaction.league_after == "AAA" || transaction.league_after == "AA" || transaction.league_after == "A")) %>
+		<% if transaction.league_before == "MLB" && transaction.league_after == "60 Day DL" %>
+			<td>60 Day DL</td>
+			<% if transaction.player.retro && transaction.player.activate %>
+				<td><%= "#{transaction.player.retro.strftime("%B %-d")} to #{transaction.player.activate.strftime("%B %-d")}" %></td>
+			<% else %>
+				<td>Please update with dates</td>
+			<% end %>
+		<% end %>
+
+		<% if transaction.league_before == "60 Day DL" && transaction.league_after == "MLB" %>
+			<td>ACTIVATE</td>
+			<td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
+		<% end %>
+
+		<% if ((transaction.league_before == "MLB" && (transaction.league_after == "AAA" || transaction.league_after == "AA" || transaction.league_after == "A")) || (transaction.league_before == "AAA" && (transaction.league_after == "AA" || transaction.league_after == "A")) || (transaction.league_before == "AA" && (transaction.league_after == "A"))) %>
 			<td>DEMOTE</td>
 			<td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
 		<% end %>

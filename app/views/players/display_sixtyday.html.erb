@@ -27,6 +27,13 @@
 								<% else %>
 									<td></td>
 								<% end %>
+
+								<% if player.activate %>
+									<td><%= "#{player.activate.strftime("%B %-d")}" %>
+								<% else %>
+									<td>Need Dates</td>
+								<% end %>
+
 							<% elsif logged_in? %>
 								<td><%= button_to "Add Player", add_player_path(player), class: "btn btn-add", :method => :get %>
 								<td></td>	

@@ -32,11 +32,14 @@
 		<div class="col-sm-12">
 			<h1>Recent Transactions</h1>
 		</div>
-		<div class="col-sm-8 col-sm-offset-2">
-			<table class="table">
-				<%= render 'transactions/recent_transactions' %>
-			</table>
+		<div class="col-sm-4">
+			<%= render 'transactions/transaction_search_form' %>
 		</div>
+		<div class="col-sm-8">			<table class="table">
+				<%= render 'transactions/recent_transactions' %>
+		</div>
+		</table>
 	</div>
 </div>
+
 
