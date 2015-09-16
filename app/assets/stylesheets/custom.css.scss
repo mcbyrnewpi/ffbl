@@ -59,6 +59,13 @@ textarea {
   margin-top: 25px;
 }
 
+.space-my-bottom {
+  padding-bottom: 25px;
+}
+
+
+
+
 /****** FOOTER ******/
 
 .main-footer {
@@ -134,7 +141,32 @@ textarea {
 }
 
 
-
+.pagination {
+  a {
+   color: #1919ff;
+   border: 1px solid #000;
+   border-radius: 5px;
+   padding: 5px 10px;
+   margin: 0px 5px;
+   background: #cce6cc;
+   font-style: italic;
+   &:hover {
+    text-decoration: none;
+    background: #fff;
+    }
+  }
+  .current {
+    color: #3c3cff;
+    border: 1px solid #000;
+    border-radius: 5px;
+    padding: 5px 10px;
+    background: #fff;
+  } 
+  .disabled {
+    padding: 5px 10px;
+    margin: 0px 5px;
+  }
+}
 
 
 /****** FORM ******/

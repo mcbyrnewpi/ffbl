@@ -3,25 +3,21 @@
 		<td><%= "#{transaction.player.first_name} #{transaction.player.last_name}" %></td>
 		
 		<% if transaction.team_before == nil && (transaction.league_after == "MLB" || transaction.league_after == "AAA" || transaction.league_after == "AA" || transaction.league_after == "A") %>
-			<td><%= "#{transaction.team_after}" %></td>
 			<td>ADD</td>
 			<td><%= "to #{transaction.league_after}" %></td>
 		<% end %>
 
 		<% if transaction.team_before != nil && transaction.team_after == nil %>
-			<td><%= "#{transaction.team_before}" %></td>
 			<td>DROP</td>
 			<td><%= "to FA" %></td>
 		<% end %>
 
 		<% if (transaction.league_before == "MLB" && (transaction.league_after == "AAA" || transaction.league_after == "AA" || transaction.league_after == "A")) %>
-			<td><%= "#{transaction.team_after}" %></td>
 			<td>DEMOTE</td>
 			<td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
 		<% end %>
 
 		<% if ((transaction.league_before == "A" && (transaction.league_after == "AA" || transaction.league_after == "AAA" || transaction.league_after == "MLB")) || (transaction.league_before == "AA" && (transaction.league_after == "AAA" || transaction.league_after == "MLB")) || (transaction.league_before == "AAA" && transaction.league_after == "MLB")) %>
-			<td><%= "#{transaction.team_after}" %></td>
 			<td>PROMOTE</td>
 			<td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
 		<% end %>
