@@ -2,7 +2,7 @@ class TransactionsController < ApplicationController
 
 	def index
 		if params[:search]
-			@transactions = Transaction.paginate(:page => params[:page], :per_page => 10).where("team_before LIKE ? OR team_after LIKE ?", "%#{(params[:search]).strip}%", "%#{(params[:search]).strip}%").order("id DESC")
+			@transactions = Transaction.paginate(:page => params[:page], :per_page => 10).where("team_before ILIKE ? OR team_after ILIKE ?", "%#{(params[:search]).strip}%", "%#{(params[:search]).strip}%").order("id DESC")
 		else
 			@transactions = Transaction.paginate(:page => params[:page], :per_page => 25).order("id DESC")
 		end
