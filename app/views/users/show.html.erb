@@ -1,10 +1,21 @@
 <%= provide(:title, @user.team) %>
 <div class="container">
 	<div class="row content-container">
-		<div class="col-sm-8 col-sm-offset-2 center">
-			<h1><%= @user.team %></h1>
-			<h4>Managed by: <%= @user.name %></h4>
-		</div>
+		<% if !@user.about.empty? %>
+			<div class="col-sm-5">
+				<h1><%= @user.team %></h1>
+				<h4>Managed by: <%= @user.name %></h4>
+			</div>
+			<div class="col-sm-7">
+				<h3 class="center">More about us:</h3>
+				<p><%= simple_format(@user.about) %></p>
+			</div>
+		<% else %>
+			<div class="col-sm-8 col-sm-offset-2 center">
+				<h1><%= @user.team %></h1>
+				<h4>Managed by: <%= @user.name %></h4>
+			</div>
+		<% end %>
 	</div>
 
 	<div class="row center content-container">
@@ -55,6 +66,7 @@
 				<h3>STOP CHEATING PLEASE</h3>
 			</div>
 		<% end %>
+
 		<div class="col-sm-4">
 			<h3>AAA Team</h3>
 			<table class="table">
