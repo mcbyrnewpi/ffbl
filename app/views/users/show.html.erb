@@ -16,7 +16,7 @@
 			<div class="col-sm-8 col-sm-offset-2 center">
 				<h1><%= @user.team %></h1>
 				<h4>Managed by: <%= @user.name %></h4>
-				<p><%= @user.transactions.all.count %> website transactions.</p>
+				<small>(<%= @user.transactions.all.count %> website transactions made)</small>
 			</div>
 		<% end %>
 	</div>
