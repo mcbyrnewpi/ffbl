@@ -68,7 +68,7 @@ small {
 }
 
 .space-my-bottom {
-  padding-bottom: 25px;
+  margin-bottom: 25px;
 }
 
 
@@ -177,6 +177,8 @@ small {
 }
 
 
+
+
 /****** FORM ******/
 
 #error_explanation {
@@ -196,6 +198,11 @@ small {
 
 .search-text {
   color: #000;
+}
+
+.search-title {
+  font-style: italic;
+  font-size: 1em;
 }
 
 

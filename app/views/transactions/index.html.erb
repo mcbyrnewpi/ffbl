@@ -3,12 +3,8 @@
 <div class= "container content-container center">
 	<div class="row">
 		<div class="col-sm-12">
-			<h1>All FFBL Website Transactions</h1>
-		</div>
-		<div class="col-sm-4">
+			<h1 class="space-my-bottom">All FFBL Website Transactions</h1>
 			<%= render 'transaction_search_form' %>
-		</div>
-		<div class="col-sm-8">
 			<table class="table">
 				<% @transactions.each do |transaction| %>
 				<tr>
@@ -60,7 +56,7 @@
 						<td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
 					<% end %>
 
-					<td><%= time_ago_in_words(transaction.created_at) %> ago</td>
+					<td><small><%= time_ago_in_words(transaction.created_at) %> ago<small></td>
 				</tr>
 				<% end %>
 				<%= will_paginate @transactions %>

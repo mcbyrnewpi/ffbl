@@ -30,15 +30,13 @@
 <div class="container content-container">
 	<div class="row center">
 		<div class="col-sm-12">
-			<h1>Recent Transactions</h1>
-		</div>
-		<div class="col-sm-4">
-			<%= render 'transactions/transaction_search_form' %>
-		</div>
-		<div class="col-sm-8">
-			<table class="table">
-				<%= render 'transactions/recent_transactions' %>
-			</table>
+			<h1 class="space-my-bottom">Recent Transactions</h1>
+				<%= render 'transactions/transaction_search_form' %>
+			<div class="give-me-top-margin">
+				<table class="table">
+					<%= render 'transactions/recent_transactions' %>
+				</table>
+			</div>
 		</div>
 	</div>
 </div>
