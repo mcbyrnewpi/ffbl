@@ -8,6 +8,13 @@
 	</div>
 
 	<div class="row center content-container">
+		<% if @players.where(level_id: 1).count > 30 %>
+			<div class="col-sm-12 roster-warning">
+				<h3>MLB Roster is in VIOLATION!!</h3>
+				<p>The maximum MLB roster size is 30 players (including MLB DL), and you currently have <%= @players.where(level_id: 1).count %>.  If this continues, random players will be removed from your roster until you are in compliance with the rules.</p>
+				<h3>STOP CHEATING PLEASE</h3>
+			</div>
+		<% end %>
 		<div class="col-sm-7">
 			<h3>MLB Roster</h3>
 			<table class="table">
@@ -41,6 +48,13 @@
 	</div>
 
 	<div class="row center content-container">
+		<% if @players.where(level_id: 3..5).count > 18 %>
+			<div class="col-sm-12 roster-warning">
+				<h3>MiLB Roster is in VIOLATION!!</h3>
+				<p>The maximum MiLB roster size is 18 players, and you currently have <%= @players.where(level_id: 3..5).count %>.  If this continues, random players will be removed from your roster until you are in compliance with the rules.</p>
+				<h3>STOP CHEATING PLEASE</h3>
+			</div>
+		<% end %>
 		<div class="col-sm-4">
 			<h3>AAA Team</h3>
 			<table class="table">
