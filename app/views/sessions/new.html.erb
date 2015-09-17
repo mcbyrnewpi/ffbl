@@ -1,12 +1,18 @@
 <%= provide(:title, "Log In") %>
 <div class="container content-container">
-	<h1>Log in</h1>
+	<div class="row">
+		<div class="col-sm-12 center space-my-bottom">
+			<h1>Log in</h1>
+		</div>
+		<div class="col-sm-6 col-sm-offset-3">
 
-	<%= simple_form_for :session, url: login_path do |f| %>
-	  <%= f.input :email, class: "form-control", :required => false %>
-	  <%= f.input :password, class: "form-control", :required => false %>
-	  <%= f.check_box :remember_me %>
-	  <span>Remember me on this computer</span></br>
-	  <%= f.submit "Log in", class: "btn btn-primary" %>
-	<% end %>
+			<%= simple_form_for :session, url: login_path do |f| %>
+			  <%= f.input :email, class: "form-control", :required => false %>
+			  <%= f.input :password, class: "form-control", :required => false %>
+			  <%= f.check_box :remember_me %>
+			  <span>Remember me on this computer</span></br>
+			  <%= f.submit "Log in", class: "btn btn-primary" %>
+			<% end %>
+		</div>
+	</div>
 </div>
