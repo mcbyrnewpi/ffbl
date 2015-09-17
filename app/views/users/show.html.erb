@@ -1,7 +1,7 @@
 <%= provide(:title, @user.team) %>
 <div class="container">
 	<div class="row content-container">
-		<% if !@user.about.empty? %>
+		<% if !@user.about.nil? %>
 			<div class="col-sm-5">
 				<h1><%= @user.team %></h1>
 				<h4>Managed by: <%= @user.name %></h4>
@@ -68,7 +68,12 @@
 		<% end %>
 
 		<div class="col-sm-4">
-			<h3>AAA Team</h3>
+			<% if !@user.aaa.nil? %>
+				<h3><%= @user.aaa %></h3>
+				<p>AAA Team</p>
+			<% else %>
+				<h3>AAA Team</h3>
+			<% end %>
 			<table class="table">
 				<% @players.where(level_id: 5).order(:position_id).each do |player| %>
 					<tr>
@@ -84,7 +89,12 @@
 		</div>
 	
 		<div class="col-sm-4">
-			<h3>AA Team</h3>
+			<% if !@user.aa.nil? %>
+				<h3><%= @user.aa %></h3>
+				<p>AA Team</p>
+			<% else %>
+				<h3>AA Team</h3>
+			<% end %>
 			<table class="table">
 				<% @players.where(level_id: 4).order(:position_id).each do |player| %>
 					<tr>
@@ -100,7 +110,12 @@
 		</div>
 		
 		<div class="col-sm-4">
-			<h3>A Team</h3>
+			<% if !@user.a.nil? %>
+				<h3><%= @user.a %></h3>
+				<p>A Team</p>
+			<% else %>
+				<h3>A Team</h3>
+			<% end %>
 			<table class="table table-condensed">
 				<% @players.where(level_id: 3).order(:position_id).each do |player| %>
 					<tr>
