@@ -21,6 +21,10 @@ class StaticPagesController < ApplicationController
 
   def team_records
   end
+
+  def team_violations
+    @users = User.all.order(:team)
+  end
   
 end
 

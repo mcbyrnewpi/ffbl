@@ -1,0 +1,32 @@
+<% provide(:title, "Violations") %>
+
+<div class="container">
+	<div class="row content-container">
+		<div class="col-sm-8 col-sm-offset-2">
+			<h1>Check All Roster Violations</h1>
+			<table class="table">
+				<tr>
+					<th></th>
+					<th class="center">MLB</th>
+					<th class="center">MiLB</th>
+				</tr>
+				<% @users.each do |user| %>
+					<tr>
+						<td><%= user.team %></td>
+						<% if user.players.all.where(level_id: 1).count > 30 %>
+							<td class="roster-warning center">VIOLATION</td>
+						<% else %>
+							<td class="center">OK</td>
+						<% end %>
+
+						<% if user.players.all.where(level_id: 3..5).count > 18 %>
+							<td class="roster-warning center">VIOLATION</td>
+						<% else %>
+							<td class="center">OK</td>
+						<% end %>
+					</tr>
+				<% end %>
+			</table>
+		</div>
+	</div>
+</div>
