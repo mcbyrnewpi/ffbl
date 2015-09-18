@@ -1,5 +1,5 @@
 <% if current_user.players.where(level_id: 1).count > 32 || current_user.players.where(level_id: 3..5).count >20 %>
-	<h2>Your roster is in violation at this time, so you are unable to add players.  To fix this issue, stop cheating and cut your roster down to legal size.</h2>
+	<p class="give-me-top-margin">Your roster is in violation at this time, so you are unable to add players.  To fix this issue, stop cheating and cut your roster down to legal size.</p>
 <% else %>
 	<%= simple_form_for @player do |f| %>
 		<%= f.input :user_id, :as => :hidden, :input_html => { :value => current_user.id } %>
