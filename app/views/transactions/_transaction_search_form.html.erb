@@ -1,6 +1,6 @@
 <div class="space-my-bottom">
 	<h4 class="search-title">Search Transactions</h4>
-	<small class="space-my-bottom">Search by team name, player first name, last name, or id (number in parentheses)</small>
+	<small class="space-my-bottom">Search by team name, player first name, or last name</small>
 </div>
 <%= form_tag transactions_path, :method => "get" do %>
 	<%= text_field_tag :search, params[:search], placeholder: "Team or Player", class: "search-text" %>
