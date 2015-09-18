@@ -1,5 +1,9 @@
-<%= simple_form_for @player do |f| %>
-	<%= f.input :user_id, :as => :hidden, :input_html => { :value => current_user.id } %>
-	<%= f.association :level, :collection => Level.where("id != 2"), as: :radio_buttons, :label_method => lambda { |level| "#{level.league}" }, label: "To which level?" %>
-	<%= f.button :submit, "Add Player", class: "btn btn-add" %>
+<% if current_user.players.where(level_id: 1).count > 32 || current_user.players.where(level_id: 3..5).count >20 %>
+	<h2>Your roster is in violation at this time, so you are unable to add players.  To fix this issue, stop cheating and cut your roster down to legal size.</h2>
+<% else %>
+	<%= simple_form_for @player do |f| %>
+		<%= f.input :user_id, :as => :hidden, :input_html => { :value => current_user.id } %>
+		<%= f.association :level, :collection => Level.where("id != 2"), as: :radio_buttons, :label_method => lambda { |level| "#{level.league}" }, label: "To which level?" %>
+		<%= f.button :submit, "Add Player", class: "btn btn-add" %>
+	<% end %>
 <% end %>
