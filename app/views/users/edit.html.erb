@@ -1,18 +1,23 @@
 <% provide(:title, "Update Team") %>
-<div class="container content-container">
-  <h1>Update your team's info</h1>
-
-  <%= simple_form_for @user do |f| %>
-    <%= render 'shared/user_error_messages' %>
-    <%= f.input :name, label: "Full Name", :required => false %>
-    <%= f.input :email, :required => false %>
-    <%= f.input :team, label: "FFBL Team Name", :required => false %>
-    <%= f.input :password, :required => false %>
-    <%= f.input :password_confirmation %>
-    <%= f.input :a, label: "A Team Name" %>
-    <%= f.input :aa, label: "AA Team Name" %>
-    <%= f.input :aaa, label: "AAA Team Name" %>
-    <%= f.input :about, label: "About My Team" %>
-    <%= f.submit "Save Changes", class: "btn btn-primary" %>
-  <% end %>
+<div class="container content-container center">
+  <div class="row">
+    <div class="col-sm-12 space-my-bottom">
+      <h1>Update your team's info</h1>
+    </div>
+    <div class="col-sm-6 col-sm-offset-3">
+      <%= simple_form_for @user do |f| %>
+        <%= render 'shared/user_error_messages' %>
+        <%= f.input :name, label: "Full Name", :required => false %>
+        <%= f.input :email, :required => false %>
+        <%= f.input :team, label: "FFBL Team Name", :required => false %>
+        <%= f.input :password, :required => false %>
+        <%= f.input :password_confirmation %>
+        <%= f.input :a, label: "A Team Name" %>
+        <%= f.input :aa, label: "AA Team Name" %>
+        <%= f.input :aaa, label: "AAA Team Name" %>
+        <%= f.input :about, label: "About My Team" %>
+        <%= f.submit "Save Changes", class: "btn btn-cancel give-me-top-margin" %>
+      <% end %>  
+    </div>
+  </div>
 </div>

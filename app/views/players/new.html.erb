@@ -1,7 +1,7 @@
 <%= provide(:title, "Create New Player") %>
-<div class="container content-container">
+<div class="container content-container center">
 	<div class="row">
-		<div class="col-sm-12 center space-my-bottom">
+		<div class="col-sm-12 space-my-bottom">
 			<h1>Create New Player</h1>
 		</div>
 		<div class="col-sm-4 col-sm-offset-4">
@@ -12,7 +12,7 @@
 				<%= f.input :dob, :include_blank => true, :start_year => 1985, :end_year => 2015, :order => [:month, :day, :year], label: "Date of Birth (if MiLB)" %>
 				<%= f.association :user, :label_method => lambda { |user| "#{user.team}" }, label: "Team (if owned)" %>
 				<%= f.association :level, as: :radio_buttons, :label_method => lambda { |level| "#{level.league}" }, label: "League (if owned)" %>
-				<%= f.button :submit, class: "btn btn-primary" %>
+				<%= f.button :submit, class: "btn btn-cancel" %>
 			<% end %>
 		</div>
 	</div>
