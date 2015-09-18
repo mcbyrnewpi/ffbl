@@ -63,7 +63,7 @@ before_action :admin_user, only: [:new, :create]
     		@league_after = nil
     	end
     	
-    	@transaction = Transaction.create(:player_id => @player.id, :user_id => current_user.id, :team_before => @team_before, :team_after => @team_after, :league_before => @league_before, :league_after => @league_after, :player_first_name => @player.first_name, :player_last_name => @player.last_name)
+    	@transaction = Transaction.create(:player_id => @player.id, :user_id => current_user.id, :team_before => @team_before, :team_after => @team_after, :league_before => @league_before, :league_after => @league_after, :player_last_name => @player.last_name)
       
       flash[:success] = "#{@player.first_name} #{@player.last_name} has been changed forever, due to your actions..."
       redirect_to current_user
