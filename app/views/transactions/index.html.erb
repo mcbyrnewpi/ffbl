@@ -8,7 +8,7 @@
 			<table class="table">
 				<% @transactions.each do |transaction| %>
 				<tr>
-					<td><%= "#{transaction.player.first_name} #{transaction.player.last_name}" %></td>
+					<td><%= "#{transaction.player.first_name} #{transaction.player.last_name}" %><small><%= " (#{transaction.player_id})" %><small></td>
 					
 					<% if transaction.team_before == nil && (transaction.league_after == "MLB" || transaction.league_after == "AAA" || transaction.league_after == "AA" || transaction.league_after == "A") %>
 						<td><%= "#{transaction.team_after}" %></td>
