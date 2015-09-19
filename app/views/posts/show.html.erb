@@ -7,7 +7,7 @@
 		</div>
 		<div class="col-sm-11 post-content">
 			<p><%= simple_format(@post.content) %></p>
-			<small>-Created by <%= @post.user.name %> <%= @post.created_at.strftime("%l:%M %P") %> on <%= @post.created_at.strftime("%b %-d, %Y") %></small>
+			<small>-Created by <%= @post.user.name %> at <%= @post.created_at.strftime("%l:%M %P") %> on <%= @post.created_at.strftime("%b %-d, %Y") %></small>
 		</div>
 	</div>
 </div>
