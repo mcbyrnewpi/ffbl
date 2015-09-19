@@ -3,22 +3,26 @@
 <div class= "container content-container">
 	<div class="row">
 		<div class="col-sm-12">
-			<h1 class="space-my-bottom">All FFBL Message Board Posts</h1>
+			<h1 class="space-my-bottom center">All FFBL Message Board Posts</h1>
 			<table class="table">
 				<tr>
 					<th>Created</th>
 					<th>By</th>
 					<th>Topic</th>
-					<th>Responses</th>
-					<th>Most Recent Response</th>
+					<th>Replies</th>
+					<th>Most Recent</th>
 				</tr>
 				<% @posts.each do |post| %>
 					<tr>
-						<td><small><%= post.created_at.strftime("%l:%M %P") %> on <%= post.created_at.strftime("%b %-d, %Y") %></small></td>
-						<td><small><%= post.user.team %></small></td>
+						<td><small><%= post.created_at.strftime("%b %-d, %Y") %> at <%= post.created_at.strftime("%l:%M %P") %></small></td>
+						<td><small><%= link_to post.user.team, user_path(post.user), class: "team-link" %></small></td>
 						<td><%= link_to post.topic, post_path(post), class: "post-link" %></td>
-						<td><small><%= "Number of Responses" %></small></td>
-						<td><small><%= "Recent Response" %></small></td>
+						<td><small><%= post.responses.count %> replies</small></td>
+						<% if post.responses.count > 0 %>
+							<td><small><%= time_ago_in_words(post.responses.last.created_at) %> ago</small></td>
+						<% else %>
+							<td></td>
+						<% end %>
 					</tr>
 				<% end %>
 			</table>

@@ -5,6 +5,7 @@ class User < ActiveRecord::Base
   has_many :levels
   has_many :transactions
   has_many :posts
+  has_many :responses
 
   before_save { self.email = email.downcase }
 
