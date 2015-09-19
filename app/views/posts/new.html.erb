@@ -1,2 +1,11 @@
-<h1>Posts#new</h1>
-<p>Find me in app/views/posts/new.html.erb</p>
+<% provide(:title, "New Post") %>
+<div class="container content-container center">
+	<div class="row">
+		<div class="col-sm-12 space-my-bottom">
+			<h1>Create New Discussion</h1>
+		</div>
+		<div class="col-sm-8 col-sm-offset-2">
+			<%= render 'new_post_form' %>
+		</div>
+	</div>
+</div>

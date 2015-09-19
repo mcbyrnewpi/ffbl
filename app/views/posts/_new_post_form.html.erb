@@ -1,0 +1,8 @@
+<%= simple_form_for @post do |f| %>
+  <%= f.input :topic, label: "Title", :required => false %>
+  <%= f.input :content, label: "Content", :required => false %>
+  <%= f.input :user_id, :as => :hidden, :input_html => { :value => current_user.id } %>
+  <div class="center give-me-top-margin">
+  	<%= f.button :submit, class: "btn btn-cancel" %>
+  </div>
+<% end %>
