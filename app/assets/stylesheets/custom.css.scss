@@ -34,6 +34,26 @@ textarea {
   margin-bottom: 10px;
 }
 
+.post-title {
+  font-style: italic;
+  margin-bottom: 10px;
+}
+
+.post-content {
+  overflow: auto;
+  border-radius: 10px;
+  border-top: 1px solid #cce6cc;
+  border-left: 2px solid #cce6cc;
+  border-bottom: 1px solid #000;
+  border-right: 1px solid #000;
+  padding: 10px 15px;
+  margin-bottom: 10px;
+  margin-left: 10px;
+  background: #fff;
+  opacity: 0.90;
+  color: #000;
+}
+
 .roster-warning {
   background: #b80000;
   color: #000;
@@ -142,6 +162,15 @@ small {
 .team-link {
   color: #cce6cc;
   font-style: italic;
+  &:hover {
+    text-decoration: none;
+    color: #fff;
+    background: #3c3cff;
+  }
+}
+
+.post-link {
+  color: #cce6cc;
   &:hover {
     text-decoration: none;
     color: #fff;

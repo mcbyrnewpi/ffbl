@@ -24,8 +24,10 @@
 			<td>60 Day DL</td>
 			<% if transaction.player.retro && transaction.player.activate %>
 				<td><%= "#{transaction.player.retro.strftime("%B %-d")} to #{transaction.player.activate.strftime("%B %-d")}" %></td>
+				<td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
 			<% else %>
 				<td>Please update with dates</td>
+				<td></td>
 			<% end %>
 		<% end %>
 
@@ -47,6 +49,6 @@
 			<td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
 		<% end %>
 
-		<td><small><%= time_ago_in_words(transaction.created_at) %> ago</small></td>
+		<td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
 	</tr>
 <% end %>

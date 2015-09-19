@@ -1,24 +1,24 @@
 <%= provide(:title, "All Posts") %>
 
-<div class= "container content-container center">
+<div class= "container content-container">
 	<div class="row">
 		<div class="col-sm-12">
-			<h1 class="space-my-bottom">All FFBL Website Transactions</h1>
+			<h1 class="space-my-bottom">All FFBL Message Board Posts</h1>
 			<table class="table">
 				<tr>
 					<th>Created</th>
 					<th>By</th>
 					<th>Topic</th>
 					<th>Responses</th>
-					<th>Last Response</th>
+					<th>Most Recent Response</th>
 				</tr>
 				<% @posts.each do |post| %>
 					<tr>
-						<td><%= post.created_at.strftime("%b %-d, %Y") %></td>
-						<td><%= post.user.team %></td>
-						<td><%= link_to post.topic, post_path(post) %></td>
-						<td><%= "Number of Responses" %></td>
-						<td><%= "Recent Response" %></td>
+						<td><small><%= post.created_at.strftime("%l:%M %P") %> on <%= post.created_at.strftime("%b %-d, %Y") %></small></td>
+						<td><small><%= post.user.team %></small></td>
+						<td><%= link_to post.topic, post_path(post), class: "post-link" %></td>
+						<td><small><%= "Number of Responses" %></small></td>
+						<td><small><%= "Recent Response" %></small></td>
 					</tr>
 				<% end %>
 			</table>

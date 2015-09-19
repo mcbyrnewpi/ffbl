@@ -34,7 +34,7 @@ class PostsController < ApplicationController
   private
 
     def post_params
-      params.require(:post).permit(:topic, :content)
+      params.require(:post).permit(:topic, :content, :user_id)
     end
 
     def admin_user

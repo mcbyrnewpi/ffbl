@@ -41,7 +41,7 @@
 			<td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
 		<% end %>
 
-		<td><small><%= time_ago_in_words(transaction.created_at) %> ago</small></td>
+		<td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
 	</tr>
 <% end %>
 

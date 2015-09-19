@@ -1,2 +1,13 @@
-<h1>Posts#show</h1>
-<p>Find me in app/views/posts/show.html.erb</p>
+<%= provide(:title, @post.topic) %>
+
+<div class="container">
+	<div class="row content-container">
+		<div class="col-sm-6 post-title">
+			<h2><%= @post.topic %></h2>
+		</div>
+		<div class="col-sm-11 post-content">
+			<p><%= simple_format(@post.content) %></p>
+			<small>-Created by <%= @post.user.name %> <%= @post.created_at.strftime("%l:%M %P") %> on <%= @post.created_at.strftime("%b %-d, %Y") %></small>
+		</div>
+	</div>
+</div>
