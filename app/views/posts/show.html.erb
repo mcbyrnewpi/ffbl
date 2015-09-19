@@ -2,12 +2,14 @@
 
 <div class="container">
 	<div class="row content-container">
-		<div class="col-sm-6 post-title">
-			<h2><%= @post.topic %></h2>
-		</div>
+		<div class="col-sm-4 give-me-top-margin">
+		 	<%= link_to "Return to Message Board", posts_path, class: "btn btn-cancel" %>
+		 </div>
 		<div class="col-sm-11 post-content">
+			<small><%= @post.user.name %> wants to talk about </small>
+			<small>"<%= @post.topic %>"</small>
 			<p><%= simple_format(@post.content) %></p>
-			<small>-Created by <%= @post.user.name %> at <%= @post.created_at.strftime("%l:%M %P") %> on <%= @post.created_at.strftime("%b %-d, %Y") %></small>
+			<small>at <%= @post.created_at.strftime("%l:%M %P") %> on <%= @post.created_at.strftime("%b %-d, %Y") %></small>
 		</div>
 		
 		<% if @responses.count > 0 %>
@@ -19,15 +21,16 @@
 				</div>
 			<% end %>
 			<% if logged_in? %>
-				<div class="col-sm-11 give-me-top-margin">
+				<div class="col-sm-6 col-sm-offset-3 give-me-top-margin">
 					<%= render 'responses/response_form' %>
 				</div>
 			<% end %>
 		<% elsif logged_in? %>
-			<div class="col-sm-11 give-me-top-margin">
+			<div class="col-sm-6 give-me-top-margin">
 				<%= render 'responses/response_form' %>
 			</div>
 		<% else %>
 		<% end %>
 	</div>
 </div>
+
