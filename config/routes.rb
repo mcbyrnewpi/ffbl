@@ -1,4 +1,14 @@
 Rails.application.routes.draw do
+  get 'posts/index'
+
+  get 'posts/show'
+
+  get 'posts/new'
+
+  get 'posts/create'
+
+  get 'posts/destroy'
+
   get 'sessions/new'
 
   root 'static_pages#home'
@@ -28,6 +38,7 @@ Rails.application.routes.draw do
   resources :levels
   resources :players
   resources :transactions
+  resources :posts
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
