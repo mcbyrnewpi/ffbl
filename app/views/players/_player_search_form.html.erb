@@ -1,7 +1,10 @@
-<h4>Search Player Database</h4>
+<div class="space-my-bottom">
+	<h3 class="search-title">Search Player Database</h4>
+	<small>Search by player first or last name</small>
+</div>
 <%= form_tag players_path, :method => "get" do %>
 	<%= text_field_tag :search, params[:search], placeholder: "Player Name", class: "search-text" %>
-	<div class="give-me-top-margin">
+
 		<%= submit_tag "Search", :name => nil, class: "btn btn-cancel" %>
-	</div>
+
 <% end %>

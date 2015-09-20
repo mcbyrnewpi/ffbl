@@ -1,9 +1,21 @@
 <% if logged_in? %>
 	<div class="container content-container">
-		<div class="row">
-			<div class="center jumbotron">
-				<h1><%= "Oh Hai, #{current_user.name}!!" %></h1>
-				<h3>You're officially logged in :-)</h3>
+		<div class="row center">
+			<div class="jumbotron">
+				<h2>Thanks for logging in, <%= current_user.name %></h2>
+				<p>Where would you like to go?</p>
+			</div>
+			<div class="col-sm-3">
+				<p class="btn btn-lg btn-cancel"><%= link_to "View my team", user_path(current_user) %></p>
+			</div>
+			<div class="col-sm-3">
+				<p class="btn btn-lg btn-cancel"><%= link_to "Message Board", posts_path %></p>
+			</div>
+			<div class="col-sm-3">
+				<p class="btn btn-lg btn-cancel"><%= link_to "Player Database", players_path %></p>
+			</div>
+			<div class="col-sm-3">
+				<p class="btn btn-lg btn-cancel"><%= link_to "See Transactions", transactions_path %></p>
 			</div>
 		</div>
 	</div>
