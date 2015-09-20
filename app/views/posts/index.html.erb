@@ -11,20 +11,18 @@
 		<div class="col-sm-12">
 			<table class="table">
 				<tr>
-					<th>Created</th>
-					<th>By</th>
 					<th>Topic</th>
+					<th>By</th>
 					<th>Replies</th>
-					<th>Most Recent</th>
+					<th>Last Post</th>
 				</tr>
 				<% @posts.each do |post| %>
 					<tr>
-						<td><small><%= post.created_at.strftime("%b %-d, %Y") %> at <%= post.created_at.strftime("%l:%M %P") %></small></td>
-						<td><small><%= link_to post.user.team, user_path(post.user), class: "team-link" %></small></td>
 						<td><%= link_to post.topic, post_path(post), class: "post-link" %></td>
+						<td><small><%= link_to post.user.name, user_path(post.user), class: "team-link" %></small></td>
 						<td><small><%= post.responses.count %> replies</small></td>
 						<% if post.responses.count > 0 %>
-							<td><small><%= time_ago_in_words(post.responses.last.created_at) %> ago</small></td>
+							<td><small><%= post.responses.last.user.name %>, <%= time_ago_in_words(post.responses.last.created_at) %> ago</small></td>
 						<% else %>
 							<td></td>
 						<% end %>

@@ -2,6 +2,7 @@
   <%= f.input :topic, label: "Title", :required => false %>
   <%= f.input :content, label: "Content", :required => false %>
   <%= f.input :user_id, :as => :hidden, :input_html => { :value => current_user.id } %>
+  <%= f.input :most_recent, :as => :hidden, :input_html => { :value => Time.now } %>
   <div class="center give-me-top-margin">
   	<%= f.button :submit, class: "btn btn-cancel" %>
   </div>

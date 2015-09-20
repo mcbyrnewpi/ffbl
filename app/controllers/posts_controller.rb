@@ -3,7 +3,7 @@ class PostsController < ApplicationController
   before_action :admin_user, only: [:destroy]
 
   def index
-    @posts = Post.paginate(:page => params[:page], :per_page => 25).order("id DESC")
+    @posts = Post.paginate(:page => params[:page], :per_page => 25).order("most_recent DESC")
   end
 
   def show
@@ -35,7 +35,7 @@ class PostsController < ApplicationController
   private
 
     def post_params
-      params.require(:post).permit(:topic, :content, :user_id)
+      params.require(:post).permit(:topic, :content, :user_id, :most_recent)
     end
 
     def admin_user
