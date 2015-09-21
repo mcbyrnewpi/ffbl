@@ -3,23 +3,25 @@
 <div class= "container content-container">
 	<div class="row">
 		<div class="col-sm-12">
-			<h1 class="space-my-bottom center">FFBL Message Board</h1>
+			<h1 class="space-my-bottom">FFBL Message Board</h1>
 		</div>
-		<div class="col-sm-4 col-sm-offset-4 center">
+		<div class="col-sm-4">
 				<%= link_to "Create a New Topic", new_post_path, class: "btn btn-cancel" %>
+		</div>
+		<div class="col-sm-6 col-sm-offset-2">
+			<%= will_paginate @posts %>
 		</div>
 		<div class="col-sm-12">
 			<table class="table">
 				<tr>
 					<th>Topic</th>
-					<th>By</th>
 					<th>Replies</th>
-					<th>Last Post</th>
+					<th>Recent Activity</th>
 				</tr>
 				<% @posts.each do |post| %>
 					<tr>
-						<td><%= link_to post.topic, post_path(post), class: "post-link" %></td>
-						<td><small><%= link_to post.user.name, user_path(post.user), class: "team-link" %></small></td>
+						<td><h4><%= link_to post.topic, post_path(post), class: "post-link" %></h4>
+						<small> by <%= link_to post.user.name, user_path(post.user), class: "team-link" %></small></td>
 						<td><small><%= post.responses.count %> replies</small></td>
 						<% if post.responses.count > 0 %>
 							<td><small><%= post.responses.last.user.name %>, <%= time_ago_in_words(post.responses.last.created_at) %> ago</small></td>

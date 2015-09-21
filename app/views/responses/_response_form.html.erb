@@ -2,7 +2,6 @@
   <%= f.input :reply, label: "Reply:", :required => false %>
   <%= f.input :user_id, :as => :hidden, :input_html => { :value => current_user.id } %>
   <%= f.input :post_id, :as => :hidden, :input_html => { :value => @post.id } %>
-  <div class="center give-me-top-margin">
-  	<%= f.button :submit, class: "btn btn-cancel" %>
-  </div>
+  <%= f.button :submit, class: "btn btn-cancel" %>
+
 <% end %>

@@ -2,7 +2,7 @@
 
 <div class="container">
 	<div class="row content-container">
-		<div class="col-sm-4 give-me-top-margin space-my-bottom">
+		<div class="col-sm-4 give-me-top-margin">
 		 	<%= link_to "Return to Message Board....", posts_path, class: "team-link" %>
 		</div>
 		<div class="col-sm-11 post-content">
@@ -24,21 +24,23 @@
 					</div>
 				</div>
 			<% end %>
-			<div class="col-sm-12 give-me-top-margin space-my-bottom">
-			 	<%= link_to "Return to Message Board....", posts_path, class: "team-link" %>
-			</div>
 			<% if logged_in? %>
-				<div class="col-sm-6 give-me-top-margin match-response-margin">
+				<div class="col-sm-6 col-sm-offset-1 give-me-top-margin match-response-margin">
 					<%= render 'responses/response_form' %>
 				</div>
 			<% end %>
-		<% elsif logged_in? %>
-			<div class="col-sm-12 give-me-top-margin space-my-bottom">
+			<div class="col-sm-10 col-sm-offset-1 match-response-margin give-me-top-margin space-my-bottom">
 			 	<%= link_to "Return to Message Board....", posts_path, class: "team-link" %>
 			</div>
+
+		<% elsif logged_in? %>
 			<div class="col-sm-6 give-me-top-margin">
 				<%= render 'responses/response_form' %>
 			</div>
+			<div class="col-sm-12 give-me-top-margin space-my-bottom">
+			 	<%= link_to "Return to Message Board....", posts_path, class: "team-link" %>
+			</div>
+
 		<% else %>
 		<% end %>
 		

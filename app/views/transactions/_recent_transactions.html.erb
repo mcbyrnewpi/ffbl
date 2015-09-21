@@ -1,4 +1,4 @@
-<% @transactions.limit(25).each do |transaction| %>
+<% @transactions.limit(10).each do |transaction| %>
 	<tr>
 		<td><%= "#{transaction.player.first_name} #{transaction.player.last_name}" %></td>
 		
