@@ -34,6 +34,47 @@ textarea {
   margin-bottom: 10px;
 }
 
+.roster-warning {
+  background: #b80000;
+  color: #000;
+  border: 2px solid #000;
+  border-radius: 5px;
+}
+
+small {
+  font-style: italic;
+}
+
+
+/****** LAYOUT ******/
+
+.jumbotron {
+  background: transparent;
+  h1 {
+    letter-spacing: -1px;
+  }
+  h3 {
+    font-weight: 300;
+    font-style: italic;
+  }
+  margin-bottom: 10px;
+}
+
+.give-me-top-padding {
+  padding-top: 25px;
+}
+
+.give-me-top-margin {
+  margin-top: 25px;
+}
+
+.space-my-bottom {
+  margin-bottom: 25px;
+}
+
+
+/****** POSTS ******/
+
 .post-content {
   overflow: auto;
   border-radius: 10px;
@@ -77,47 +118,6 @@ textarea {
 .match-response-margin {
   margin-left: 7.667%;
 }
-
-.roster-warning {
-  background: #b80000;
-  color: #000;
-  border: 2px solid #000;
-  border-radius: 5px;
-}
-
-small {
-  font-style: italic;
-}
-
-
-/****** LAYOUT ******/
-
-.jumbotron {
-  background: transparent;
-  h1 {
-    letter-spacing: -1px;
-  }
-  h3 {
-    font-weight: 300;
-    font-style: italic;
-  }
-  margin-bottom: 10px;
-}
-
-.give-me-top-padding {
-  padding-top: 25px;
-}
-
-.give-me-top-margin {
-  margin-top: 25px;
-}
-
-.space-my-bottom {
-  margin-bottom: 25px;
-}
-
-
-
 
 /****** FOOTER ******/
 
