@@ -160,9 +160,16 @@ small {
   font-weight: 700;
   background: #cce6cc;
   margin-bottom: 10px;
+  border-right: 1px solid #000;
   &:hover {
     color: #3c3cff;
     background: #fff;
+  }
+  a {
+    color: #1919ff;
+    &:hover {
+      text-decoration: none;
+    }
   }
 }
 

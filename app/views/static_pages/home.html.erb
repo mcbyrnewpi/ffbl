@@ -5,17 +5,17 @@
 				<h2>Thanks for logging in, <%= current_user.name %></h2>
 				<p>Where would you like to go?</p>
 			</div>
-			<div class="col-sm-3">
-				<%= link_to "View my team", user_path(current_user), class: "btn btn-lg btn-cancel" %>
+			<div class="col-sm-3 btn btn-lg btn-cancel">
+				<%= link_to "View my team", user_path(current_user) %>
 			</div>
-			<div class="col-sm-3">
-				<%= link_to "Message Board", posts_path, class: "btn btn-lg btn-cancel" %>
+			<div class="col-sm-3 btn btn-lg btn-cancel">
+				<%= link_to "Message Board", posts_path %>
 			</div>
-			<div class="col-sm-3">
-				<%= link_to "Player Database", players_path, class: "btn btn-lg btn-cancel" %>
+			<div class="col-sm-3 btn btn-lg btn-cancel">
+				<%= link_to "Player Database", players_path %>
 			</div>
-			<div class="col-sm-3">
-				<%= link_to "Transactions", transactions_path, class: "btn btn-lg btn-cancel" %>
+			<div class="col-sm-3 btn btn-lg btn-cancel">
+				<%= link_to "Transactions", transactions_path %>
 			</div>
 		</div>
 	</div>
