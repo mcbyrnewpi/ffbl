@@ -5,18 +5,16 @@
 				<h3>Thanks for logging in, <%= current_user.name %>!</h3>
 				<h1>What would you like to do?</h1>
 			</div>
-			<div class="col-sm-12 center">
-				<h2><%= link_to "View my team", user_path(current_user), class: "team-link" %></h2>
-			</div>
-			<div class="col-sm-12 center">
-				<h2><%= link_to "Visit the Message Board", posts_path, class: "team-link" %></h2>
-			</div>
-			<div class="col-sm-12 center">
-				<h2><%= link_to "Check the Player Database", players_path, class: "team-link" %></h2>
-			</div>
-			<div class="col-sm-12 center">
-				<h2><%= link_to "View League Transactions", transactions_path, class: "team-link" %><h2>
-			</div>
+			<table class="table">
+				<tr>
+					<td><h2><%= link_to "View Team", user_path(current_user), class: "team-link" %></h2></td>
+					<td><h2><%= link_to "Visit Message Board", posts_path, class: "team-link" %></h2></td>
+				</tr>
+				<tr>
+					<td><h2><%= link_to "Check Player Database", players_path, class: "team-link" %></h2></td>
+					<td><h2><%= link_to "View League Transactions", transactions_path, class: "team-link" %><h2></td>
+				</tr>
+			</table>
 		</div>
 	</div>
 <% else %>

@@ -73,6 +73,9 @@ small {
 }
 
 
+
+
+
 /****** POSTS ******/
 
 .post-content {
@@ -243,6 +246,7 @@ small {
 
 /****** FORM ******/
 
+
 #error_explanation {
   color: red;
   ul {
@@ -276,7 +280,10 @@ small {
   margin-top: 15px;
 }
 
-
+.table-header {
+  background: #000;
+  opacity: 0.50;
+}
 
 /****** CLEARFIX ******/
 
