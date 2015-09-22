@@ -1,4 +1,11 @@
-<% @transactions.limit(10).each do |transaction| %>
+<tr class="table-header">
+	<th>Player</th>
+	<th>Team</th>
+	<th>Action</th>
+	<th>Details</th>
+	<th></th>
+</tr>
+<% @transactions.limit(5).each do |transaction| %>
 	<tr>
 		<td><%= "#{transaction.player.first_name} #{transaction.player.last_name}" %></td>
 		

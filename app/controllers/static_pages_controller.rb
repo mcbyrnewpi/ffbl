@@ -2,6 +2,7 @@ class StaticPagesController < ApplicationController
   
   def home
     @transactions = Transaction.all.order("id DESC")
+    @posts = Post.all.order("most_recent DESC")
   end
 
   def about

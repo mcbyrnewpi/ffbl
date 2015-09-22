@@ -1,16 +1,23 @@
 <%= provide(:title, "All Transactions") %>
 
-<div class= "container content-container center">
+<div class= "container content-container">
 	<div class="row">
-		<div class="col-sm-12">
-			<h1 class="space-my-bottom">All FFBL Website Transactions</h1>
+		<div class="col-sm-12 space-my-bottom center">
+			<h1>All FFBL Website Transactions</h1>
+		</div>
+		<div class="col-sm-4 center">
 			<%= render 'transaction_search_form' %>
+		</div>
+		<div class="col-sm-8 center give-me-top-margin">
+			<%= will_paginate @transactions %>
+		</div>
+		<div class="col-sm-12">
 			<table class="table">
-				<tr>
-					<th class="center">Player</th>
-					<th class="center">Team</th>
-					<th class="center">Action</th>
-					<th class="center">Details</th>
+				<tr class="table-header">
+					<th>Player</th>
+					<th>Team</th>
+					<th>Action</th>
+					<th>Details</th>
 					<th></th>
 				</tr>
 				<% @transactions.each do |transaction| %>
@@ -66,7 +73,6 @@
 					<td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
 				</tr>
 				<% end %>
-				<%= will_paginate @transactions %>
 			</table>
 			<%= will_paginate @transactions %>
 		</div>

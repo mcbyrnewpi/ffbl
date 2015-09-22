@@ -5,18 +5,21 @@
 				<h3>Thanks for logging in, <%= current_user.name %>!</h3>
 				<h1>What would you like to do?</h1>
 			</div>
-			<table class="table">
-				<tr>
-					<td><h2><%= link_to "View Team", user_path(current_user), class: "team-link" %></h2></td>
-					<td><h2><%= link_to "Visit Message Board", posts_path, class: "team-link" %></h2></td>
-				</tr>
-				<tr>
-					<td><h2><%= link_to "Check Player Database", players_path, class: "team-link" %></h2></td>
-					<td><h2><%= link_to "View League Transactions", transactions_path, class: "team-link" %><h2></td>
-				</tr>
-			</table>
+			<div class="col-sm-8 col-sm-offset-2">
+				<table class="table">
+					<tr>
+						<td><h2><%= link_to "View Team", user_path(current_user), class: "team-link" %></h2></td>
+						<td><h2><%= link_to "Visit Message Board", posts_path, class: "team-link" %></h2></td>
+					</tr>
+					<tr>
+						<td><h2><%= link_to "Check Player Database", players_path, class: "team-link" %></h2></td>
+						<td><h2><%= link_to "View League Transactions", transactions_path, class: "team-link" %><h2></td>
+					</tr>
+				</table>
+			</div>
 		</div>
 	</div>
+
 <% else %>
 	<div class="container content-container">
 		<div class="row">
@@ -41,14 +44,27 @@
 </div>
 
 <div class="container content-container">
-	<div class="row center">
+	<div class="row">
 		<div class="col-sm-12">
 			<h2>Recent Transactions</h2>
 			<div class="give-me-top-margin">
 				<table class="table">
 					<%= render 'transactions/recent_transactions' %>
 				</table>
+				<p><%= link_to "View all transactions....", transactions_path, class: "team-link" %></p>
 			</div>
+		</div>
+	</div>
+</div>
+
+<div class="container content-container">
+	<div class="row">
+		<div class="col-sm-12">
+			<h2>Recent Messages</h2>
+			<table class="table">
+				<%= render 'posts/recent_posts' %>
+			</table>
+			<p><%= link_to "View all posts....", posts_path, class: "team-link" %></p>
 		</div>
 	</div>
 </div>
