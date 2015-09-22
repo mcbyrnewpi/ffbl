@@ -57,16 +57,18 @@
 	</div>
 </div>
 
-<div class="container content-container">
-	<div class="row">
-		<div class="col-sm-12">
-			<h2>Recent Messages</h2>
-			<table class="table">
-				<%= render 'posts/recent_posts' %>
-			</table>
-			<p><%= link_to "View all posts....", posts_path, class: "team-link" %></p>
+<% if logged_in? %>
+	<div class="container content-container">
+		<div class="row">
+			<div class="col-sm-12">
+				<h2>Recent Posts</h2>
+				<table class="table">
+					<%= render 'posts/recent_posts' %>
+				</table>
+				<p><%= link_to "View all posts....", posts_path, class: "team-link" %></p>
+			</div>
 		</div>
 	</div>
-</div>
+<% end %>
 
 
