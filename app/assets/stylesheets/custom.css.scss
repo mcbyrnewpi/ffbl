@@ -72,6 +72,12 @@ small {
   margin-bottom: 25px;
 }
 
+@media only screen and (min-width: 768px) {
+  .relative-position {
+    position: fixed;
+  }
+}
+
 
 
 

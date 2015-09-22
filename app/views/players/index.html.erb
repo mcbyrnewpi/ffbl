@@ -1,14 +1,14 @@
 <%= provide(:title, "All Players") %>
 <div class="container content-container">
 	<div class="row">
-		<div class="col-sm-12 space-my-bottom center">
+		<div class="col-sm-8 col-sm-offset-4 space-my-bottom center">
 			<h1>Franklin Fantasy Player Database</h1>
 		</div>
-		<div class="col-sm-4 center">
+		<div class="col-sm-3 center relative-position">
 			<%= render 'players/player_search_form' %>
 		</div>
 
-		<div class="col-sm-8">
+		<div class="col-sm-8 col-sm-offset-4">
 			<% if @players.count == 0 %>
 				<h3>There are no players matching your search.</h3>
 				<% if logged_in? %>  
