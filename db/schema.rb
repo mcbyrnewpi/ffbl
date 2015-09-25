@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150920165757) do
+ActiveRecord::Schema.define(version: 20150925161653) do
 
   create_table "levels", force: :cascade do |t|
     t.string   "league"
@@ -39,6 +39,7 @@ ActiveRecord::Schema.define(version: 20150920165757) do
     t.datetime "created_at",     null: false
     t.datetime "updated_at",     null: false
     t.integer  "position_id"
+    t.text     "trade_info"
   end
 
   add_index "players", ["level_id"], name: "index_players_on_level_id"
@@ -87,6 +88,7 @@ ActiveRecord::Schema.define(version: 20150920165757) do
     t.string   "team_before"
     t.string   "player_first_name"
     t.string   "player_last_name"
+    t.text     "details"
   end
 
   add_index "transactions", ["player_id"], name: "index_transactions_on_player_id"

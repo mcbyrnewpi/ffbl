@@ -1,0 +1,19 @@
+<%= provide(:title, "View Transaction") %>
+<div class="container content-container">
+  <div class="row">
+
+  	<% if @transaction.details %>
+	    <div class="col-sm-4">
+				<h1>Trade Details:</h1>
+			</div>
+			<div class="col-sm-6 col-sm-offset-1 give-me-top-margin">
+				<p><%= simple_format(@transaction.details) %></p>
+			</div>
+		<% else %>
+			<div class="col-sm-12 center">
+				<h1 class="space-my-bottom">Why do you want to look at this transaction?</h1>
+				<p>The details were already displayed, weirdo...</p>
+			</div>
+		<% end %>
+	</div>
+</div>

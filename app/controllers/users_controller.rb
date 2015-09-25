@@ -10,7 +10,7 @@ class UsersController < ApplicationController
   def show
     @user = User.find(params[:id])
     @players = @user.players.all
-    @transactions = Transaction.where(user_id: @user.id).order("id DESC")
+    @transactions = Transaction.where("team_before = ? OR team_after = ?", @user.team, @user.team).order("id DESC")
   end
 
   def new
