@@ -126,7 +126,7 @@
 								<small><%= player.dob.strftime("%-m/%-d/%y") %></small>
 							</td>
 						<% else %>
-							<td><%= "#{player.first_name} #{player.last_name}" %></td>
+							<td class="milb-warning"><%= "#{player.first_name} #{player.last_name}" %></br><small>Needs DOB</small></td>
 						<% end %>
 						<% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>
 							<td><%= button_to "Promote", edit_player_path(player), :method => :get, class: "btn btn-add" %></td>
@@ -159,7 +159,7 @@
 								<small><%= player.dob.strftime("%-m/%-d/%y") %></small>
 							</td>
 						<% else %>
-							<td><%= "#{player.first_name} #{player.last_name}" %></td>
+							<td class="milb-warning"><%= "#{player.first_name} #{player.last_name}" %></br><small>Needs DOB</small></td>
 						<% end %>
 						<% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>
 							<td><%= button_to "Promote", edit_player_path(player), :method => :get, class: "btn btn-add" %></td>
