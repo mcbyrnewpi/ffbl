@@ -153,10 +153,14 @@
 						<tr>
 					<% end %>
 						<td><%= player.position.spot %></td>
-						<td>
-							<%= "#{player.first_name} #{player.last_name}" %></br>
-							<small><%= player.dob.strftime("%-m/%-d/%y") %></small>
-						</td>
+						<% if player.dob %>
+							<td>
+								<%= "#{player.first_name} #{player.last_name}" %></br>
+								<small><%= player.dob.strftime("%-m/%-d/%y") %></small>
+							</td>
+						<% else %>
+							<td><%= "#{player.first_name} #{player.last_name}" %></td>
+						<% end %>
 						<% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>
 							<td><%= button_to "Promote", edit_player_path(player), :method => :get, class: "btn btn-add" %></td>
 							<td><%= button_to "Drop", drop_player_path(player), :method => :get, class: "btn btn-drop" %></td>
