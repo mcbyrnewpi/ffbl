@@ -41,6 +41,13 @@ textarea {
   border-radius: 5px;
 }
 
+.milb-warning {
+  background: #b80000;
+  color: #000;
+  border: 2px solid #000;
+  border-radius: 5px;
+}
+
 small {
   font-style: italic;
 }
@@ -128,6 +135,9 @@ small {
   margin-left: 7.667%;
 }
 
+
+
+
 /****** FOOTER ******/
 
 .main-footer {
@@ -185,6 +195,7 @@ small {
 .btn-drop {
   color: #fff;
   background-color: #d9534f;
+  border: 1px solid #000;
   padding: 2px 5px;
   font-style: italic;
   margin-bottom: 10px;
