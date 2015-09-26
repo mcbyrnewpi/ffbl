@@ -2,7 +2,7 @@
 
 <div class="container">
 	<div class="row content-container">
-		<% if !@user.about.nil? %>
+		<% if !@user.about.blank? %>
 			<div class="col-sm-5">
 				<h1><%= @user.team %></h1>
 				<h4>Managed by: <%= @user.name %></h4>
