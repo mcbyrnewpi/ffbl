@@ -96,6 +96,38 @@ before_action :admin_user, only: [:new, :create]
   	@player = Player.find(params[:id])
   end
 
+  def catcher_sort
+    @players = Player.where(position_id: 1)
+  end
+
+  def all_first
+    @players = Player.where(position_id: 2)
+  end
+
+  def all_second
+    @players = Player.where(position_id: 3)
+  end
+
+  def all_third
+    @players = Player.where(position_id: 4)
+  end
+
+  def all_short
+    @players = Player.where(position_id: 5)
+  end
+
+  def all_of
+    @players = Player.where(position_id: 6)
+  end
+
+  def all_sp
+    @players = Player.where(position_id: 7)
+  end
+
+  def all_rp
+    @players = Player.where(position_id: 8)
+  end
+
 
 	private
 

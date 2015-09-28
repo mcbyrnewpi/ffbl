@@ -1,8 +1,8 @@
-<%= provide(:title, "Owned MLB Database") %>
+<%= provide(:title, "All Players") %>
 <div class="container content-container">
 	<div class="row">
 		<div class="col-sm-8 col-sm-offset-4 space-my-bottom center">
-			<h1>All Owned MLB Players</h1>
+			<h1>Franklin Fantasy Player Database</h1>
 		</div>
 		<div class="col-sm-3 center give-me-top-margin relative-position">
 			<%= render 'players/player_search_form' %>
@@ -12,21 +12,21 @@
 			<div class="row">
 				<div class="col-sm-7">
 					<small class="team-non-link">Sort by...</small>
-					<p><%= link_to "All", players_path, class: "team-link" %> | <%= link_to "Available", all_unowned_path, class: "team-link" %> | Owned MLB | <%= link_to "Owned MiLB", all_milb_path, class: "team-link" %> | <%= link_to "60 Day DL", all_sixtyday_path, class: "team-link" %></p>
+					<p><%= link_to "All", players_path, class: "team-link" %> | <%= link_to "Available", all_unowned_path, class: "team-link" %> | <%= link_to "Owned MLB", all_mlb_path, class: "team-link" %> | <%= link_to "Owned MiLB", all_milb_path, class: "team-link" %> | <%= link_to "60 Day DL", all_sixtyday_path, class: "team-link" %></p>
 				</div>
 				<div class="col-sm-5">
 					<small class="team-non-link">Or by position</small>
-					<p><%= link_to "C", all_catchers_path, class: "team-link" %> | <%= link_to "1B", all_first_path, class: "team-link" %> | <%= link_to "2B", all_second_path, class: "team-link" %> | <%= link_to "3B", all_third_path, class: "team-link" %> | <%= link_to "SS", all_short_path, class: "team-link" %> | <%= link_to "OF", all_of_path, class: "team-link" %> | <%= link_to "SP", all_sp_path, class: "team-link" %> | <%= link_to "RP", all_rp_path, class: "team-link" %></p>
+					<p class="team-non-link">C | <%= link_to "1B", all_first_path, class: "team-link" %> | <%= link_to "2B", all_second_path, class: "team-link" %> | <%= link_to "3B", all_third_path, class: "team-link" %> | <%= link_to "SS", all_short_path, class: "team-link" %> | <%= link_to "OF", all_of_path, class: "team-link" %> | <%= link_to "SP", all_sp_path, class: "team-link" %> | <%= link_to "RP", all_rp_path, class: "team-link" %></p>
 				</div>
 			</div>
 			<% if @players.count == 0 %>
 				<h3>There are no players matching your search.</h3>
 				<% if logged_in? %>  
-					<p>Check your spelling and try again, or email mcbyrnewpi@yahoo.com to request this player be added to your team and/or the player database.</p>
+					<p>Check your spelling and try again, or email ffblwebsite@gmail.com to request this player be added to your team and/or the player database.</p>
 				<% end %>
 			<% else %>
 				<table class="table">
-					<% @players.where("level_id = 1 OR level_id = 2").each do |player| %>
+					<% @players.order(:last_name).each do |player| %>
 						<tr>
 							<td><%= "#{player.last_name}, #{player.first_name}" %></td>
 							<td><%= player.position.spot %></td>

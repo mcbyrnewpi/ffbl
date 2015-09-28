@@ -9,6 +9,16 @@
 		</div>
 
 		<div class="col-sm-8 col-sm-offset-4">
+			<div class="row">
+				<div class="col-sm-7">
+					<small class="team-non-link">Sort by...</small>
+					<p>All | <%= link_to "Available", all_unowned_path, class: "team-link" %> | <%= link_to "Owned MLB", all_mlb_path, class: "team-link" %> | <%= link_to "Owned MiLB", all_milb_path, class: "team-link" %> | <%= link_to "60 Day DL", all_sixtyday_path, class: "team-link" %></p>
+				</div>
+				<div class="col-sm-5">
+					<small class="team-non-link">Or by position</small>
+					<p><%= link_to "C", all_catchers_path, class: "team-link" %> | <%= link_to "1B", all_first_path, class: "team-link" %> | <%= link_to "2B", all_second_path, class: "team-link" %> | <%= link_to "3B", all_third_path, class: "team-link" %> | <%= link_to "SS", all_short_path, class: "team-link" %> | <%= link_to "OF", all_of_path, class: "team-link" %> | <%= link_to "SP", all_sp_path, class: "team-link" %> | <%= link_to "RP", all_rp_path, class: "team-link" %></p>
+				</div>
+			</div>
 			<% if @players.count == 0 %>
 				<h3>There are no players matching your search.</h3>
 				<% if logged_in? %>  
