@@ -34,10 +34,10 @@
 		<% end %>
 
 		<% if transaction.league_before == "MLB" && transaction.league_after == "60 Day DL" %>
+			<td><%= "#{transaction.team_before}" %></td>
 			<td>60 Day DL</td>
 			<% if transaction.player.retro && transaction.player.activate %>
 				<td><%= "#{transaction.player.retro.strftime("%B %-d")} to #{transaction.player.activate.strftime("%B %-d")}" %></td>
-				<td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
 			<% else %>
 				<td>Please update with dates</td>
 				<td></td>
