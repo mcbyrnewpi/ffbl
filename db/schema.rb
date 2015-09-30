@@ -11,7 +11,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150930155855) do
+ActiveRecord::Schema.define(version: 20150930164815) do
+
+  create_table "books", force: :cascade do |t|
+    t.string   "selector"
+    t.string   "title"
+    t.string   "author"
+    t.text     "summary"
+    t.date     "start"
+    t.date     "end"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "levels", force: :cascade do |t|
     t.string   "league"
