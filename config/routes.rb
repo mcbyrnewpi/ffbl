@@ -1,4 +1,10 @@
 Rails.application.routes.draw do
+  get 'books/index'
+
+  get 'books/new'
+
+  get 'books/show'
+
   get 'posts/index'
 
   get 'posts/show'
