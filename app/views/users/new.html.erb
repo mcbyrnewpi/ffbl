@@ -12,6 +12,7 @@
 			  <%= f.input :team, label: "FFBL Team Name", :required => false %>
 			  <%= f.input :password, :required => false %>
 			  <%= f.input :password_confirmation, :required => false %>
+			  <%= f.input :glctac, label: "GLCTAC Member?", as: :boolean, checked_value: true, unchecked_value: false %>
 			  <%= f.input :admin, label: "Admin user", as: :boolean, checked_value: true, unchecked_value: false %>
 			  <%= f.button :submit, class: "btn btn-cancel" %>
 			<% end %>

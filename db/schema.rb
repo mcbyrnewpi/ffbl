@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150925161653) do
+ActiveRecord::Schema.define(version: 20150930155855) do
 
   create_table "levels", force: :cascade do |t|
     t.string   "league"
@@ -107,6 +107,7 @@ ActiveRecord::Schema.define(version: 20150925161653) do
     t.string   "aaa"
     t.text     "about"
     t.boolean  "admin",           default: false
+    t.boolean  "glctac",          default: false
   end
 
   add_index "users", ["team"], name: "index_users_on_team"
