@@ -1,50 +1,55 @@
-<%= provide(:title, @book.title) %>
+<% if !@books.empty? %>
 
-<div class="container">
-	<div class="row content-container">
-		<div class="col-sm-12">
-			<h1 class="team-non-link"><%= @book.title %></h1>
-			<p>By: <%= @book.author %></p>
-			<p><small>Selection by <%= @book.selector %>, and read between <%= @book.start.strftime("%-m/%-d/%y") %> and <%= @book.end.strftime("%-m/%-d/%y") %>.</small></p>
+	<%= provide(:title, @book.title) %>
 
-		</div>
-		<div class="col-sm-12 space-my-bottom">
-			<h2>Summary:</h2>
-			<p><%= simple_format(@book.summary) %></p>
-		</div>
+	<div class="container">
+		<div class="row content-container">
+			<div class="col-sm-12">
+				<h1 class="team-non-link"><%= @book.title %></h1>
+				<p>By: <%= @book.author %></p>
+				<p><small>Selection by <%= @book.selector %>, and read between <%= @book.start.strftime("%-m/%-d/%y") %> and <%= @book.end.strftime("%-m/%-d/%y") %>.</small></p>
 
-		<% if @reviews.count > 0 %>
-			<div class="col-sm-10 col-sm-offset-1 center">
-				<h2>GLCTAC's thoughts on the book:</h2>
 			</div>
-			<% @book.reviews.each do |review| %>
-				<div class="col-sm-10 col-sm-offset-1 response-content">
-					<small><%= review.user.name %> thinks...</small>
-					<p><%= simple_format(review.thoughts) %></p>
-					<div class="post-footer">
-						<small>at <%= review.created_at.strftime("%l:%M %P") %> on <%= review.created_at.strftime("%b %-d, %Y") %></small>
-					</div>
+			<div class="col-sm-12 space-my-bottom">
+				<h2>Summary:</h2>
+				<p><%= simple_format(@book.summary) %></p>
+			</div>
+
+			<% if @reviews.count > 0 %>
+				<div class="col-sm-10 col-sm-offset-1 center">
+					<h2>GLCTAC's thoughts on the book:</h2>
 				</div>
-			<% end %>
-			<% if logged_in? %>
-				<div class="col-sm-6 col-sm-offset-1 give-me-top-margin match-response-margin">
+				<% @book.reviews.each do |review| %>
+					<div class="col-sm-10 col-sm-offset-1 response-content">
+						<small><%= review.user.name %> thinks...</small>
+						<p><%= simple_format(review.thoughts) %></p>
+						<div class="post-footer">
+							<small>at <%= review.created_at.strftime("%l:%M %P") %> on <%= review.created_at.strftime("%b %-d, %Y") %></small>
+						</div>
+					</div>
+				<% end %>
+				<% if logged_in? %>
+					<div class="col-sm-6 col-sm-offset-1 give-me-top-margin match-response-margin">
+						<%= render 'reviews/review_form' %>
+					</div>
+				<% end %>
+				<div class="col-sm-10 col-sm-offset-1 match-response-margin give-me-top-margin space-my-bottom">
+				 	<%= link_to "Return to All Selections....", glctac_all_books_path, class: "team-link" %>
+				</div>
+
+			<% elsif logged_in? %>
+				<div class="col-sm-6 give-me-top-margin">
 					<%= render 'reviews/review_form' %>
 				</div>
+				<div class="col-sm-12 give-me-top-margin space-my-bottom">
+				 	<%= link_to "Return to All Selections....", glctac_all_books_path, class: "team-link" %>
+				</div>
+
+			<% else %>
 			<% end %>
-			<div class="col-sm-10 col-sm-offset-1 match-response-margin give-me-top-margin space-my-bottom">
-			 	<%= link_to "Return to All Selections....", glctac_all_books_path, class: "team-link" %>
-			</div>
 
-		<% elsif logged_in? %>
-			<div class="col-sm-6 give-me-top-margin">
-				<%= render 'reviews/review_form' %>
-			</div>
-			<div class="col-sm-12 give-me-top-margin space-my-bottom">
-			 	<%= link_to "Return to All Selections....", glctac_all_books_path, class: "team-link" %>
-			</div>
-
-		<% else %>
-		<% end %>
-
+		</div>
 	</div>
-</div>
+<% else %>
+	<h1> No books yet, please add one</h1>
+<% end %>

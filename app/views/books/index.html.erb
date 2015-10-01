@@ -1,54 +1,57 @@
 <%= provide(:title, "GLCTAC") %>
-
-<div class= "container content-container">
-	<div class="row">
-		<div class="jumbotron center">
-			<h2 class="team-non-link">The Gentlemen's Literary, Cigars, and Topical Amusements Club</h2>
-		</div>
-		<div class="col-sm-12 center space-my-bottom">
-			<% if logged_in? && current_user.admin? %>
-				<%= link_to "New Selection", glctac_new_path, class: "btn btn-lg btn-cancel" %>
-			<% end %>
-		</div>
-	</div>
-</div>
-
-<div class="container content-container">
-	<div class="row">
-		<div class="jumbotron center">
-			<h2>All hail the Selector...</h2>
-			<h1><%= @books.last.selector %></h1>
-		</div>
-
-		<% if !@books.empty? %>
-			<div class="col-sm-12 center space-my-bottom">
-				<h3>Current Selection:</h3>
-				<h2><%= link_to @books.last.title, book_path(@books.last), class: "team-link" %></h2>
-				<p>By: <%= @books.last.author %></p>
+<% if !@books.empty? %>
+	<div class= "container content-container">
+		<div class="row">
+			<div class="jumbotron center">
+				<h2 class="team-non-link">The Gentlemen's Literary, Cigars, and Topical Amusements Club</h2>
 			</div>
-		<% end %>
-
-		
-		<div class="col-sm-4">
-			<h3 class="center">Upcoming</h3>
-			<table class="table">
-				<tr class="table-header">
-					<th>Selectors in Waiting</th>
-				</tr>
-				<tr><td>Nick Mirto</td></tr>
-				<tr><td>Ryan Dopson</td></tr>
-				<tr><td>Jeff Varnum</td></tr>
-				<tr><td>Matt Byrne</td></tr>
-				<tr><td>Anthony DiComo</td></tr>
-				<tr><td>Thom Partridge</td></tr>
-			</table>
-		</div>
-		<div class="col-sm-7 col-sm-offset-1">
-			<h3 class="center">Past Selections</h3>
-				<table class="table">
-					<%= render 'past_selections' %>
-				</table>
-			<p><%= link_to "View all selections....", glctac_all_books_path, class: "team-link" %></p>
+			<div class="col-sm-12 center space-my-bottom">
+				<% if logged_in? && current_user.admin? %>
+					<%= link_to "New Selection", glctac_new_path, class: "btn btn-lg btn-cancel" %>
+				<% end %>
+			</div>
 		</div>
 	</div>
-</div>
+
+	<div class="container content-container">
+		<div class="row">
+			<div class="jumbotron center">
+				<h2>All hail the Selector...</h2>
+				<h1><%= @books.last.selector %></h1>
+			</div>
+
+			<% if !@books.empty? %>
+				<div class="col-sm-12 center space-my-bottom">
+					<h3>Current Selection:</h3>
+					<h2><%= link_to @books.last.title, book_path(@books.last), class: "team-link" %></h2>
+					<p>By: <%= @books.last.author %></p>
+				</div>
+			<% end %>
+
+			
+			<div class="col-sm-4">
+				<h3 class="center">Upcoming</h3>
+				<table class="table">
+					<tr class="table-header">
+						<th>Selectors in Waiting</th>
+					</tr>
+					<tr><td>Nick Mirto</td></tr>
+					<tr><td>Ryan Dopson</td></tr>
+					<tr><td>Jeff Varnum</td></tr>
+					<tr><td>Matt Byrne</td></tr>
+					<tr><td>Anthony DiComo</td></tr>
+					<tr><td>Thom Partridge</td></tr>
+				</table>
+			</div>
+			<div class="col-sm-7 col-sm-offset-1">
+				<h3 class="center">Past Selections</h3>
+					<table class="table">
+						<%= render 'past_selections' %>
+					</table>
+				<p><%= link_to "View all selections....", glctac_all_books_path, class: "team-link" %></p>
+			</div>
+		</div>
+	</div>
+<% else %>
+	<h1> No books yet, please add one</h1>
+<% end %>
