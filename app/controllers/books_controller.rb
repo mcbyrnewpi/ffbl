@@ -30,6 +30,6 @@ class BooksController < ApplicationController
     end
 
     def glctac_user
-      redirect_to(root_url) unless logged_in? && current_user.glctac = true
+      redirect_to(root_url) unless logged_in? && current_user.glctac == true
     end
 end

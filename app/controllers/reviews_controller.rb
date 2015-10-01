@@ -14,11 +14,11 @@ class ReviewsController < ApplicationController
 
 	private
 
-		def response_params
+		def review_params
       params.require(:review).permit(:thoughts, :user_id, :book_id)
     end
 
 		def glctac_user
-      redirect_to(root_url) unless logged_in? && current_user.glctac = true
+      redirect_to(root_url) unless logged_in? && current_user.glctac == true
     end
 end

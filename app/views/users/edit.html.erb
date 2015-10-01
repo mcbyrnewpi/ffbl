@@ -16,6 +16,9 @@
         <%= f.input :aa, label: "AA Team Name" %>
         <%= f.input :aaa, label: "AAA Team Name" %>
         <%= f.input :about, label: "About My Team" %>
+        <% if current_user.admin? %>
+          <%= f.input :glctac, label: "GLCTAC Member?", as: :boolean, checked_value: true, unchecked_value: false %>
+        <% end %>
         <%= f.submit "Save Changes", class: "btn btn-cancel give-me-top-margin" %>
       <% end %>  
     </div>
