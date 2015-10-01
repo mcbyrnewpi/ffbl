@@ -1,5 +1,5 @@
 class BooksController < ApplicationController
-  before_action :glctac_user, only: [:index, :new, :create, :show]
+  before_action :glctac_user, only: [:index, :new, :create, :show, :all_books]
 
   def index
   	@books = Book.all
@@ -21,6 +21,11 @@ class BooksController < ApplicationController
 
   def show
   	@book = Book.find(params[:id])
+  	@reviews = @book.reviews.all
+  end
+
+  def all_books
+  	@books = Book.paginate(:page => params[:page], :per_page => 15).order("id DESC")
   end
 
   private 

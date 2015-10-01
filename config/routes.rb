@@ -44,6 +44,7 @@ Rails.application.routes.draw do
   get  'team_violations'    => 'static_pages#team_violations'
   get  'glctac'             => 'books#index'
   get  'glctac/new'         => 'books#new'
+  get  'glctac/all_books'   => 'books#all_books'
   
   get  'players/:id/drop_player', to: 'players#drop_player', as: 'drop_player'
   get  'players/:id/add_player', to: 'players#add_player', as: 'add_player'
@@ -57,6 +58,7 @@ Rails.application.routes.draw do
   resources :posts
   resources :responses
   resources :books
+  resources :reviews
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
