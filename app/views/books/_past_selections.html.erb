@@ -1,13 +1,13 @@
 <tr class="table-header">
-	<th>Selector</th>
 	<th>Title</br><small class="team-non-link">Author</small></td>
+	<th>Selector</th>
 	<th>Start</th>
 	<th>End</th>
 </tr>
-<% @books.each do |book| %>
+<% @books.order("id DESC").limit(5).each do |book| %>
 	<tr>
+		<td><%= link_to book.title, book_path(book), class: "team-link" %></br><small><%= book.author %></td>		
 		<td><%= book.selector %></td>
-		<td><%= link_to book.title, book_path %></br><small class="team-non-link"><%= book.author %></td>
 		<td><%= book.start.strftime("%-m/%-d/%y") %></td>
 		<td><%= book.end.strftime("%-m/%-d/%y") %></td>
 	</tr>

@@ -1,2 +1,16 @@
-<h1>Books#show</h1>
-<p>Find me in app/views/books/show.html.erb</p>
+<%= provide(:title, @book.title) %>
+
+<div class="container">
+	<div class="row content-container">
+		<div class="col-sm-12">
+			<h1 class="team-non-link"><%= @book.title %></h1>
+			<p>By: <%= @book.author %></p>
+			<p><small>Read between <%= @book.start.strftime("%-m/%-d/%y") %> and <%= @book.end.strftime("%-m/%-d/%y") %>.</small><p>
+		</div>
+		<div class="col-sm-12">
+			<h2>Summary:</h2>
+			<p><%= simple_format(@book.summary) %></p>
+		</div>
+
+	</div>
+</div>
