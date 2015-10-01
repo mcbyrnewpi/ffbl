@@ -1,2 +1,12 @@
-<h1>Books#new</h1>
-<p>Find me in app/views/books/new.html.erb</p>
+<%= provide(:title, "New Selection") %>
+
+<div class= "container content-container">
+	<div class="row give-me-top-margin">
+		<div class="col-sm-12 center">
+			<h1>Create New Selection</h1>
+		</div>
+		<div class="col-sm-6 col-sm-offset-3">
+			<%= render 'new_book_form' %>
+		</div>
+	</div>
+</div>

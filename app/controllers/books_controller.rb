@@ -2,7 +2,7 @@ class BooksController < ApplicationController
   before_action :glctac_user, only: [:index, :new, :create, :show]
 
   def index
-  	@books = Book.all.("id DESC")
+  	@books = Book.all.order("id DESC")
   end
 
   def new

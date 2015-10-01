@@ -42,6 +42,8 @@ Rails.application.routes.draw do
   get  'all_sp'             => 'players#all_sp'
   get  'all_transactions'   => 'transactions#index'
   get  'team_violations'    => 'static_pages#team_violations'
+  get  'glctac'             => 'books#index'
+  get  'glctac/new'         => 'books#new'
   
   get  'players/:id/drop_player', to: 'players#drop_player', as: 'drop_player'
   get  'players/:id/add_player', to: 'players#add_player', as: 'add_player'

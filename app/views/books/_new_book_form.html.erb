@@ -1,0 +1,11 @@
+<%= simple_form_for @book do |f| %>
+  <%= f.input :selector, :required => false %>
+  <%= f.input :title, :required => false %>
+  <%= f.input :author, :required => false %>
+  <%= f.input :summary, :required => false %>
+  <%= f.input :start, :include_blank => true, :start_year => 2014, :end_year => 2099, :order => [:month, :day, :year], label: "Start Date", :required => false %>
+  <%= f.input :end, :include_blank => true, :start_year => 2014, :end_year => 2099, :order => [:month, :day, :year], label: "End Date", :required => false %>
+  <div class="center give-me-top-margin">
+  	<%= f.button :submit, class: "btn btn-cancel" %>
+  </div>
+<% end %>

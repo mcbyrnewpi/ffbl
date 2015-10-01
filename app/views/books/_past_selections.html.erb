@@ -1,0 +1,14 @@
+<tr class="table-header">
+	<th>Selector</th>
+	<th>Title</br><small class="team-non-link">Author</small></td>
+	<th>Start</th>
+	<th>End</th>
+</tr>
+<% @books.each do |book| %>
+	<tr>
+		<td><%= book.selector %></td>
+		<td><%= link_to book.title, book_path %></br><small class="team-non-link"><%= book.author %></td>
+		<td><%= book.start.strftime("%-m/%-d/%y") %></td>
+		<td><%= book.end.strftime("%-m/%-d/%y") %></td>
+	</tr>
+<% end %>
