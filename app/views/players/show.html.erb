@@ -1,3 +1,27 @@
 <%= provide(:title, @player.first_name + " " + @player.last_name) %>
-
-<h1>Page to display each individual player</h1>
+<% if @player %>
+	<div class="container content-container">
+		<div class="row center give-me-top-padding space-my-bottom">
+			<div class="col-sm-5">
+				<h1><%= @player.first_name + " " + @player.last_name %></h1>
+				<% if @player.dob %>
+					<p class="team-non-link">Born: <%= @player.dob.strftime("%-m/%-d/%y") %></p>
+				<% end %>
+			</div>
+			<div class="col-sm-7">
+				<% if @player.user_id %>
+					<h3 class="team-non-link">Currently a member of <%= @player.user.team %> at the <%= @player.level.league %> level.</h3>
+				<% else %>
+					<h3 class="team-non-link">Currently a Free Agent</h3>
+					<%= button_to "Add Player?", add_player_path(@player), class: "btn btn-add", :method => :get %>
+				<% end %>
+			</div>
+		</div>
+	</div>
+<% else %>
+	<div class="container content-container">
+		<div class="row center">
+			<h1>Player Not Found</h1>
+		</div>
+	</div>
+<% end %>

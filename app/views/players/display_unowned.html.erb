@@ -28,7 +28,7 @@
 				<table class="table">
 					<% @players.where(user_id: nil).each do |player| %>
 						<tr>
-							<td><%= "#{player.last_name}, #{player.first_name}" %></td>
+							<td><%= link_to "#{player.last_name}, #{player.first_name}", player_path(player), class: "player-link" %></td>
 							<td><%= player.position.spot %></td>
 							<% if logged_in? %>
 								<td><%= button_to "Add Player", add_player_path(player), class: "btn btn-add", :method => :get %>

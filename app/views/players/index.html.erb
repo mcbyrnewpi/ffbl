@@ -28,7 +28,7 @@
 				<table class="table">
 					<% @players.order(:last_name).each do |player| %>
 						<tr>
-							<td><%= "#{player.last_name}, #{player.first_name}" %></td>
+							<td><%= link_to "#{player.last_name}, #{player.first_name}", player_path(player), class: "player-link" %></td>
 							<td><%= player.position.spot %></td>
 							<% if player.user_id %>
 								<td><%= link_to "#{player.user.team}", user_path(player.user), class: "team-link" %></td>

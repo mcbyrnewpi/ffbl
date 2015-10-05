@@ -226,6 +226,15 @@ small {
   font-style: italic;
 }
 
+.player-link {
+  color: #cce6cc;
+  &:hover {
+    text-decoration: none;
+    color: #fff;
+    background: #3c3cff;
+  }
+}
+
 .post-link {
   color: #cce6cc;
   &:hover {
