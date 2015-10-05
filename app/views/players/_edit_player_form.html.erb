@@ -5,6 +5,9 @@
 		<%= f.input :last_name, label: "Last Name", :required => false %>
 		<%= f.association :user, :label_method => lambda { |user| "#{user.team}" }, label: "Team (if Trade, team traded to)" %>
 		<%= f.association :level, as: :radio_buttons, :label_method => lambda { |level| "#{level.league}" }, label: "To which level?" %>
+		<% if @player.dob.nil? %>
+			<%= f.input :dob, :include_blank => true, :start_year => 1985, :end_year => 2015, :order => [:month, :day, :year], label: "Date of Birth (if demoting)" %> 
+		<% end %>
 		<%= f.input :retro, :include_blank => true, :discard_year => true, :order => [:month, :day], label: "If 60 Day DL, date added:" %>
 			<%= f.input :activate, :include_blank => true, :discard_year => true, :order => [:month, :day], label: "If 60 Day DL, activation date:" %>
 		<%= f.input :trade_info, label: "Full Trade Details", :required => false %>
