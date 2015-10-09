@@ -1,6 +1,5 @@
 <tr class="table-header">
 	<th>Player</th>
-	<th>Team</th>
 	<th>Action</th>
 	<th>Details</th>
 	<th></th>
@@ -10,6 +9,11 @@
 	<tr>
 		<td><%= "#{transaction.player.first_name} #{transaction.player.last_name}" %></td>
 		
+		<% if transaction.team_before == transaction.team_after && transaction.league_before == transaction.league_after %>
+			<td><%= "#{transaction.team_before}" %></td>
+			<td>INFO UPDATE</td>
+		<% end %>
+
 		<% if (transaction.team_before != nil && transaction.team_after != nil) && (transaction.team_before != transaction.team_after) %>
 			<td><%= link_to "TRADE", transaction_path(transaction), class: "team-link" %></td>
 			<td><%= "to #{transaction.team_after}" %></td>

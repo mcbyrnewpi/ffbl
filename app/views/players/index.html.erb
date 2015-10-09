@@ -20,10 +20,12 @@
 				</div>
 			</div>
 			<% if @players.count == 0 %>
-				<h3>There are no players matching your search.</h3>
-				<% if logged_in? %>  
-					<p>Check your spelling and try again, or email ffblwebsite@gmail.com to request this player be added to your team and/or the player database.</p>
-				<% end %>
+				<div class="center">
+					<h3>There are no players matching your search.</h3>
+					<% if logged_in? %>  
+						<p>Check your spelling and try again, or email ffblwebsite@gmail.com to request this player be added to your team and/or the player database.</p>
+					<% end %>
+				</div>
 			<% else %>
 				<table class="table">
 					<% @players.order(:last_name).each do |player| %>
