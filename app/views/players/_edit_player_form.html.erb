@@ -11,7 +11,7 @@
 		<%= f.input :retro, :include_blank => true, :discard_year => true, :order => [:month, :day], label: "If 60 Day DL, date added:" %>
 			<%= f.input :activate, :include_blank => true, :discard_year => true, :order => [:month, :day], label: "If 60 Day DL, activation date:" %>
 		<%= f.input :trade_info, label: "Full Trade Details", :required => false %>
-		<%= f.button :submit, "Activate #{@player.first_name} #{@player.last_name}?", class: "btn btn-cancel give-me-top-margin" %>
+		<%= f.button :submit, "Update #{@player.first_name} #{@player.last_name}?", class: "btn btn-cancel give-me-top-margin" %>
 		<%= link_to "Cancel", user_path(@player.user), class: "btn btn-danger give-me-top-margin" %>
 
 	<% else %>
@@ -35,6 +35,9 @@
 
 		<% elsif @player.level_id == 3 || @player.level_id == 4 || @player.level_id == 5 %>
 			<%= f.association :level, :collection => Level.where("id != 2"), as: :radio_buttons, :label_method => lambda { |level| "#{level.league}" }, label: "To which level?" %>
+			<% if @player.dob.nil? %>
+				<%= f.input :dob, :include_blank => true, :start_year => 1985, :end_year => 2015, :order => [:month, :day, :year], label: "Date of Birth (if demoting)" %> 
+			<% end %>
 			<%= f.button :submit, class: "btn btn-cancel give-me-top-margin" %>
 			<%= link_to "Cancel", user_path(@player.user), class: "btn btn-danger give-me-top-margin" %>
 
