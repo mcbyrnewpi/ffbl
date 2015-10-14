@@ -27,6 +27,9 @@
 					<% end %>
 				</div>
 			<% else %>
+				<div class="center">
+					<small>If the player you are looking for is not listed, email ffblwebsite@gmail.com to have him added to the database and/or your team.</small>
+				</div>
 				<table class="table">
 					<% @players.order(:last_name).each do |player| %>
 						<tr>
