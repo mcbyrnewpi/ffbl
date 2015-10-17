@@ -1,0 +1,11 @@
+<%= simple_form_for @player do |f| %>
+	<div class="col-sm-6 center">
+		<%= f.input :affiliation, label: "MLB Organization (BOS, NYY, PHI, MIN...)", :required => false %>
+	</div>
+	<div class="col-sm-6 center">
+		<%= f.input :player_note, label: "Additional Information", :required => false %>
+	</div>
+	<div class="col-sm-12 center">
+		<%= f.submit "Update Player", class: "btn btn-cancel give-me-top-margin" %>
+	</div>
+<% end %>

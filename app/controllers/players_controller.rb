@@ -132,7 +132,7 @@ before_action :admin_user, only: [:new, :create]
 	private
 
 		def player_params
-      params.require(:player).permit(:first_name, :last_name, :dob, :retro, :activate, :user_id, :position_id, :level_id, :trade_info)
+      params.require(:player).permit(:first_name, :last_name, :dob, :retro, :activate, :user_id, :position_id, :level_id, :trade_info, :affiliation, :player_note)
     end
 
 		def admin_user

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20150930170315) do
+ActiveRecord::Schema.define(version: 20151017183905) do
 
   create_table "books", force: :cascade do |t|
     t.string   "selector"
@@ -51,6 +51,8 @@ ActiveRecord::Schema.define(version: 20150930170315) do
     t.datetime "updated_at",     null: false
     t.integer  "position_id"
     t.text     "trade_info"
+    t.string   "affiliation"
+    t.text     "player_note"
   end
 
   add_index "players", ["level_id"], name: "index_players_on_level_id"

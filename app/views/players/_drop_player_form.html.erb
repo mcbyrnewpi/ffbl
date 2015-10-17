@@ -3,6 +3,7 @@
 	<%= f.input :level_id, :as => :hidden, :input_html => { :value => nil } %>
 	<%= f.input :retro, :as => :hidden, :input_html => { :value => nil } %>
 	<%= f.input :activate, :as => :hidden, :input_html => { :value => nil } %>
+	<%= f.input :player_note, :as => :hidden, :input_html => { :value => nil } %>
 	<div class="row">
 		<div class="col-sm-4 col-sm-offset-2 center give-me-top-margin">
 			<%= f.button :submit, "Drop #{@player.first_name} #{@player.last_name}?", class: "btn btn-danger", data: { confirm: "Drop this player?" } %>

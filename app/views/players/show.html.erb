@@ -1,23 +1,45 @@
 <%= provide(:title, @player.first_name + " " + @player.last_name) %>
 <% if @player %>
 	<div class="container content-container">
-		<div class="row center give-me-top-padding space-my-bottom">
-			<div class="col-sm-5">
+		<div class="row give-me-top-padding space-my-bottom">
+			<div class="col-sm-12 space-my-bottom center">
 				<h1><%= @player.first_name + " " + @player.last_name %></h1>
-				<% if @player.dob %>
-					<p class="team-non-link">Born: <%= @player.dob.strftime("%-m/%-d/%y") %></p>
-				<% end %>
 			</div>
-			<div class="col-sm-7">
+			<div class="col-sm-8 col-sm-offset-2">
+				<% if @player.dob %>
+					<p>DOB: <%= @player.dob.strftime("%-m/%-d/%y") %></p>
+				<% end %>
+				<p>Position: <%= @player.position.spot %></p>
 				<% if @player.user_id %>
-					<h3 class="team-non-link">Currently a member of <%= @player.user.team %> at the <%= @player.level.league %> level.</h3>
+					<p>FFBL Team: <%= @player.user.team %>, <%= @player.level.league %></h3>
 				<% else %>
 					<h3 class="team-non-link">Currently a Free Agent</h3>
 					<%= button_to "Add Player?", add_player_path(@player), class: "btn btn-add", :method => :get %>
 				<% end %>
+				<% if @player.affiliation %>
+					<p>MLB Team: <%= @player.affiliation %></p>
+				<% end %>
+				<% if @player.player_note %>
+					<div class="row">
+						<div class="col-sm-12">
+							<p class="underline-me">Additional Information:</p>
+						</div>
+						<div class="col-sm-10">
+							<p><%= simple_format(@player.player_note) %></p>
+						</div>
+					</div>
+				<% end %>
 			</div>
 		</div>
 	</div>
+	<% if logged_in? && @player.user && (@player.user == current_user) %>
+		<div class="container content-container">
+			<div class="row give-me-top-padding space-my-bottom">
+				<%= render 'affiliation_note_form' %>
+			</div>
+		</div>
+	<% end %>
+
 <% else %>
 	<div class="container content-container">
 		<div class="row center">
