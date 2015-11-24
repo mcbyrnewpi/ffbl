@@ -4,7 +4,7 @@
 	<th>Start</th>
 	<th>End</th>
 </tr>
-<% @books.order("id DESC").limit(5).each do |book| %>
+<% @books.order("id DESC").limit(5).drop(1).each do |book| %>
 	<tr>
 		<td><%= link_to book.title, book_path(book), class: "team-link" %></br><small><%= book.author %></td>		
 		<td><%= book.selector %></td>
