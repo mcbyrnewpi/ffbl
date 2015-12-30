@@ -3585,10 +3585,7 @@ tbody.collapse.in {
   font-size: 14px;
   text-align: left;
   list-style: none;
-  background: linear-gradient(#34282c, #3c3cff, #34282c);
-  background: -webkit-linear-gradient(#34282c, #3c3cff, #34282c);
-  background: -o-linear-gradient(#34282c, #3c3cff, #34282c);
-  background: -moz-linear-gradient(#34282c, #3c3cff, #34282c);
+  background: #800000;
   -webkit-background-clip: padding-box;
           background-clip: padding-box;
   border: 1px solid #ccc;
@@ -3621,10 +3618,8 @@ tbody.collapse.in {
 .dropdown-menu > li > a:focus {
   color: #fff;
   text-decoration: none;
-  background: linear-gradient(#34282c, #3c3cff, #34282c);
-  background: -webkit-linear-gradient(#34282c, #3c3cff, #34282c);
-  background: -o-linear-gradient(#34282c, #3c3cff, #34282c);
-  background: -moz-linear-gradient(#34282c, #3c3cff, #34282c);
+  background: #800000;
+
 }
 .dropdown-menu > .active > a,
 .dropdown-menu > .active > a:hover,
@@ -4646,11 +4641,9 @@ fieldset[disabled] .navbar-default .btn-link:focus {
   color: #ccc;
 }
 .navbar-inverse {
-  background: linear-gradient(#000, #1919ff, #000);
-  background: -webkit-linear-gradient(#000, #1919ff, #000);
-  background: -o-linear-gradient(#000, #1919ff, #000);
-  background: -moz-linear-gradient(#000, #1919ff, #000);
+  background: #00004d;
   border-color: #080808;
+  border-bottom: 1px solid white;
 }
 .navbar-inverse .navbar-brand {
   color: #cce6cc;
