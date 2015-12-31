@@ -2,7 +2,7 @@
 <div class="container content-container">
   <div class="row">
 
-  	<% if @transaction.details %>
+  	<% if !@transaction.details.blank? %>
 	    <div class="col-sm-4">
 				<h1>Trade Details:</h1>
 				<h3><%= @transaction.player.first_name %> <%= @transaction.player.last_name %></h3>
