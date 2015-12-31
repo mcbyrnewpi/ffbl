@@ -6,6 +6,12 @@
 /*! normalize.css v3.0.3 | MIT License | github.com/necolas/normalize.css */
 @import url(https://fonts.googleapis.com/css?family=Merriweather+Sans:400,700italic,400italic,300italic);
 
+$ffblfontcolor:  #ffffe5;
+$ffblbodybackground:  #a6a6a6;
+$ffblcontainerbackground:  #00004d;
+$ffblcontainerbackgroundlight:  #323270;
+$ffblwarningcolor:  #b80000;
+
 html {
   font-family: sans-serif;
   -webkit-text-size-adjust: 100%;
@@ -3611,7 +3617,7 @@ tbody.collapse.in {
   font-weight: 300;
   font-style: italic;
   line-height: 1.42857143;
-  color: #cce6cc;
+  color: $ffblfontcolor;
   white-space: nowrap;
 }
 .dropdown-menu > li > a:hover,
@@ -4646,11 +4652,11 @@ fieldset[disabled] .navbar-default .btn-link:focus {
   border-bottom: 1px solid white;
 }
 .navbar-inverse .navbar-brand {
-  color: #cce6cc;
+  color: $ffblfontcolor;
   letter-spacing: 1.5px;
   font-style: italic;
   font-weight: 700;
-  font-size: 1.75em;
+  font-size: 1.9em;
   text-shadow: -1px .5px #000;
 }
 .navbar-inverse .navbar-brand:hover,
@@ -4662,9 +4668,11 @@ fieldset[disabled] .navbar-default .btn-link:focus {
   color: #9d9d9d;
 }
 .navbar-inverse .navbar-nav > li > a {
-  color: #cce6cc;
+  color: $ffblfontcolor;
   letter-spacing: 1px;
   font-style: italic;
+  font-weight: 700;
+  font-size: 1.25em;
 }
 .navbar-inverse .navbar-nav > li > a:hover,
 .navbar-inverse .navbar-nav > li > a:focus {
@@ -4688,10 +4696,7 @@ fieldset[disabled] .navbar-default .btn-link:focus {
 }
 .navbar-inverse .navbar-toggle:hover,
 .navbar-inverse .navbar-toggle:focus {
-  background: linear-gradient(#34282c, #3c3cff, #34282c);
-  background: -webkit-linear-gradient(#34282c, #3c3cff, #34282c);
-  background: -o-linear-gradient(#34282c, #3c3cff, #34282c);
-  background: -moz-linear-gradient(#34282c, #3c3cff, #34282c);
+  background: $ffblcontainerbackgroundlight;
 }
 .navbar-inverse .navbar-toggle .icon-bar {
   background-color: #fff;
@@ -4704,20 +4709,17 @@ fieldset[disabled] .navbar-default .btn-link:focus {
 .navbar-inverse .navbar-nav > .open > a:hover,
 .navbar-inverse .navbar-nav > .open > a:focus {
   color: #fff;
-  background: linear-gradient(#34282c, #3c3cff, #34282c);
-  background: -webkit-linear-gradient(#34282c, #3c3cff, #34282c);
-  background: -o-linear-gradient(#34282c, #3c3cff, #34282c);
-  background: -moz-linear-gradient(#34282c, #3c3cff, #34282c);
+  background: $ffblcontainerbackgroundlight;
 }
 @media (max-width: 767px) {
   .navbar-inverse .navbar-nav .open .dropdown-menu > .dropdown-header {
     border-color: #080808;
   }
   .navbar-inverse .navbar-nav .open .dropdown-menu .divider {
-    background-color: #080808;
+    background-color: $ffblfontcolor;
   }
   .navbar-inverse .navbar-nav .open .dropdown-menu > li > a {
-    color: #cce6cc;
+    color: $ffblfontcolor;
   }
   .navbar-inverse .navbar-nav .open .dropdown-menu > li > a:hover,
   .navbar-inverse .navbar-nav .open .dropdown-menu > li > a:focus {

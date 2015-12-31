@@ -6,8 +6,8 @@
 
 body {
   padding-top: 60px;
-  color: #ffffe5;
-  background: #a6a6a6;
+  color: $ffblfontcolor;
+  background: $ffblbodybackground;
 }
 
 section {
@@ -23,7 +23,7 @@ textarea {
 }
 
 .content-container {
-  background: #00004d;
+  background: $ffblcontainerbackground;
   border-radius: 10px;
   border-top: 1px solid #cce6cc;
   border-left: 2px solid #cce6cc;
@@ -32,14 +32,14 @@ textarea {
 }
 
 .roster-warning {
-  background: #b80000;
+  background: $ffblwarningcolor;
   color: #000;
   border: 2px solid #000;
   border-radius: 5px;
 }
 
 .milb-warning {
-  background: #b80000;
+  background: $ffblwarningcolor;
   color: #000;
   border: 2px solid #000;
   border-radius: 5px;
@@ -136,7 +136,13 @@ small {
   margin-left: 7.667%;
 }
 
+/****** HEADER ******/
 
+.main-header {
+  a {
+    color: $ffblfontcolor;
+  }
+}
 
 
 /****** FOOTER ******/
@@ -148,7 +154,7 @@ small {
     list-style-type: none;
   }
   a {
-    color: #cce6cc;
+    color: $ffblfontcolor;
     font-style: italic;
     &:hover {
       text-decoration: none;
@@ -166,8 +172,8 @@ small {
 
 .btn-add {
   font-style: italic;
-  color: #1919ff;
-  background: #cce6cc;
+  color: $ffblcontainerbackground;
+  background: $ffblfontcolor;
   padding: 2px 5px;
   &:hover {
     color: #3c3cff;
@@ -176,9 +182,9 @@ small {
 }
 
 .btn-cancel {
-  color: #1919ff;
+  color: $ffblcontainerbackground;
   font-weight: 700;
-  background: #cce6cc;
+  background: $ffblfontcolor;
   border-right: 1px solid #000;
   border-left: 1px solid #000;
   &:hover {
@@ -213,35 +219,35 @@ small {
 /****** LINKS ******/
 
 .team-link {
-  color: #cce6cc;
+  color: $ffblfontcolor;
   font-style: italic;
   &:hover {
     text-decoration: none;
     color: #fff;
-    background: #3c3cff;
+    background: $ffblcontainerbackgroundlight;
   }
 }
 
 .team-non-link {
-  color: #cce6cc;
+  color: $ffblfontcolor;
   font-style: italic;
 }
 
 .player-link {
-  color: #cce6cc;
+  color: $ffblfontcolor;
   &:hover {
     text-decoration: none;
     color: #fff;
-    background: #3c3cff;
+    background: $ffblcontainerbackgroundlight;
   }
 }
 
 .post-link {
-  color: #cce6cc;
+  color: $ffblfontcolor;
   &:hover {
     text-decoration: none;
     color: #fff;
-    background: #3c3cff;
+    background: $ffblcontainerbackgroundlight;
   }
 }
 
@@ -253,7 +259,7 @@ small {
    border-radius: 5px;
    padding: 5px 10px;
    margin: 0px 5px;
-   background: #cce6cc;
+   background: $ffblfontcolor;
    font-style: italic;
    &:hover {
     text-decoration: none;
