@@ -4653,10 +4653,10 @@ fieldset[disabled] .navbar-default .btn-link:focus {
 }
 .navbar-inverse .navbar-brand {
   color: $ffblfontcolor;
-  letter-spacing: 1.5px;
+  letter-spacing: 2px;
   font-style: italic;
   font-weight: 700;
-  font-size: 1.9em;
+  font-size: 1.95em;
   text-shadow: -1px .5px #000;
 }
 .navbar-inverse .navbar-brand:hover,
