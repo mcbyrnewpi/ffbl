@@ -42,6 +42,7 @@ Rails.application.routes.draw do
   get  'all_sp'             => 'players#all_sp'
   get  'all_transactions'   => 'transactions#index'
   get  'team_violations'    => 'static_pages#team_violations'
+  get  'tutorial'           => 'static_pages#tutorial'
   get  'glctac'             => 'books#index'
   get  'glctac/new'         => 'books#new'
   get  'glctac/all_books'   => 'books#all_books'

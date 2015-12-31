@@ -136,13 +136,6 @@ small {
   margin-left: 7.667%;
 }
 
-/****** HEADER ******/
-
-.main-header {
-  a {
-    color: $ffblfontcolor;
-  }
-}
 
 
 /****** FOOTER ******/
@@ -159,7 +152,7 @@ small {
     &:hover {
       text-decoration: none;
       color: #fff;
-      background: #3c3cff;
+      background: $ffblcontainerbackgroundlight;
     }
   }
 }
