@@ -37,7 +37,11 @@
 				<% @players.where(level_id: 1).order(:position_id).each do |player| %>
 					<tr>
 						<td><%= player.position.spot %></td>
-						<td><%= link_to "#{player.first_name} #{player.last_name}", player_path(player), class: "player-link" %></td>
+							<% if !player.player_note.blank? %>
+								<td><%= link_to "#{player.first_name} #{player.last_name} *", player_path(player), class: "player-link" %></td>
+							<% else %>
+								<td><%= link_to "#{player.first_name} #{player.last_name}", player_path(player), class: "player-link" %></td>
+							<% end %>
 						<% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>
 							<td><%= button_to "Demote or DL", edit_player_path(player), :method => :get, class: "btn btn-add" %></td>
 							<td><%= button_to "Drop", drop_player_path(player), :method => :get, class: "btn btn-drop" %></td>
@@ -52,7 +56,11 @@
 				<% @players.where(level_id: 2).order(:position_id).each do |player| %>
 					<tr>
 						<td><%= player.position.spot %></td>
-						<td><%= link_to "#{player.first_name} #{player.last_name}", player_path(player), class: "player-link" %></td>
+						<% if !player.player_note.blank? %>
+								<td><%= link_to "#{player.first_name} #{player.last_name} *", player_path(player), class: "player-link" %></td>
+							<% else %>
+								<td><%= link_to "#{player.first_name} #{player.last_name}", player_path(player), class: "player-link" %></td>
+							<% end %>
 						<% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>
 							<td><%= button_to "Activate", edit_player_path(player), :method => :get, class: "btn btn-add" %></td>
 							<td><%= button_to "Drop", drop_player_path(player), :method => :get, class: "btn btn-drop" %></td>
@@ -90,11 +98,21 @@
 						<td><%= player.position.spot %></td>
 						<% if player.dob %>
 							<td>
-								<%= link_to "#{player.first_name} #{player.last_name}", player_path(player), class: "player-link" %></br>
+								<% if !player.player_note.blank? %>
+									<%= link_to "#{player.first_name} #{player.last_name} *", player_path(player), class: "player-link" %></br>
+								<% else %>
+									<%= link_to "#{player.first_name} #{player.last_name}", player_path(player), class: "player-link" %></br>
+								<% end %>
 								<small><%= player.dob.strftime("%-m/%-d/%y") %></small>
 							</td>
 						<% else %>
-							<td class="milb-warning"><%= "#{player.first_name} #{player.last_name}" %></br><small>Needs DOB</small></td>
+							<td class="milb-warning">
+								<% if !player.player_note.blank? %>
+									<%= link_to "#{player.first_name} #{player.last_name} *", player_path(player), class: "player-link" %></br>
+								<% else %>
+									<%= link_to "#{player.first_name} #{player.last_name}", player_path(player), class: "player-link" %></br>
+								<% end %>
+								<small>Needs DOB</small></td>
 						<% end %>
 
 						<% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>
@@ -124,12 +142,23 @@
 						<td><%= player.position.spot %></td>
 						<% if player.dob %>
 							<td>
-								<%= link_to "#{player.first_name} #{player.last_name}", player_path(player), class: "player-link" %></br>
+								<% if !player.player_note.blank? %>
+									<%= link_to "#{player.first_name} #{player.last_name} *", player_path(player), class: "player-link" %></br>
+								<% else %>
+									<%= link_to "#{player.first_name} #{player.last_name}", player_path(player), class: "player-link" %></br>
+								<% end %>
 								<small><%= player.dob.strftime("%-m/%-d/%y") %></small>
 							</td>
 						<% else %>
-							<td class="milb-warning"><%= "#{player.first_name} #{player.last_name}" %></br><small>Needs DOB</small></td>
+							<td class="milb-warning">
+								<% if !player.player_note.blank? %>
+									<%= link_to "#{player.first_name} #{player.last_name} *", player_path(player), class: "player-link" %></br>
+								<% else %>
+									<%= link_to "#{player.first_name} #{player.last_name}", player_path(player), class: "player-link" %></br>
+								<% end %>
+								<small>Needs DOB</small></td>
 						<% end %>
+
 						<% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>
 							<td><%= button_to "Promote", edit_player_path(player), :method => :get, class: "btn btn-add" %></td>
 							<td><%= button_to "Drop", drop_player_path(player), :method => :get, class: "btn btn-drop" %></td>
@@ -157,12 +186,23 @@
 						<td><%= player.position.spot %></td>
 						<% if player.dob %>
 							<td>
-								<%= link_to "#{player.first_name} #{player.last_name}", player_path(player), class: "player-link" %></br>
+								<% if !player.player_note.blank? %>
+									<%= link_to "#{player.first_name} #{player.last_name} *", player_path(player), class: "player-link" %></br>
+								<% else %>
+									<%= link_to "#{player.first_name} #{player.last_name}", player_path(player), class: "player-link" %></br>
+								<% end %>
 								<small><%= player.dob.strftime("%-m/%-d/%y") %></small>
 							</td>
 						<% else %>
-							<td class="milb-warning"><%= "#{player.first_name} #{player.last_name}" %></br><small>Needs DOB</small></td>
+							<td class="milb-warning">
+								<% if !player.player_note.blank? %>
+									<%= link_to "#{player.first_name} #{player.last_name} *", player_path(player), class: "player-link" %></br>
+								<% else %>
+									<%= link_to "#{player.first_name} #{player.last_name}", player_path(player), class: "player-link" %></br>
+								<% end %>
+								<small>Needs DOB</small></td>
 						<% end %>
+						
 						<% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>
 							<td><%= button_to "Promote", edit_player_path(player), :method => :get, class: "btn btn-add" %></td>
 							<td><%= button_to "Drop", drop_player_path(player), :method => :get, class: "btn btn-drop" %></td>
