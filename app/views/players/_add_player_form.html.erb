@@ -3,7 +3,11 @@
 
 <% else %>
 	<%= simple_form_for @player do |f| %>
-		<%= f.input :user_id, :as => :hidden, :input_html => { :value => current_user.id } %>
+		<% if current_user.admin? %>
+      <%= f.association :user, :label_method => lambda { |user| "#{user.team}" }, label: "Team (if assigning)", selected: current_user.id %>
+    <% else %>
+      <%= f.input :user_id, :as => :hidden, :input_html => { :value => current_user.id } %>
+    <% end %>
 		<%= f.association :level, :collection => Level.where("id != 2"), as: :radio_buttons, :label_method => lambda { |level| "#{level.league}" }, label: "To which level?" %>
 		<%= f.button :submit, "Add Player", class: "btn btn-cancel" %>
 		<%= link_to "Cancel", all_unowned_path, class: "btn btn-danger" %>

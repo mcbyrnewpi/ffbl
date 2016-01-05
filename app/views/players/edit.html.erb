@@ -11,6 +11,8 @@
 				<% else %>
 					<h1>Player is owned by <%= @player.user.team %>... trade for him or PISS OFF!!</h1>
 				<% end %>
+			<% else %>
+				<h2 class="give-me-top-margin space-my-bottom">Unowned players can not be edited like this.</h2>
 			<% end %>
 		</div>
 	</div>
