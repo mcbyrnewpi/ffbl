@@ -10,6 +10,11 @@ body {
   background: $ffblbodybackground;
 }
 
+img {
+  max-width: 100%;
+  height: auto;
+}
+
 section {
   overflow: auto;
 }

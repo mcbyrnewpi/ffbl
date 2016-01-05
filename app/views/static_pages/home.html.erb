@@ -2,6 +2,7 @@
 	<div class="container content-container">
 		<div class="row center">
 			<div class="jumbotron">
+				<%= image_tag("FFBLLogo.png", :alt => "FFBL Logo") %>
 				<h3>Thanks for logging in, <%= current_user.name %>!</h3>
 				<h1>What would you like to do?</h1>
 			</div>
@@ -24,6 +25,7 @@
 	<div class="container content-container">
 		<div class="row">
 		  <div class="center jumbotron">
+		  	<%= image_tag("FFBLLogo.png", :alt => "FFBL Logo") %>
 		    <h1>Welcome to the Franklin Fantasy Baseball League</h1>
 		    <h3>Your home for competitive Fantasy Baseball since 2002</h3>
 		    <%= link_to "Log In", login_path, class: "btn btn-lg btn-cancel give-me-top-margin" %>
