@@ -1,20 +1,26 @@
 <%= provide(:title, @user.team) %>
 
 <div class="container">
-	<div class="row content-container">
+	<div class="row content-container main-image pad-my-bottom">
 		<% if !@user.about.blank? %>
-			<div class="col-sm-5">
+			<div class="col-sm-2 center give-me-top-margin">
+				<%= image_tag((@user.id).to_s + "main.PNG", :alt => @user.team + " Logo") %>
+			</div>
+			<div class="col-sm-4">
 				<h1><%= @user.team %></h1>
 				<h4>Managed by: <%= @user.name %></h4>
 				<p>Current Roster Size:  <%= @players.count %> players</p>
 				<small>(<%= @user.transactions.all.count %> website transactions made)</small>
 			</div>
-			<div class="col-sm-7">
+			<div class="col-sm-6">
 				<h3 class="center">More about us:</h3>
 				<p><%= simple_format(@user.about) %></p>
 			</div>
 		<% else %>
-			<div class="col-sm-8 col-sm-offset-2 center">
+			<div class="col-sm-2 give-me-top-margin">
+				<%= image_tag((@user.id).to_s + "main.PNG", :alt => @user.team + " Logo") %>
+			</div>
+			<div class="col-sm-8 center">
 				<h1><%= @user.team %></h1>
 				<h4>Managed by: <%= @user.name %></h4>
 				<p>Current Roster Size:  <%= @players.count %> players</p>
@@ -71,7 +77,7 @@
 		</div>
 	</div>
 
-	<div class="row center content-container">
+	<div class="row center content-container minor-image">
 		<% if @players.where(level_id: 3..5).count > 18 %>
 			<div class="col-sm-12 roster-warning">
 				<h3>MiLB Roster is in VIOLATION!!</h3>
@@ -80,11 +86,13 @@
 			</div>
 		<% end %>
 
-		<div class="col-md-4">
+		<div class="col-md-4 give-me-top-margin">
 			<% if !@user.aaa.nil? %>
+				<%= image_tag((@user.id).to_s + "aaa.PNG", :alt => @user.team + " Logo") %>
 				<h3><%= @user.aaa %></h3>
 				<p>AAA Team</p>
 			<% else %>
+				<%= image_tag((@user.id).to_s + "aaa.PNG", :alt => @user.team + " Logo") %>
 				<h3>AAA Team</h3>
 			<% end %>
 			<table class="table">
@@ -124,11 +132,13 @@
 			</table>
 		</div>
 	
-		<div class="col-md-4">
+		<div class="col-md-4 give-me-top-margin">
 			<% if !@user.aa.nil? %>
+				<%= image_tag((@user.id).to_s + "aa.PNG", :alt => @user.team + " Logo") %>
 				<h3><%= @user.aa %></h3>
 				<p>AA Team</p>
 			<% else %>
+				<%= image_tag((@user.id).to_s + "aa.PNG", :alt => @user.team + " Logo") %>
 				<h3>AA Team</h3>
 			<% end %>
 			<table class="table">
@@ -168,11 +178,13 @@
 			</table>
 		</div>
 		
-		<div class="col-md-4">
+		<div class="col-md-4 give-me-top-margin">
 			<% if !@user.a.nil? %>
+				<%= image_tag((@user.id).to_s + "a.PNG", :alt => @user.team + " Logo") %>
 				<h3><%= @user.a %></h3>
 				<p>A Team</p>
 			<% else %>
+				<%= image_tag((@user.id).to_s + "a.PNG", :alt => @user.team + " Logo") %>
 				<h3>A Team</h3>
 			<% end %>
 			<table class="table table-condensed">

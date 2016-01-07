@@ -5,10 +5,11 @@
 		<div class="col-sm-12">
 			<h1>All FFBL Teams</h1>
 		</div>
-		<div class="col-sm-4 col-sm-offset-4">
+		<div class="col-md-6 col-md-offset-3 minor-image">
 			<table class="table">
 				<% @users.each do |user| %>
 				<tr>
+					<td><%= link_to image_tag((user.id).to_s + "main.PNG", :alt => user.team + " Logo"), user_path(user) %></td>
 					<td><h3><%= link_to user.team, user_path(user), class: "team-link" %></h3></td>
 				</tr>
 				<% end %>

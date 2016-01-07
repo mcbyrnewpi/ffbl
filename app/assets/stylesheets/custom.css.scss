@@ -24,6 +24,21 @@ body {
   }
 }
 
+.main-image {
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+.minor-image {
+  img {
+    height: 200px;
+    width: auto;
+    max-width: 100%;
+  }
+}
+
 section {
   overflow: auto;
 }
