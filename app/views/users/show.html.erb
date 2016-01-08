@@ -32,6 +32,13 @@
 				<h4>Managed by: <%= @user.name %></h4>
 				<p>Current Roster Size:  <%= @players.count %> players</p>
 				<small>(<%= @user.transactions.all.count %> website transactions made)</small>
+				<% if @user.id == 3 %>
+					<div class="row give-me-top-margin">
+						<div class="col-sm-12">
+							<%= link_to "Preseason Report", cfhpre2015_path, class: "btn btn-cancel" %>
+						</div>
+					</div>
+				<% end %>
 			</div>
 		<% end %>
 	</div>
