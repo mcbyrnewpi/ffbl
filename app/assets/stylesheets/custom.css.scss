@@ -356,6 +356,22 @@ small {
   background-color: white;
 }
 
+.cfhhof {
+  background-color: black;
+  background-image: url("2007 Logo 1.JPG");
+  background-size: 35%;
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  border-radius: 5px;
+  td {
+    border: 1px solid white;
+    background-color: black;
+  }
+  img {
+    border: 1px solid gray;
+  }
+}
+
 /****** CLEARFIX ******/
 
 .clearfix:after {
