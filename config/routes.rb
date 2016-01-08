@@ -46,6 +46,12 @@ Rails.application.routes.draw do
   get  'glctac'             => 'books#index'
   get  'glctac/new'         => 'books#new'
   get  'glctac/all_books'   => 'books#all_books'
+  get  'cfhpre2010'         => 'static_pages#CFHPre2010'
+  get  'cfhpre2011'         => 'static_pages#CFHPre2011'
+  get  'cfhpre2012'         => 'static_pages#CFHPre2012'
+  get  'cfhpre2013'         => 'static_pages#CFHPre2013'
+  get  'cfhpre2014'         => 'static_pages#CFHPre2014'
+  get  'cfhpre2015'         => 'static_pages#CFHPre2015'
   
   get  'players/:id/drop_player', to: 'players#drop_player', as: 'drop_player'
   get  'players/:id/add_player', to: 'players#add_player', as: 'add_player'
