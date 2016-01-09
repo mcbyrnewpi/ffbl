@@ -39,6 +39,16 @@ body {
   }
 }
 
+.preseason-image {
+  img {
+    height: 200px;
+    width: auto;
+    max-width: 100%;
+    float: left;
+    padding-right: 10px;
+  }
+}
+
 section {
   overflow: auto;
 }
@@ -371,6 +381,8 @@ small {
     border: 1px solid gray;
   }
 }
+
+
 
 /****** CLEARFIX ******/
 
