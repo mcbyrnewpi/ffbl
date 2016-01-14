@@ -7,6 +7,7 @@ class User < ActiveRecord::Base
   has_many :posts
   has_many :responses
   has_many :reviews
+  has_many :preseason_reports
 
   before_save { self.email = email.downcase }
 
