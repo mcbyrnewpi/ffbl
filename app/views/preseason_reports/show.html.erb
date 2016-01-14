@@ -1,0 +1,286 @@
+<%= provide(:title, @preseason_report.report_title) %>
+<div class="container">
+  <div class="row content-container preseason-image pad-my-bottom">
+    <div class="col-md-12 center pad-my-bottom">
+      <h1><%= @preseason_report.report_title %></h1>
+    </div>
+
+    <div class="col-md-5 col-md-offset-1">
+      <% if @preseason_report.user_id == 3 %>
+        <%= image_tag("cfhexclusive.png", :alt => "Cowboys Logo") %>
+      <% end %>
+
+      <p><%= simple_format(@preseason_report.report_content) %></p>
+    </div>
+
+    <div class="col-md-4 col-md-offset-1">
+      <table class="table preseason-table">
+        <tr class="preseason-table-header">
+          <th>Top Ten Prospects</th>
+        </tr>
+
+        <tr class="preseason-table-content">
+          <td>1. </td>
+          <td><%= @preseason_report.prospect1 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>2. </td>
+          <td><%= @preseason_report.prospect2 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>3. </td>
+          <td><%= @preseason_report.prospect3 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>4. </td>
+          <td><%= @preseason_report.prospect4 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>5. </td>
+          <td><%= @preseason_report.prospect5 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>6. </td>
+          <td><%= @preseason_report.prospect6 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>7. </td>
+          <td><%= @preseason_report.prospect7 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>8. </td>
+          <td><%= @preseason_report.prospect8 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>9. </td>
+          <td><%= @preseason_report.prospect9 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>10. </td>
+          <td><%= @preseason_report.prospect10 %></td>
+        </tr>
+      </table>
+
+      <table class="table preseason-table">
+        <tr class="preseason-table-header">
+          <th>Projected Starting <%= @preseason_report.proj_year %> Lineup</th>
+        </tr>
+
+        <tr class="preseason-table-content">
+          <td>Catcher</td>
+          <td><%= @preseason_report.catch %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>First Base</td>
+          <td><%= @preseason_report.first %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>Second Base</td>
+          <td><%= @preseason_report.second %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>Third Base</td>
+          <td><%= @preseason_report.third %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>Shortstop</td>
+          <td><%= @preseason_report.short %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>Outfield</td>
+          <td><%= @preseason_report.of1 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>Outfield</td>
+          <td><%= @preseason_report.of2 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>Outfield</td>
+          <td><%= @preseason_report.of3 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>Utility</td>
+          <td><%= @preseason_report.util1 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>Utility</td>
+          <td><%= @preseason_report.util2 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>Starter</td>
+          <td><%= @preseason_report.sp1 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>Starter</td>
+          <td><%= @preseason_report.sp2 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>Starter</td>
+          <td><%= @preseason_report.sp3 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>Reliever</td>
+          <td><%= @preseason_report.rp1 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>Reliever</td>
+          <td><%= @preseason_report.rp2 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>Reliever</td>
+          <td><%= @preseason_report.rp3 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>Pitcher</td>
+          <td><%= @preseason_report.p1 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>Pitcher</td>
+          <td><%= @preseason_report.p2 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>Bench</td>
+          <td><%= @preseason_report.bench1 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>Bench</td>
+          <td><%= @preseason_report.bench2 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>Bench</td>
+          <td><%= @preseason_report.bench3 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>Bench</td>
+          <td><%= @preseason_report.bench4 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>Bench</td>
+          <td><%= @preseason_report.bench5 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>Bench</td>
+          <td><%= @preseason_report.bench6 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td>Bench</td>
+          <td><%= @preseason_report.bench7 %></td>
+        </tr>
+      </table>
+
+      <table class="table preseason-table">
+        <tr class="preseason-table-header">
+          <th>Top Prospects of the Past 10 Years</th>
+        </tr>
+
+        <tr class="preseason-table-content">
+          <td><%= @preseason_report.pyr1 %></td>
+          <td><%= @preseason_report.past_prospect1 %></td>
+          <td><%= @preseason_report.pcurrent1 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td><%= @preseason_report.pyr2 %></td>
+          <td><%= @preseason_report.past_prospect2 %></td>
+          <td><%= @preseason_report.pcurrent2 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td><%= @preseason_report.pyr3 %></td>
+          <td><%= @preseason_report.past_prospect3 %></td>
+          <td><%= @preseason_report.pcurrent3 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td><%= @preseason_report.pyr4 %></td>
+          <td><%= @preseason_report.past_prospect4 %></td>
+          <td><%= @preseason_report.pcurrent4 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td><%= @preseason_report.pyr5 %></td>
+          <td><%= @preseason_report.past_prospect5 %></td>
+          <td><%= @preseason_report.pcurrent5 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td><%= @preseason_report.pyr6 %></td>
+          <td><%= @preseason_report.past_prospect6 %></td>
+          <td><%= @preseason_report.pcurrent6 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td><%= @preseason_report.pyr7 %></td>
+          <td><%= @preseason_report.past_prospect7 %></td>
+          <td><%= @preseason_report.pcurrent7 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td><%= @preseason_report.pyr8 %></td>
+          <td><%= @preseason_report.past_prospect8 %></td>
+          <td><%= @preseason_report.pcurrent8 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td><%= @preseason_report.pyr9 %></td>
+          <td><%= @preseason_report.past_prospect9 %></td>
+          <td><%= @preseason_report.pcurrent9 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td><%= @preseason_report.pyr10 %></td>
+          <td><%= @preseason_report.past_prospect10 %></td>
+          <td><%= @preseason_report.pcurrent10 %></td>
+        </tr>
+      </table>
+
+      <table class="table preseason-table">
+        <tr class="preseason-table-header">
+          <th>Top Draft Picks Last 10 Years</th>
+        </tr>
+
+        <tr class="preseason-table-content">
+          <td><%= @preseason_report.dpyr1 %></td>
+          <td><%= @preseason_report.draft_pick1 %></td>
+          <td><%= @preseason_report.dpcurrent1 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td><%= @preseason_report.dpyr2 %></td>
+          <td><%= @preseason_report.draft_pick2 %></td>
+          <td><%= @preseason_report.dpcurrent2 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td><%= @preseason_report.dpyr3 %></td>
+          <td><%= @preseason_report.draft_pick3 %></td>
+          <td><%= @preseason_report.dpcurrent3 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td><%= @preseason_report.dpyr4 %></td>
+          <td><%= @preseason_report.draft_pick4 %></td>
+          <td><%= @preseason_report.dpcurrent4 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td><%= @preseason_report.dpyr5 %></td>
+          <td><%= @preseason_report.draft_pick5 %></td>
+          <td><%= @preseason_report.dpcurrent5 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td><%= @preseason_report.dpyr6 %></td>
+          <td><%= @preseason_report.draft_pick6 %></td>
+          <td><%= @preseason_report.dpcurrent6 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td><%= @preseason_report.dpyr7 %></td>
+          <td><%= @preseason_report.draft_pick7 %></td>
+          <td><%= @preseason_report.dpcurrent7 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td><%= @preseason_report.dpyr8 %></td>
+          <td><%= @preseason_report.draft_pick8 %></td>
+          <td><%= @preseason_report.dpcurrent8 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td><%= @preseason_report.dpyr9 %></td>
+          <td><%= @preseason_report.draft_pick9 %></td>
+          <td><%= @preseason_report.dpcurrent9 %></td>
+        </tr>
+        <tr class="preseason-table-content">
+          <td><%= @preseason_report.dpyr10 %></td>
+          <td><%= @preseason_report.draft_pick10 %></td>
+          <td><%= @preseason_report.dpcurrent10 %></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
