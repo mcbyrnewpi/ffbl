@@ -45,7 +45,7 @@
               <li><%= link_to "Update Team Info", edit_user_path(current_user) %></li>
               <li class="divider"></li>
               <% if current_user.varnum? %>
-                <li><%= link_to "Create Preseason Report", new_preseason_report_path %></li>
+                <li><%= link_to "Create Preseason Report", new_preseason_report_path, :"data-no-turbolink" => true %></li>
                 <li class="divider"></li>
               <% end %>
               <li><%= link_to "Message Board", posts_path %></li>

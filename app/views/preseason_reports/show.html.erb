@@ -7,7 +7,7 @@
 
     <% if current_user == @user %>
       <div class="col-md-12 center pad-my-bottom">
-        <%= link_to "Edit Report", edit_preseason_report_path(@preseason_report), class: "btn btn-drop" %>
+        <%= link_to "Edit Report", edit_preseason_report_path(@preseason_report), :"data-no-turbolink" => true, class: "btn btn-drop" %>
       </div>
     <% end %>
 

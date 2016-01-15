@@ -6,149 +6,139 @@
     </div>
 
     <div class="col-sm-8 col-sm-offset-2 center">
-      <%= simple_form_for @preseason_report do |f| %>
-        <%= f.input :user_id, :as => :hidden, :input_html => { :value => current_user.id } %>
-        <%= f.input :report_title, label: "Title", :required => false %>
-        <%= f.input :report_content, label: "Report Content", :required => false %>
-    </div>
-    <div class="col-sm-6 col-sm-offset-3 center">
-        <h3 class="pad-my-bottom">Current Top 10 Prospects</h3>
-        <%= f.input :prospect1, label: false, :placeholder => "#1 Prospect Name, Position", :required => false %>
-        <%= f.input :prospect2, label: false, :placeholder => "#2 Prospect Name, Position", :required => false %>
-        <%= f.input :prospect3, label: false, :placeholder => "#3 Prospect Name, Position", :required => false %>
-        <%= f.input :prospect4, label: false, :placeholder => "#4 Prospect Name, Position", :required => false %>
-        <%= f.input :prospect5, label: false, :placeholder => "#5 Prospect Name, Position", :required => false %>
-        <%= f.input :prospect6, label: false, :placeholder => "#6 Prospect Name, Position", :required => false %>
-        <%= f.input :prospect7, label: false, :placeholder => "#7 Prospect Name, Position", :required => false %>
-        <%= f.input :prospect8, label: false, :placeholder => "#8 Prospect Name, Position", :required => false %>
-        <%= f.input :prospect9, label: false, :placeholder => "#9 Prospect Name, Position", :required => false %>
-        <%= f.input :prospect10, label: false, :placeholder => "#10 Prospect Name, Position", :required => false %>
-    </div>
-    <div class="col-sm-6 col-sm-offset-3 center">
+        <%= simple_form_for @preseason_report do |f| %>
+            <%= f.input :user_id, :as => :hidden, :input_html => { :value => current_user.id } %>
+            <%= f.input :report_title, label: "Title", :required => false %>
+            <%= f.input :report_content, label: "Report Content", :required => false %>
 
-        <h3 class="give-me-top-margin pad-my-bottom">Future Projected Starting Lineup</h3>
-        <%= f.input :proj_year, label: false, :placeholder => "Projection Year (ie. 2016)", :required => false %>
-        <%= f.input :catch, label: false, :placeholder => "Catcher", :required => false %>
-        <%= f.input :first, label: false, :placeholder => "1B", :required => false %>
-        <%= f.input :second, label: false, :placeholder => "2B", :required => false %>
-        <%= f.input :third, label: false, :placeholder => "3B", :required => false %>
-        <%= f.input :short, label: false, :placeholder => "SS", :required => false %>
-        <%= f.input :of1, label: false, :placeholder => "OF #1", :required => false %>
-        <%= f.input :of2, label: false, :placeholder => "OF #2", :required => false %>
-        <%= f.input :of3, label: false, :placeholder => "OF #3", :required => false %>
-        <%= f.input :util1, label: false, :placeholder => "Util #1", :required => false %>
-        <%= f.input :util2, label: false, :placeholder => "Util #2", :required => false %>
-        <%= f.input :sp1, label: false, :placeholder => "SP #1", :required => false %>
-        <%= f.input :sp2, label: false, :placeholder => "SP #2", :required => false %>
-        <%= f.input :sp3, label: false, :placeholder => "SP #3", :required => false %>
-        <%= f.input :rp1, label: false, :placeholder => "RP #1", :required => false %>
-        <%= f.input :rp2, label: false, :placeholder => "RP #2", :required => false %>
-        <%= f.input :rp3, label: false, :placeholder => "RP #3", :required => false %>
-        <%= f.input :p1, label: false, :placeholder => "P #1", :required => false %>
-        <%= f.input :p2, label: false, :placeholder => "P #2", :required => false %>
-        <%= f.input :bench1, label: false, :placeholder => "Bench #1", :required => false %>
-        <%= f.input :bench2, label: false, :placeholder => "Bench #2", :required => false %>
-        <%= f.input :bench3, label: false, :placeholder => "Bench #3", :required => false %>
-        <%= f.input :bench4, label: false, :placeholder => "Bench #4", :required => false %>
-        <%= f.input :bench5, label: false, :placeholder => "Bench #5", :required => false %>
-        <%= f.input :bench6, label: false, :placeholder => "Bench #6", :required => false %>
-        <%= f.input :bench7, label: false, :placeholder => "Bench #7", :required => false %>
+            <h3>Current Top 10 Prospects</h3>
+            <%= f.input :prospect1, label: false, :placeholder => "#1 Prospect Name, Position", :required => false %>
+            <%= f.input :prospect2, label: false, :placeholder => "#2 Prospect Name, Position", :required => false %>
+            <%= f.input :prospect3, label: false, :placeholder => "#3 Prospect Name, Position", :required => false %>
+            <%= f.input :prospect4, label: false, :placeholder => "#4 Prospect Name, Position", :required => false %>
+            <%= f.input :prospect5, label: false, :placeholder => "#5 Prospect Name, Position", :required => false %>
+            <%= f.input :prospect6, label: false, :placeholder => "#6 Prospect Name, Position", :required => false %>
+            <%= f.input :prospect7, label: false, :placeholder => "#7 Prospect Name, Position", :required => false %>
+            <%= f.input :prospect8, label: false, :placeholder => "#8 Prospect Name, Position", :required => false %>
+            <%= f.input :prospect9, label: false, :placeholder => "#9 Prospect Name, Position", :required => false %>
+            <%= f.input :prospect10, label: false, :placeholder => "#10 Prospect Name, Position", :required => false %>
 
-    </div>
-    <div class="col-sm-6 col-sm-offset-3 pad-my-bottom">
+            <h3 class="give-me-top-margin">Future Projected Starting Lineup</h3>
+            <%= f.input :proj_year, label: false, :placeholder => "Projection Year (ie. 2016)", :required => false %>
+            <%= f.input :catch, label: false, :placeholder => "Catcher", :required => false %>
+            <%= f.input :first, label: false, :placeholder => "1B", :required => false %>
+            <%= f.input :second, label: false, :placeholder => "2B", :required => false %>
+            <%= f.input :third, label: false, :placeholder => "3B", :required => false %>
+            <%= f.input :short, label: false, :placeholder => "SS", :required => false %>
+            <%= f.input :of1, label: false, :placeholder => "OF #1", :required => false %>
+            <%= f.input :of2, label: false, :placeholder => "OF #2", :required => false %>
+            <%= f.input :of3, label: false, :placeholder => "OF #3", :required => false %>
+            <%= f.input :util1, label: false, :placeholder => "Util #1", :required => false %>
+            <%= f.input :util2, label: false, :placeholder => "Util #2", :required => false %>
+            <%= f.input :sp1, label: false, :placeholder => "SP #1", :required => false %>
+            <%= f.input :sp2, label: false, :placeholder => "SP #2", :required => false %>
+            <%= f.input :sp3, label: false, :placeholder => "SP #3", :required => false %>
+            <%= f.input :rp1, label: false, :placeholder => "RP #1", :required => false %>
+            <%= f.input :rp2, label: false, :placeholder => "RP #2", :required => false %>
+            <%= f.input :rp3, label: false, :placeholder => "RP #3", :required => false %>
+            <%= f.input :p1, label: false, :placeholder => "P #1", :required => false %>
+            <%= f.input :p2, label: false, :placeholder => "P #2", :required => false %>
+            <%= f.input :bench1, label: false, :placeholder => "Bench #1", :required => false %>
+            <%= f.input :bench2, label: false, :placeholder => "Bench #2", :required => false %>
+            <%= f.input :bench3, label: false, :placeholder => "Bench #3", :required => false %>
+            <%= f.input :bench4, label: false, :placeholder => "Bench #4", :required => false %>
+            <%= f.input :bench5, label: false, :placeholder => "Bench #5", :required => false %>
+            <%= f.input :bench6, label: false, :placeholder => "Bench #6", :required => false %>
+            <%= f.input :bench7, label: false, :placeholder => "Bench #7", :required => false %>
 
-        <h3 class="give-me-top-margin pad-my-bottom center">Top Prospects of Past 10 Years</h3>
-        <p>Prospect 1 (Oldest)</p>
-        <%= f.input :pyr1, label: false, :placeholder => "Year", :required => false %>
-        <%= f.input :past_prospect1, label: false, :placeholder => "Name, Position", :required => false %>
-        <%= f.input :pcurrent1, label: false, :placeholder => "Current Status", :required => false %>
-        <p>Prospect 2</p>
-        <%= f.input :pyr2, label: false, :placeholder => "Year", :required => false %>
-        <%= f.input :past_prospect2, label: false, :placeholder => "Name, Position", :required => false %>
-        <%= f.input :pcurrent2, label: false, :placeholder => "Current Status", :required => false %>
-        <p>Prospect 3</p>
-        <%= f.input :pyr3, label: false, :placeholder => "Year", :required => false %>
-        <%= f.input :past_prospect3, label: false, :placeholder => "Name, Position", :required => false %>
-        <%= f.input :pcurrent3, label: false, :placeholder => "Current Status", :required => false %>
-        <p>Prospect 4</p>
-        <%= f.input :pyr4, label: false, :placeholder => "Year", :required => false %>
-        <%= f.input :past_prospect4, label: false, :placeholder => "Name, Position", :required => false %>
-        <%= f.input :pcurrent4, label: false, :placeholder => "Current Status", :required => false %>
-        <p>Prospect 5</p>
-        <%= f.input :pyr5, label: false, :placeholder => "Year", :required => false %>
-        <%= f.input :past_prospect5, label: false, :placeholder => "Name, Position", :required => false %>
-        <%= f.input :pcurrent5, label: false, :placeholder => "Current Status", :required => false %>
-        <p>Prospect 6</p>
-        <%= f.input :pyr6, label: false, :placeholder => "Year", :required => false %>
-        <%= f.input :past_prospect6, label: false, :placeholder => "Name, Position", :required => false %>
-        <%= f.input :pcurrent6, label: false, :placeholder => "Current Status", :required => false %>
-        <p>Prospect 7</p>
-        <%= f.input :pyr7, label: false, :placeholder => "Year", :required => false %>
-        <%= f.input :past_prospect7, label: false, :placeholder => "Name, Position", :required => false %>
-        <%= f.input :pcurrent7, label: false, :placeholder => "Current Status", :required => false %>
-        <p>Prospect 8</p>
-        <%= f.input :pyr8, label: false, :placeholder => "Year", :required => false %>
-        <%= f.input :past_prospect8, label: false, :placeholder => "Name, Position", :required => false %>
-        <%= f.input :pcurrent8, label: false, :placeholder => "Current Status", :required => false %>
-        <p>Prospect 9</p>
-        <%= f.input :pyr9, label: false, :placeholder => "Year", :required => false %>
-        <%= f.input :past_prospect9, label: false, :placeholder => "Name, Position", :required => false %>
-        <%= f.input :pcurrent9, label: false, :placeholder => "Current Status", :required => false %>
-        <p>Prospect 10 (Newest)</p>
-        <%= f.input :pyr10, label: false, :placeholder => "Year", :required => false %>
-        <%= f.input :past_prospect10, label: false, :placeholder => "Name, Position", :required => false %>
-        <%= f.input :pcurrent10, label: false, :placeholder => "Current Status", :required => false %>
+            <h3 class="give-me-top-margin center">Top Prospects of Past 10 Years</h3>
+            <p>Prospect 1 (Oldest)</p>
+            <%= f.input :pyr1, label: false, :placeholder => "Year", :required => false %>
+            <%= f.input :past_prospect1, label: false, :placeholder => "Name, Position", :required => false %>
+            <%= f.input :pcurrent1, label: false, :placeholder => "Current Status", :required => false %>
+            <p>Prospect 2</p>
+            <%= f.input :pyr2, label: false, :placeholder => "Year", :required => false %>
+            <%= f.input :past_prospect2, label: false, :placeholder => "Name, Position", :required => false %>
+            <%= f.input :pcurrent2, label: false, :placeholder => "Current Status", :required => false %>
+            <p>Prospect 3</p>
+            <%= f.input :pyr3, label: false, :placeholder => "Year", :required => false %>
+            <%= f.input :past_prospect3, label: false, :placeholder => "Name, Position", :required => false %>
+            <%= f.input :pcurrent3, label: false, :placeholder => "Current Status", :required => false %>
+            <p>Prospect 4</p>
+            <%= f.input :pyr4, label: false, :placeholder => "Year", :required => false %>
+            <%= f.input :past_prospect4, label: false, :placeholder => "Name, Position", :required => false %>
+            <%= f.input :pcurrent4, label: false, :placeholder => "Current Status", :required => false %>
+            <p>Prospect 5</p>
+            <%= f.input :pyr5, label: false, :placeholder => "Year", :required => false %>
+            <%= f.input :past_prospect5, label: false, :placeholder => "Name, Position", :required => false %>
+            <%= f.input :pcurrent5, label: false, :placeholder => "Current Status", :required => false %>
+            <p>Prospect 6</p>
+            <%= f.input :pyr6, label: false, :placeholder => "Year", :required => false %>
+            <%= f.input :past_prospect6, label: false, :placeholder => "Name, Position", :required => false %>
+            <%= f.input :pcurrent6, label: false, :placeholder => "Current Status", :required => false %>
+            <p>Prospect 7</p>
+            <%= f.input :pyr7, label: false, :placeholder => "Year", :required => false %>
+            <%= f.input :past_prospect7, label: false, :placeholder => "Name, Position", :required => false %>
+            <%= f.input :pcurrent7, label: false, :placeholder => "Current Status", :required => false %>
+            <p>Prospect 8</p>
+            <%= f.input :pyr8, label: false, :placeholder => "Year", :required => false %>
+            <%= f.input :past_prospect8, label: false, :placeholder => "Name, Position", :required => false %>
+            <%= f.input :pcurrent8, label: false, :placeholder => "Current Status", :required => false %>
+            <p>Prospect 9</p>
+            <%= f.input :pyr9, label: false, :placeholder => "Year", :required => false %>
+            <%= f.input :past_prospect9, label: false, :placeholder => "Name, Position", :required => false %>
+            <%= f.input :pcurrent9, label: false, :placeholder => "Current Status", :required => false %>
+            <p>Prospect 10 (Newest)</p>
+            <%= f.input :pyr10, label: false, :placeholder => "Year", :required => false %>
+            <%= f.input :past_prospect10, label: false, :placeholder => "Name, Position", :required => false %>
+            <%= f.input :pcurrent10, label: false, :placeholder => "Current Status", :required => false %>
 
-    </div>
-    <div class="col-sm-6 col-sm-offset-3 pad-my-bottom">
-        <h3 class="give-me-top-margin pad-my-bottom center">Top Draft Picks of Past 10 Years</h3>
-        <p>Draft Pick 1 (Oldest)</p>
-        <%= f.input :dpyr1, label: false, :placeholder => "Year", :required => false %>
-        <%= f.input :draft_pick1, label: false, :placeholder => "Name, Position", :required => false %>
-        <%= f.input :dpcurrent1, label: false, :placeholder => "Current Status", :required => false %>
-        <p>Draft Pick 2</p>
-        <%= f.input :dpyr2, label: false, :placeholder => "Year", :required => false %>
-        <%= f.input :draft_pick2, label: false, :placeholder => "Name, Position", :required => false %>
-        <%= f.input :dpcurrent2, label: false, :placeholder => "Current Status", :required => false %>
-        <p>Draft Pick 3</p>
-        <%= f.input :dpyr3, label: false, :placeholder => "Year", :required => false %>
-        <%= f.input :draft_pick3, label: false, :placeholder => "Name, Position", :required => false %>
-        <%= f.input :dpcurrent3, label: false, :placeholder => "Current Status", :required => false %>
-        <p>Draft Pick 4</p>
-        <%= f.input :dpyr4, label: false, :placeholder => "Year", :required => false %>
-        <%= f.input :draft_pick4, label: false, :placeholder => "Name, Position", :required => false %>
-        <%= f.input :dpcurrent4, label: false, :placeholder => "Current Status", :required => false %>
-        <p>Draft Pick 5</p>
-        <%= f.input :dpyr5, label: false, :placeholder => "Year", :required => false %>
-        <%= f.input :draft_pick5, label: false, :placeholder => "Name, Position", :required => false %>
-        <%= f.input :dpcurrent5, label: false, :placeholder => "Current Status", :required => false %>
-        <p>Draft Pick 6</p>
-        <%= f.input :dpyr6, label: false, :placeholder => "Year", :required => false %>
-        <%= f.input :draft_pick6, label: false, :placeholder => "Name, Position", :required => false %>
-        <%= f.input :dpcurrent6, label: false, :placeholder => "Current Status", :required => false %>
-        <p>Draft Pick 7</p>
-        <%= f.input :dpyr7, label: false, :placeholder => "Year", :required => false %>
-        <%= f.input :draft_pick7, label: false, :placeholder => "Name, Position", :required => false %>
-        <%= f.input :dpcurrent7, label: false, :placeholder => "Current Status", :required => false %>
-        <p>Draft Pick 8</p>
-        <%= f.input :dpyr8, label: false, :placeholder => "Year", :required => false %>
-        <%= f.input :draft_pick8, label: false, :placeholder => "Name, Position", :required => false %>
-        <%= f.input :dpcurrent8, label: false, :placeholder => "Current Status", :required => false %>
-        <p>Draft Pick 9</p>
-        <%= f.input :dpyr9, label: false, :placeholder => "Year", :required => false %>
-        <%= f.input :draft_pick9, label: false, :placeholder => "Name, Position", :required => false %>
-        <%= f.input :dpcurrent9, label: false, :placeholder => "Current Status", :required => false %>
-        <p>Draft Pick 10 (Newest)</p>
-        <%= f.input :dpyr10, label: false, :placeholder => "Year", :required => false %>
-        <%= f.input :draft_pick10, label: false, :placeholder => "Name, Position", :required => false %>
-        <%= f.input :dpcurrent10, label: false, :placeholder => "Current Status", :required => false %>
-    </div>
-    <div class="col-sm-8 col-sm-offset-2 center">
+            <h3 class="give-me-top-margin center">Top Draft Picks of Past 10 Years</h3>
+            <p>Draft Pick 1 (Oldest)</p>
+            <%= f.input :dpyr1, label: false, :placeholder => "Year", :required => false %>
+            <%= f.input :draft_pick1, label: false, :placeholder => "Name, Position", :required => false %>
+            <%= f.input :dpcurrent1, label: false, :placeholder => "Current Status", :required => false %>
+            <p>Draft Pick 2</p>
+            <%= f.input :dpyr2, label: false, :placeholder => "Year", :required => false %>
+            <%= f.input :draft_pick2, label: false, :placeholder => "Name, Position", :required => false %>
+            <%= f.input :dpcurrent2, label: false, :placeholder => "Current Status", :required => false %>
+            <p>Draft Pick 3</p>
+            <%= f.input :dpyr3, label: false, :placeholder => "Year", :required => false %>
+            <%= f.input :draft_pick3, label: false, :placeholder => "Name, Position", :required => false %>
+            <%= f.input :dpcurrent3, label: false, :placeholder => "Current Status", :required => false %>
+            <p>Draft Pick 4</p>
+            <%= f.input :dpyr4, label: false, :placeholder => "Year", :required => false %>
+            <%= f.input :draft_pick4, label: false, :placeholder => "Name, Position", :required => false %>
+            <%= f.input :dpcurrent4, label: false, :placeholder => "Current Status", :required => false %>
+            <p>Draft Pick 5</p>
+            <%= f.input :dpyr5, label: false, :placeholder => "Year", :required => false %>
+            <%= f.input :draft_pick5, label: false, :placeholder => "Name, Position", :required => false %>
+            <%= f.input :dpcurrent5, label: false, :placeholder => "Current Status", :required => false %>
+            <p>Draft Pick 6</p>
+            <%= f.input :dpyr6, label: false, :placeholder => "Year", :required => false %>
+            <%= f.input :draft_pick6, label: false, :placeholder => "Name, Position", :required => false %>
+            <%= f.input :dpcurrent6, label: false, :placeholder => "Current Status", :required => false %>
+            <p>Draft Pick 7</p>
+            <%= f.input :dpyr7, label: false, :placeholder => "Year", :required => false %>
+            <%= f.input :draft_pick7, label: false, :placeholder => "Name, Position", :required => false %>
+            <%= f.input :dpcurrent7, label: false, :placeholder => "Current Status", :required => false %>
+            <p>Draft Pick 8</p>
+            <%= f.input :dpyr8, label: false, :placeholder => "Year", :required => false %>
+            <%= f.input :draft_pick8, label: false, :placeholder => "Name, Position", :required => false %>
+            <%= f.input :dpcurrent8, label: false, :placeholder => "Current Status", :required => false %>
+            <p>Draft Pick 9</p>
+            <%= f.input :dpyr9, label: false, :placeholder => "Year", :required => false %>
+            <%= f.input :draft_pick9, label: false, :placeholder => "Name, Position", :required => false %>
+            <%= f.input :dpcurrent9, label: false, :placeholder => "Current Status", :required => false %>
+            <p>Draft Pick 10 (Newest)</p>
+            <%= f.input :dpyr10, label: false, :placeholder => "Year", :required => false %>
+            <%= f.input :draft_pick10, label: false, :placeholder => "Name, Position", :required => false %>
+            <%= f.input :dpcurrent10, label: false, :placeholder => "Current Status", :required => false %>
 
-        <%= f.button :submit, "Create Preseason Report", class: "btn btn-cancel" %>
-      
+            <%= f.button :submit, "Create Preseason Report", class: "btn btn-cancel" %>
+        <% end %> 
     </div>
-    <% end %>
+    
 
   </div>
 </div>
