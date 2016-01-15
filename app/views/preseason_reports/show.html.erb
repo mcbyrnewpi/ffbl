@@ -293,25 +293,24 @@
       </table>
     </div>
 
-    <% if @preseason_report.user.team == "Cowboys From Hell" %>
-      <div class="col-sm-12 center">
-        <h3 class="underline-me">Other Preseason Reports</h3>
-        <% if !@user.preseason_reports.empty? %>
-          <div class="col-sm-12">
-            <% @preseason_reports.each do |report| %>
-              <%= link_to report.created_at.strftime("%Y"), preseason_report_path(report), class: "btn btn-cancel" %>
-            <% end %>
-          </div>
+    <div class="col-sm-12 center">
+      <h3 class="underline-me">All Preseason Reports</h3>
+      <div class="col-sm-12">
+        <% @preseason_reports.each do |report| %>
+          <%= link_to report.created_at.strftime("%Y"), preseason_report_path(report), class: "btn btn-cancel" %>
         <% end %>
+      </div>
+
+      <% if @preseason_report.user.team == "Cowboys From Hell" %>
+        <div class="col-sm-12">
         <%= link_to "2015", cfhpre2015_path, class: "btn btn-cancel give-me-top-margin" %>
         <%= link_to "2014", cfhpre2014_path, class: "btn btn-cancel give-me-top-margin" %>
         <%= link_to "2013", cfhpre2013_path, class: "btn btn-cancel give-me-top-margin" %>
         <%= link_to "2012", cfhpre2012_path, class: "btn btn-cancel give-me-top-margin" %>
         <%= link_to "2011", cfhpre2011_path, class: "btn btn-cancel give-me-top-margin" %>
         <%= link_to "2010", cfhpre2010_path, class: "btn btn-cancel give-me-top-margin" %>
-        
-      </div>
-      
-    <% end %>
+        </div>
+      <% end %>
+    </div>
   </div>
 </div>
