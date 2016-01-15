@@ -11,12 +11,12 @@
       </div>
     <% end %>
 
-    <div class="col-md-5 col-md-offset-1">
+    <div class="col-md-5 col-md-offset-1 auto-preseason-image">
       <% if @preseason_report.user.team == "Cowboys From Hell" %>
         <%= image_tag("cfhexclusive.png", :alt => "Cowboys Logo") %>
       <% end %>
 
-      <%= simple_format(@preseason_report.report_content) %>
+      <p><%= simple_format(@preseason_report.report_content) %></p>
     </div>
 
     <div class="col-md-4 col-md-offset-1">
