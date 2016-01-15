@@ -11,6 +11,7 @@ class UsersController < ApplicationController
     @user = User.find(params[:id])
     @players = @user.players.all
     @transactions = Transaction.where("team_before = ? OR team_after = ?", @user.team, @user.team).order("id DESC")
+    @preseason_report = @user.preseason_reports.last
   end
 
   def new

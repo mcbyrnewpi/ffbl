@@ -6,7 +6,7 @@
     </div>
 
     <div class="col-md-5 col-md-offset-1">
-      <% if @preseason_report.user_id == 3 %>
+      <% if @preseason_report.user.team == "Cowboys From Hell" %>
         <%= image_tag("cfhexclusive.png", :alt => "Cowboys Logo") %>
       <% end %>
 
@@ -14,10 +14,8 @@
     </div>
 
     <div class="col-md-4 col-md-offset-1">
-      <table class="table preseason-table">
-        <tr class="preseason-table-header">
-          <th>Top Ten Prospects</th>
-        </tr>
+      <table class="table preseason-table table-condensed">
+        <caption class="center">Top Ten Prospects</caption>
 
         <tr class="preseason-table-content">
           <td>1. </td>
@@ -61,10 +59,8 @@
         </tr>
       </table>
 
-      <table class="table preseason-table">
-        <tr class="preseason-table-header">
-          <th>Projected Starting <%= @preseason_report.proj_year %> Lineup</th>
-        </tr>
+      <table class="table preseason-table table-condensed">
+        <caption class="center">Projected Starting <%= @preseason_report.proj_year %> Lineup</caption>
 
         <tr class="preseason-table-content">
           <td>Catcher</td>
@@ -168,9 +164,13 @@
         </tr>
       </table>
 
-      <table class="table preseason-table">
-        <tr class="preseason-table-header">
-          <th>Top Prospects of the Past 10 Years</th>
+      <table class="table preseason-table table-condensed">
+        <caption class="center">Top Prospects of the Past 10 Years</caption>
+
+        <tr class="preseason-table-content">
+          <th>Year</th>
+          <th>Player, Position</th>
+          <th>Currently</th>
         </tr>
 
         <tr class="preseason-table-content">
@@ -225,9 +225,13 @@
         </tr>
       </table>
 
-      <table class="table preseason-table">
-        <tr class="preseason-table-header">
-          <th>Top Draft Picks Last 10 Years</th>
+      <table class="table preseason-table table-condensed">
+        <caption class="center">Top Draft Picks Last 10 Years</caption>
+
+        <tr class="preseason-table-content">
+          <th>Year</th>
+          <th>Player, Position</th>
+          <th>Currently</th>
         </tr>
 
         <tr class="preseason-table-content">
@@ -282,5 +286,25 @@
         </tr>
       </table>
     </div>
+
+    <% if @preseason_report.user.team == "Cowboys From Hell" %>
+      <div class="col-sm-12 center">
+        <h3 class="pad-my-bottom underline-me">Other Preseason Reports</h3>
+        <% if !@user.preseason_reports.empty? %>
+          <div class="col-sm-12 pad-my-bottom center">
+            <% @preseason_reports.each do |report| %>
+              <%= link_to report.created_at.strftime("%Y"), preseason_report_path(report), class: "btn btn-cancel" %>
+            <% end %>
+          </div>
+        <% end %>
+        <%= link_to "2010", cfhpre2010_path, class: "btn btn-cancel" %>
+        <%= link_to "2011", cfhpre2011_path, class: "btn btn-cancel" %>
+        <%= link_to "2012", cfhpre2012_path, class: "btn btn-cancel" %>
+        <%= link_to "2013", cfhpre2013_path, class: "btn btn-cancel" %>
+        <%= link_to "2014", cfhpre2014_path, class: "btn btn-cancel" %>
+        <%= link_to "2015", cfhpre2015_path, class: "btn btn-cancel" %>
+      </div>
+      
+    <% end %>
   </div>
 </div>

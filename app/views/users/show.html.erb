@@ -11,23 +11,28 @@
 				<h4>Managed by: <%= @user.name %></h4>
 				<p>Current Roster Size:  <%= @players.count %> players</p>
 				<small>(<%= @user.transactions.all.count %> website transactions made)</small>
-				<% if @user.id == 3 %>
-					<div class="row give-me-top-margin">
-						<div class="col-sm-12">
-							<%= link_to "Trophy Room", cfhtr_path, class: "btn btn-cancel give-me-top-margin" %>
-						</div>
-						<div class="col-sm-12">
-							<%= link_to "Hall of Fame", cfhhof_path, class: "btn btn-cancel give-me-top-margin" %>
-						</div>
-						<div class="col-sm-12">
-							<%= link_to "Preseason Report", cfhpre2015_path, class: "btn btn-cancel give-me-top-margin" %>
-						</div>
-					</div>
-				<% end %>
+				
 			</div>
 			<div class="col-sm-6">
 				<h3 class="center">More about us:</h3>
 				<p><%= simple_format(@user.about) %></p>
+				<% if @user.team == "Cowboys From Hell" %>
+					<div class="row give-me-top-margin">
+						<div class="col-md-4">
+							<%= link_to "Trophy Room", cfhtr_path, class: "btn btn-cancel give-me-top-margin" %>
+						</div>
+						<div class="col-md-4">
+							<%= link_to "Hall of Fame", cfhhof_path, class: "btn btn-cancel give-me-top-margin" %>
+						</div>
+						<div class="col-md-4">
+							<% if !@user.preseason_reports.empty? %>
+								<%= link_to "Preseason Report", preseason_report_path(@preseason_report), class: "btn btn-cancel give-me-top-margin" %>
+							<% else %>
+								<%= link_to "Preseason Report", cfhpre2015_path, class: "btn btn-cancel give-me-top-margin" %>
+							<% end %>
+						</div>
+					</div>
+				<% end %>
 			</div>
 		<% else %>
 			<div class="col-sm-2 center give-me-top-margin">
@@ -38,7 +43,7 @@
 				<h4>Managed by: <%= @user.name %></h4>
 				<p>Current Roster Size:  <%= @players.count %> players</p>
 				<small>(<%= @user.transactions.all.count %> website transactions made)</small>
-				<% if @user.id == 3 %>
+				<% if @user.team == "Cowboys From Hell" %>
 					<div class="row">
 						<div class="col-sm-4">
 							<%= link_to "Trophy Room", cfhtr_path, class: "btn btn-cancel give-me-top-margin" %>
@@ -47,7 +52,11 @@
 							<%= link_to "Hall of Fame", cfhhof_path, class: "btn btn-cancel give-me-top-margin" %>
 						</div>
 						<div class="col-sm-4">
-							<%= link_to "Preseason Report", cfhpre2015_path, class: "btn btn-cancel give-me-top-margin" %>
+							<% if !@user.preseason_reports.empty? %>
+								<%= link_to "Preseason Report", preseason_report_path(@preseason_report), class: "btn btn-cancel give-me-top-margin" %>
+							<% else %>
+								<%= link_to "Preseason Report", cfhpre2015_path, class: "btn btn-cancel give-me-top-margin" %>
+							<% end %>
 						</div>
 					</div>
 				<% end %>
