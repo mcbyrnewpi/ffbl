@@ -1,5 +1,6 @@
 class PreseasonReportsController < ApplicationController
-  before_action :varnum_user,   only: [:new, :create, :edit, :update]
+  before_action :varnum_user,   only: [:new, :create]
+  before_action :correct_varnum_user, only: [:edit, :update]
 
   def new
     @preseason_report = PreseasonReport.new
@@ -44,5 +45,11 @@ class PreseasonReportsController < ApplicationController
 
     def varnum_user
       redirect_to(root_url) unless logged_in? && current_user.varnum == true
+    end
+
+    def correct_varnum_user
+      @preseason_report = PreseasonReport.find(params[:id])
+      @user = @preseason_report.user
+      redirect_to(root_url) unless current_user?(@user)
     end
 end
