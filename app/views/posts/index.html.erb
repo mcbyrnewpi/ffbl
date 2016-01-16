@@ -9,7 +9,7 @@
 				<%= link_to "Create a New Topic", new_post_path, class: "btn btn-cancel" %>
 		</div>
 		<div class="col-sm-6 col-sm-offset-2">
-			<%= will_paginate @posts %>
+			<%= will_paginate @posts, :page_links => false %>
 		</div>
 		<div class="col-sm-12">
 			<table class="table">

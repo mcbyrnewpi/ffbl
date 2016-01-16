@@ -9,7 +9,7 @@
 			<%= render 'transaction_search_form' %>
 		</div>
 		<div class="col-sm-8 col-sm-offset-4 center give-me-top-margin">
-			<%= will_paginate @transactions %>
+			<%= will_paginate @transactions, :page_links => false %>
 		</div>
 		<div class="col-sm-8 col-sm-offset-4">
 
@@ -94,7 +94,7 @@
 				</table>
 			<% end %>
 			<div class="center">
-				<%= will_paginate @transactions %>
+				<%= will_paginate @transactions, :page_links => false %>
 			</div>
 		</div>
 	</div>
