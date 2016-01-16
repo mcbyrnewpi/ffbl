@@ -5,6 +5,11 @@
 			<div class="col-sm-12 space-my-bottom center">
 				<h1><%= @player.first_name + " " + @player.last_name %></h1>
 			</div>
+			<% if current_user.admin? %>
+				<div class="col-sm-12 space-my-bottom center">
+					<%= link_to "Edit Player", edit_player_path(@player), class: "btn btn-drop" %>
+				</div>
+			<% end %>
 			<div class="col-sm-8 col-sm-offset-2">
 				<% if @player.dob %>
 					<p>DOB: <%= @player.dob.strftime("%-m/%-d/%y") %></p>
