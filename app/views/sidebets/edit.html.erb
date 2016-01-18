@@ -1,0 +1,20 @@
+<% provide(:title, "Edit Sidebet") %>
+<div class="container content-container">
+  <div class="row">
+    <div class="col-sm-12 center give-me-top-margin space-my-bottom">
+      <h1>Update Sidebet</h1>
+    </div>
+    <div class="col-sm-8 col-sm-offset-2">
+      <%= simple_form_for @sidebet do |f| %>
+        <%= f.input :over, label: "Who has the Over?", :required => false %>
+        <%= f.input :under, label: "Who has the Under?", :required => false %>
+        <%= f.input :bet_info, label: "Bet Information", :required => false %>
+        <%= f.input :stakes, label: "Stakes", :required => false %>
+        <%= f.input :winner, label: "Winner (if complete)", :required => false %>
+    </div>
+    <div class="col-sm-8 col-sm-offset-2 center give-me-top-margin">
+        <%= f.button :submit, class: "btn btn-cancel" %>
+      <% end %>
+    </div>
+  </div>
+</div>

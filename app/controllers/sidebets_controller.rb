@@ -41,7 +41,7 @@ class SidebetsController < ApplicationController
   private
 
     def sidebet_params
-      params.require(:sidebet).permit(:over, :under, :bet_info, :stakes)
+      params.require(:sidebet).permit(:over, :under, :bet_info, :stakes, :winner)
     end
 
     def admin_user

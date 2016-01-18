@@ -1,0 +1,57 @@
+<%= provide(:title, "Brett's Sidebet Corner") %>
+
+<div class= "container content-container sidebet-corner">
+  <div class="row">
+    <div class="col-md-10 col-md-offset-1 give-me-top-margin pad-my-bottom center">
+      <%= image_tag("TableCrop.JPG", :alt => "Sidebet Table") %>
+    </div>
+
+    <div class="col-sm-10 col-sm-offset-1 give-me-top-margin pad-my-bottom border-divide">
+    </div>
+
+    <div class="col-sm-10 col-sm-offset-1 give-me-top-margin center">
+      <%= image_tag("AmidonBanner.png", :alt => "Handsome Brett") %>
+      <p class="give-me-small-top-margin"><small>"Place your bets, Jabronis"</small></p>
+      <p><small>-B. Amidon</small></p>
+    </div>
+
+    <% if logged_in? && current_user.admin? %>
+      <div class="col-sm-6 col-sm-offset-3 center pad-my-bottom give-me-top-margin">
+        <%= link_to "Create New Bet", new_sidebet_path, class: "btn btn-cancel" %>
+      </div>
+    <% end %>
+
+    <div class="col-md-10 col-md-offset-1">
+      <table class="table table-striped">
+        <tr>
+          <th>Over</th>
+          <th>Under</th>
+          <th>Bet Info</th>
+          <th>Stakes</th>
+          <th>Winner</th>
+          <% if logged_in? && current_user.admin? %>
+            <th>Update</th>
+          <% end %>
+        </tr>
+
+        <% @sidebets.each do |bet| %>
+        <tr>
+          <td><%= bet.over %></td>
+          <td><%= bet.under %></td>
+          <td><%= bet.bet_info %></td>
+          <td><%= bet.stakes %></td>
+          <% if !bet.winner.blank? %>
+            <td><%= bet.winner %></td>
+          <% else %>
+            <td>TBD</td>
+          <% end %>
+          
+          <% if logged_in? && current_user.admin? %>
+            <td><%= link_to "Update Bet", edit_sidebet_path(bet), :"data-no-turbolink" => true, class: "btn btn-drop" %></td>
+          <% end %>
+        </tr>
+        <% end %>
+      </table>
+    </div>
+  </div>
+</div>

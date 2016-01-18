@@ -87,6 +87,10 @@ small {
   margin-top: 25px;
 }
 
+.give-me-small-top-margin {
+  margin-top: 10px;
+}
+
 .space-my-bottom {
   margin-bottom: 25px;
 }
@@ -105,7 +109,9 @@ small {
   text-decoration: underline;
 }
 
-
+.border-divide {
+  border-bottom: 1px solid $ffblfontcolor;
+}
 
 
 /****** POSTS ******/
@@ -398,6 +404,18 @@ small {
 .auto-preseason-image {
   img {
     margin-top: 10px;
+  }
+}
+
+.sidebet-corner {
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+  }
+  .table-striped > tbody > tr:nth-child(odd) > td,
+  .table-striped > tbody > tr:nth-child(odd) > th {
+    background-color: $ffblcontainerbackgroundlight;
   }
 }
 
