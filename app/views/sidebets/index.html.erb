@@ -17,7 +17,7 @@
 
     <% if logged_in? && current_user.admin? %>
       <div class="col-md-6 col-md-offset-3 center pad-my-bottom give-me-top-margin">
-        <%= link_to "Create New Bet", new_sidebet_path, class: "btn btn-cancel" %>
+        <%= link_to "Create New Bet", new_sidebet_path, :"data-no-turbolink" => true, class: "btn btn-cancel" %>
       </div>
     <% end %>
 
