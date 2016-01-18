@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160114180437) do
+ActiveRecord::Schema.define(version: 20160118150734) do
 
   create_table "books", force: :cascade do |t|
     t.string   "selector"
@@ -206,6 +206,15 @@ ActiveRecord::Schema.define(version: 20160114180437) do
 
   add_index "reviews", ["book_id"], name: "index_reviews_on_book_id"
   add_index "reviews", ["user_id"], name: "index_reviews_on_user_id"
+
+  create_table "sidebets", force: :cascade do |t|
+    t.string   "over"
+    t.string   "under"
+    t.text     "bet_info"
+    t.string   "stakes"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "transactions", force: :cascade do |t|
     t.string   "team_after"

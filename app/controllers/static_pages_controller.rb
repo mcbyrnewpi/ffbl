@@ -27,5 +27,6 @@ class StaticPagesController < ApplicationController
     @users = User.all.order(:team)
   end
   
+
 end
 
