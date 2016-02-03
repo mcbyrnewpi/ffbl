@@ -1,6 +1,7 @@
 class CommishNotesController < ApplicationController
 
-  before_action :commish, only: [:edit, :update]
+  before_action :commish, only: [:edit, :update, :create]
+  before_action :logged_in_user, only: [:index]
 
   def create
     @commish_note = CommishNote.new(commish_note_params)
@@ -39,5 +40,13 @@ class CommishNotesController < ApplicationController
 
     def commish
       redirect_to(root_url) unless logged_in? && current_user.commish?
+    end
+
+    def logged_in_user
+      unless logged_in?
+        store_location
+        flash[:danger] = "Please log in."
+        redirect_to login_url
+      end
     end
 end
