@@ -16,6 +16,10 @@ class CommishNotesController < ApplicationController
     end
   end
 
+  def index
+    @commish_notes = CommishNote.all("id DESC")
+  end
+
 
   private
 
