@@ -54,6 +54,7 @@ Rails.application.routes.draw do
   get  'cfhpre2015'         => 'static_pages#CFHPre2015'
   get  'cfhtr'              => 'static_pages#CFHTR'
   get  'cfhhof'             => 'static_pages#CFHHOF'
+  get  'commissioner'       => 'static_pages#commissioner'
   
   get  'players/:id/drop_player', to: 'players#drop_player', as: 'drop_player'
   get  'players/:id/add_player', to: 'players#add_player', as: 'add_player'

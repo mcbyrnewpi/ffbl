@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160118155851) do
+ActiveRecord::Schema.define(version: 20160203001646) do
 
   create_table "books", force: :cascade do |t|
     t.string   "selector"
@@ -249,6 +249,7 @@ ActiveRecord::Schema.define(version: 20160118155851) do
     t.boolean  "admin",           default: false
     t.boolean  "glctac",          default: false
     t.boolean  "varnum",          default: false
+    t.boolean  "commish",         default: false
   end
 
   add_index "users", ["team"], name: "index_users_on_team"
