@@ -38,6 +38,24 @@
 	</div>
 <% end %>
 
+<% if @commish_note %>
+	<div class="container content-container">
+		<div class="row commish-note">
+			<div class="col-sm-12 pad-my-bottom center">
+				<h1>Message from the Commissioner</h1>
+			</div>
+
+			<div class="col-sm-8 col-sm-offset-2 pad-my-bottom">
+				<h3 class="center pad-my-bottom"><%= @commish_note.created_at.strftime("- %B %-d, %Y -") %></h3>
+				<p><%= simple_format(@commish_note.commish_note_content) %></p>
+			</div>
+			<div class="col-sm-8 col-sm-offset-2 pad-my-bottom">
+				<p><%= link_to "View all commish messages....", commish_notes_path, class: "team-link" %></p>
+			</div>
+		</div>
+	</div>
+<% end %>
+
 <div class="container content-container">
 	<div class="row">
 		<div class="center col-sm-6">

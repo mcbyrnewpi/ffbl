@@ -5,7 +5,8 @@ before_action :commish, only: [:commissioner]
   def home
     @transactions = Transaction.all.order("id DESC")
     @posts = Post.all.order("most_recent DESC")
-    @commish_notes = CommishNote.all("id DESC")
+    @commish_notes = CommishNote.all.order("id DESC")
+    @commish_note = CommishNote.last
   end
 
   def about

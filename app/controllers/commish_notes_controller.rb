@@ -2,6 +2,16 @@ class CommishNotesController < ApplicationController
 
   before_action :commish, only: [:edit, :update]
 
+  def create
+    @commish_note = CommishNote.new(commish_note_params)
+    if @commish_note.save
+      flash[:success] = "Commish Note Created!"
+      redirect_to root_url
+    else
+      redirect_to commissioner_path
+    end
+  end
+
   def edit
     @commish_note = CommishNote.find(params[:id])
   end
@@ -17,7 +27,7 @@ class CommishNotesController < ApplicationController
   end
 
   def index
-    @commish_notes = CommishNote.all("id DESC")
+    @commish_notes = CommishNote.all.order("id DESC")
   end
 
 
