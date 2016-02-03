@@ -1,4 +1,6 @@
 class StaticPagesController < ApplicationController
+before_action :commish, only: [:commissioner]
+
   
   def home
     @transactions = Transaction.all.order("id DESC")
@@ -26,6 +28,16 @@ class StaticPagesController < ApplicationController
   def team_violations
     @users = User.all.order(:team)
   end
+
+  def commissioner
+
+  end
+
+  private
+
+    def commish
+      redirect_to(root_url) unless logged_in? && current_user.commish?
+    end
   
 
 end
