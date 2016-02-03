@@ -74,6 +74,10 @@
               <li><%= link_to "Display Positions", positions_path %></li>
               <li class="divider"></li>
               <li><%= link_to "Display Levels", levels_path %></li>
+              <% if current_user.commish? %>
+                <li class="divider"></li>
+                <li><%= link_to "New Commissioner Note", commissioner_path %></li>
+              <% end %>
             </ul>
           </li>
         <% else %>

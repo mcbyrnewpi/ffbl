@@ -40,13 +40,13 @@
 
 <% if @commish_note %>
 	<div class="container content-container">
-		<div class="row commish-note">
+		<div class="row">
 			<div class="col-sm-12 pad-my-bottom center">
 				<h1>Message from the Commissioner</h1>
 			</div>
 
-			<div class="col-sm-8 col-sm-offset-2 pad-my-bottom">
-				<h3 class="center pad-my-bottom"><%= @commish_note.created_at.strftime("- %B %-d, %Y -") %></h3>
+			<div class="col-sm-8 col-sm-offset-2 pad-my-bottom space-my-bottom commish-note">
+				<h3 class="center give-me-small-top-padding pad-my-bottom"><%= @commish_note.created_at.strftime("- %B %-d, %Y -") %></h3>
 				<p><%= simple_format(@commish_note.commish_note_content) %></p>
 			</div>
 			<div class="col-sm-8 col-sm-offset-2 pad-my-bottom">

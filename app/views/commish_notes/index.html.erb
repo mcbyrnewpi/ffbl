@@ -1,0 +1,16 @@
+<% provide(:title, "Commissioner's Notes") %>
+
+<div class="container">
+  <div class="row content-container">
+    <div class="col-sm-12 center space-my-bottom">
+      <h1 class="underline-me">All Commissioner's Notes</h1>
+    </div>
+    <% @commish_notes.each do |note| %>
+      <div class="col-sm-8 col-sm-offset-2 space-my-bottom pad-my-bottom commish-note">
+        <h3 class="center pad-my-bottom"><%= note.created_at.strftime("- %B %-d, %Y -") %></h3>
+        <p><%= simple_format(note.commish_note_content) %></p>
+      </div>
+    <% end %>
+
+  </div>
+</div>
