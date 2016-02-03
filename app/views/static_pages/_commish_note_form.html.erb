@@ -1,0 +1,4 @@
+<%= simple_form_for CommishNote.new do |f| %>
+  <%= f.input :commish_note_content, label: "New Commish Note", :required => false %>
+  <%= f.button :submit, class: "btn btn-cancel" %>
+<% end %>
