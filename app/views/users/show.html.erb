@@ -80,6 +80,23 @@
 		<% end %>
 	</div>
 
+	<% if @players.where(level_id: 6..7).count > 0 %>
+		<div class="row content-container">
+			<div class="col-sm-12 center">
+				<h1>Draft Picks</h1>
+			</div>
+			<div class="col-sm-8 col-sm-offset-2 center">
+				<table class="table">
+					<% @players.where(level_id: 6..7).each do |player| %>
+						<tr>
+							<td><%= link_to "#{player.last_name} (#{player.first_name})", player_path(player), class: "player-link" %></td>
+						</tr>
+					<% end %>
+				</table>
+			</div>
+		</div>
+	<% end %>
+
 
 	<div class="row center content-container">
 		<% if @players.where(level_id: 1).count > 30 %>
