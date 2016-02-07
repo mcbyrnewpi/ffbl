@@ -13,7 +13,7 @@
 			<%= f.input :activate, :include_blank => true, :discard_year => true, :order => [:month, :day], label: "If 60 Day DL, activation date:" %>
 		<%= f.input :trade_info, label: "Full Trade Details", :required => false %>
 		<%= f.button :submit, "Update #{@player.first_name} #{@player.last_name}?", class: "btn btn-cancel give-me-top-margin" %>
-		<%= link_to "Cancel", user_path(@player.user), class: "btn btn-danger give-me-top-margin" %>
+		<%= link_to "Cancel", player_path(@player), class: "btn btn-danger give-me-top-margin" %>
 
 	<% else %>
 		<%= f.input :user_id, :as => :hidden, :input_html => { :value => current_user.id } %>
@@ -43,7 +43,7 @@
 			<%= link_to "Cancel", user_path(@player.user), class: "btn btn-danger give-me-top-margin" %>
 
 		<% else %>
-			<%= f.association :level, as: :radio_buttons, :label_method => lambda { |level| "#{level.league}" }, label: "Promote or Demote to which level?" %>
+			<%= f.association :level, :collection => Level.where("id != 6"), as: :radio_buttons, :label_method => lambda { |level| "#{level.league}" }, label: "Promote or Demote to which level?" %>
 			<%= f.input :retro, :include_blank => true, :discard_year => true, :order => [:month, :day], label: "If 60 Day DL, retroactive date:" %>
 			<%= f.input :activate, :include_blank => true, :discard_year => true, :order => [:month, :day], label: "If 60 Day DL, activation date:" %>
 			<% if @player.dob.nil? %>

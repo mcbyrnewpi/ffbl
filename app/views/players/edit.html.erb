@@ -2,7 +2,7 @@
 <div class="container content-container center">
 	<div class="row">
 		<div class="col-sm-6 col-sm-offset-3">
-			<% if @player.user_id %>
+			<% if @player.user_id || current_user.admin? %>
 				<% provide(:title, "Update #{@player.first_name} #{@player.last_name}") %>
 				<% if (@player.user_id == current_user.id) || current_user.admin? %>
 					<h2 class="space-my-bottom"><%= "Update #{@player.first_name} #{@player.last_name}'s Status" %></h2>
