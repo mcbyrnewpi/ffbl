@@ -87,7 +87,7 @@
 			</div>
 			<div class="col-sm-8 col-sm-offset-2 center">
 				<table class="table">
-					<% @players.where(level_id: 6).each do |player| %>
+					<% @players.where(level_id: 6).order("id ASC").each do |player| %>
 						<tr>
 							<td><%= link_to "#{player.last_name} (#{player.first_name})", player_path(player), class: "player-link" %></td>
 						</tr>
