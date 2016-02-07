@@ -14,7 +14,7 @@
 				<% @users.each do |user| %>
 					<tr>
 						<td><%= link_to user.team, user_path(user), class: "team-link" %></td>
-						<td class="center"><%= user.players.count %></td>
+						<td class="center"><%= user.players.where(level_id: 1..5).count %></td>
 						<% if user.players.all.where(level_id: 1).count > 30 %>
 							<td class="roster-warning center">VIOLATION</td>
 						<% else %>
