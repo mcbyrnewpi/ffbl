@@ -1,7 +1,7 @@
 <%= provide(:title, "Drop #{@player.first_name} #{@player.last_name}") %>
 <div class="container content-container">
 <div class="row">
-	<% if @player.user_id == current_user.id %>
+	<% if (@player.user_id == current_user.id) || current_user.admin? %>
 		<div class="col-sm-12 center give-me-top-padding">
 			<h1>Choose His Destiny...</h1>
 		</div>
