@@ -38,6 +38,7 @@ before_action :admin_user, only: [:new, :create]
     
     if @player.user
     	@team_before = @player.user.team
+      @user_page = @player.user
     else
     	@team_before = nil
     end
@@ -70,7 +71,12 @@ before_action :admin_user, only: [:new, :create]
     	@transaction = Transaction.create(:player_id => @player.id, :user_id => current_user.id, :team_before => @team_before, :team_after => @team_after, :league_before => @league_before, :league_after => @league_after, :player_last_name => @player.last_name, :player_first_name => @player.first_name, :details => @player.trade_info)
       
       flash[:success] = "#{@player.first_name} #{@player.last_name} has been changed forever, due to your actions..."
-      redirect_to current_user
+      
+      if current_user.admin?
+        redirect_to user_path(@user_page)
+      else
+        redirect_to current_user
+      end
     else
       render 'edit'
     end
