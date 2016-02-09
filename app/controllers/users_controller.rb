@@ -12,6 +12,8 @@ class UsersController < ApplicationController
     @players = @user.players.all
     @transactions = Transaction.where("team_before = ? OR team_after = ?", @user.team, @user.team).order("id DESC")
     @preseason_report = @user.preseason_reports.last
+    @year1 = @players.where("last_name LIKE ?", "%2016")
+    @year2 = @players.where("last_name LIKE ?", "%2017")
   end
 
   def new
