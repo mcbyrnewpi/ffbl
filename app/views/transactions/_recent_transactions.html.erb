@@ -7,7 +7,7 @@
 	</tr>
 <% @transactions.limit(5).each do |transaction| %>
 	<tr>
-		<td><%= "#{transaction.player.first_name} #{transaction.player.last_name}" %></td>
+		<td><%= link_to "#{transaction.player.first_name} #{transaction.player.last_name}", player_path(transaction.player), class: "player-link" %></td>
 		
 		<% if (transaction.team_before != nil && transaction.team_after != nil) && (transaction.team_before != transaction.team_after) %>
 			<td><%= "#{transaction.team_before}" %></td>
@@ -37,11 +37,7 @@
 		<% elsif transaction.league_before == "MLB" && transaction.league_after == "60 Day DL" %>
 			<td><%= "#{transaction.team_before}" %></td>
 			<td>60 Day DL</td>
-			<% if transaction.player.retro && transaction.player.activate %>
-				<td><%= "#{transaction.player.retro.strftime("%B %-d")} to #{transaction.player.activate.strftime("%B %-d")}" %></td>
-			<% else %>
-				<td>Please update with dates</td>
-			<% end %>
+			<td>MLB to 60 Day DL</td>
 
 		<% elsif transaction.league_before == "60 Day DL" && transaction.league_after == "MLB" %>
 			<td><%= "#{transaction.team_after}" %></td>

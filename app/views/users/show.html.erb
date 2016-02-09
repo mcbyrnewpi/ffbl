@@ -115,10 +115,16 @@
 					<tr>
 						<td><%= player.position.spot %></td>
 						<% if !player.player_note.blank? %>
-								<td><%= link_to "#{player.first_name} #{player.last_name} *", player_path(player), class: "player-link" %></td>
-							<% else %>
-								<td><%= link_to "#{player.first_name} #{player.last_name}", player_path(player), class: "player-link" %></td>
+							<td><%= link_to "#{player.first_name} #{player.last_name} *", player_path(player), class: "player-link" %></br>
+							<% if player.activate %>
+								<small>Activate on or after <%= player.activate.strftime("%-m/%-d") %></small></td>
 							<% end %>
+						<% else %>
+							<td><%= link_to "#{player.first_name} #{player.last_name}", player_path(player), class: "player-link" %></br>
+							<% if player.activate %>
+								<small>Activate on or after <%= player.activate.strftime("%-m/%-d") %></small></td>
+							<% end %>
+						<% end %>
 						<% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>
 							<td><%= button_to "Activate", edit_player_path(player), :method => :get, class: "btn btn-add" %></td>
 							<td><%= button_to "Drop", drop_player_path(player), :method => :get, class: "btn btn-drop" %></td>

@@ -62,6 +62,10 @@ before_action :admin_user, only: [:new, :create]
     	else
     		@league_after = nil
     	end
+
+      if @player.retro
+        @player.update_attributes(activate: @player.retro + 60)
+      end
     	
     	@transaction = Transaction.create(:player_id => @player.id, :user_id => current_user.id, :team_before => @team_before, :team_after => @team_after, :league_before => @league_before, :league_after => @league_after, :player_last_name => @player.last_name, :player_first_name => @player.first_name, :details => @player.trade_info)
       

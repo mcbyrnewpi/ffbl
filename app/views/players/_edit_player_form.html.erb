@@ -9,8 +9,7 @@
 		<% if @player.dob.nil? %>
 			<%= f.input :dob, :include_blank => true, :start_year => 1985, :end_year => 2015, :order => [:month, :day, :year], label: "Date of Birth (if demoting)" %> 
 		<% end %>
-		<%= f.input :retro, :include_blank => true, :discard_year => true, :order => [:month, :day], label: "If 60 Day DL, date added:" %>
-			<%= f.input :activate, :include_blank => true, :discard_year => true, :order => [:month, :day], label: "If 60 Day DL, activation date:" %>
+		<%= f.input :retro, :include_blank => true, :start_year => 2016, :order => [:month, :day, :year], label: "If 60 Day DL, date added:" %>
 		<%= f.input :trade_info, label: "Full Trade Details", :required => false %>
 		<%= f.button :submit, "Update #{@player.first_name} #{@player.last_name}?", class: "btn btn-cancel give-me-top-margin" %>
 		<%= link_to "Cancel", player_path(@player), class: "btn btn-danger give-me-top-margin" %>
@@ -27,7 +26,7 @@
 			<%= link_to "Cancel", user_path(@player.user), class: "btn btn-danger give-me-top-margin" %>
 
 		<% elsif @player.level.league == "60 Day DL" %>
-			<h4><%= "Player was improperly added to DL.  Please activate, then place the player on 60 Day DL with correct Added and Activation Dates." %></h4>
+			<h4><%= "Player was improperly added to DL.  Please activate, then place the player on 60 Day DL with correct Added Date." %></h4>
 			<%= f.input :level_id, :as => :hidden, :input_html => { :value => 1 } %>
 			<%= f.input :retro, :as => :hidden, :input_html => { :value => nil } %>
 			<%= f.input :activate, :as => :hidden, :input_html => { :value => nil } %>
@@ -44,12 +43,11 @@
 
 		<% else %>
 			<%= f.association :level, :collection => Level.where("id != 6"), as: :radio_buttons, :label_method => lambda { |level| "#{level.league}" }, label: "Promote or Demote to which level?" %>
-			<%= f.input :retro, :include_blank => true, :discard_year => true, :order => [:month, :day], label: "If 60 Day DL, retroactive date:" %>
-			<%= f.input :activate, :include_blank => true, :discard_year => true, :order => [:month, :day], label: "If 60 Day DL, activation date:" %>
+			<%= f.input :retro, :include_blank => true, :start_year => 2016, :order => [:month, :day, :year], label: "If 60 Day DL, retroactive date:" %>
 			<% if @player.dob.nil? %>
 				<%= f.input :dob, :include_blank => true, :start_year => 1985, :end_year => 2015, :order => [:month, :day, :year], label: "Date of Birth (if demoting)" %> 
 			<% end %>
-			<%= f.button :submit, class: "btn btn-cancel give-me-top-margin", data: { confirm: "If you demote an ineligible player, you will lose his rights.  Click 'Okay' only if you have confirmed #{@player.first_name} #{@player.last_name}'s eligibility." } %>
+			<%= f.button :submit, class: "btn btn-cancel give-me-top-margin", data: { confirm: "If you demote or DL an ineligible player, you will lose his rights.  Click 'Okay' only if you have confirmed #{@player.first_name} #{@player.last_name}'s eligibility." } %>
 			<%= link_to "Cancel", user_path(@player.user), class: "btn btn-danger give-me-top-margin" %>
 
 		<% end %>
