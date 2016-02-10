@@ -33,21 +33,25 @@
 				<table class="table">
 					<% @players.order(:last_name).each do |player| %>
 						<tr>
-							<td><%= link_to "#{player.last_name}, #{player.first_name}", player_path(player), class: "player-link" %></td>
-							<td><%= player.position.spot %></td>
-							<% if player.user_id %>
-								<td><%= link_to "#{player.user.team}", user_path(player.user), class: "team-link" %></td>
-								<% if player.level %>
-									<td><%= "#{player.level.league}" %></td>
+							<% if player.position_id == 9 %>
+
+							<% else %>
+								<td><%= link_to "#{player.last_name}, #{player.first_name}", player_path(player), class: "player-link" %></td>
+								<td><%= player.position.spot %></td>
+								<% if player.user_id %>
+									<td><%= link_to "#{player.user.team}", user_path(player.user), class: "team-link" %></td>
+									<% if player.level %>
+										<td><%= "#{player.level.league}" %></td>
+									<% else %>
+										<td></td>
+									<% end %>
+								<% elsif logged_in? %>
+									<td><%= button_to "Add Player", add_player_path(player), class: "btn btn-add", :method => :get %>
+									<td></td>	
 								<% else %>
 									<td></td>
+									<td></td>
 								<% end %>
-							<% elsif logged_in? %>
-								<td><%= button_to "Add Player", add_player_path(player), class: "btn btn-add", :method => :get %>
-								<td></td>	
-							<% else %>
-								<td></td>
-								<td></td>
 							<% end %>
 						</tr>
 					<% end %>
