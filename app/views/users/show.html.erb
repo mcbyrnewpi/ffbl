@@ -154,7 +154,7 @@
 				<h3>AAA Team</h3>
 			<% end %>
 			<table class="table">
-				<% @players.where(level_id: 5).order(:position_id).each do |player| %>
+				<% @players.where(level_id: 5).each do |player| %>
 
 					<% if player.dob && ((Date.today.year - player.dob.year) > 25 && (Date.today.month - player.dob.month) >= 0  || Date.today.year - player.dob.year > 26) %>
 						<tr class="milb-warning">

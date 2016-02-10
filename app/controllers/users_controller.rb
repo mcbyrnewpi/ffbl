@@ -9,7 +9,7 @@ class UsersController < ApplicationController
 
   def show
     @user = User.find(params[:id])
-    @players = @user.players.all
+    @players = @user.players.all.order(:position_id)
     @transactions = Transaction.where("team_before = ? OR team_after = ?", @user.team, @user.team).order("id DESC")
     @preseason_report = @user.preseason_reports.last
     @year1 = @players.where("last_name LIKE ?", "%2016")
