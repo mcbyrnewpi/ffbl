@@ -357,6 +357,16 @@ small {
   }
 }
 
+.champion-table th,
+.champion-table td {
+  text-align: center;
+}
+
+.champion-table {
+  table-layout: fixed;
+  word-wrap: break-word;
+}
+
 
 /****** CUSTOM PAGES ******/
 
@@ -427,7 +437,11 @@ small {
   background:  #f3ece2;
   color: black;
   border-radius: 5px;
+}
 
+.table-striped > tbody > tr:nth-child(odd) > td,
+.table-striped > tbody > tr:nth-child(odd) > th {
+  background-color: $ffblcontainerbackgroundlight;
 }
 
 /****** CLEARFIX ******/
