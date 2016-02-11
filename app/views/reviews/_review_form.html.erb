@@ -2,5 +2,5 @@
   <%= f.input :thoughts, label: "Your thoughts?", :required => false %>
   <%= f.input :user_id, :as => :hidden, :input_html => { :value => current_user.id } %>
   <%= f.input :book_id, :as => :hidden, :input_html => { :value => @book.id } %>
-  <%= f.button :submit, class: "btn btn-cancel" %>
+  <%= f.button :submit, "Post Review", class: "btn btn-cancel" %>
 <% end %>
