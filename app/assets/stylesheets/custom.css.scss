@@ -358,11 +358,16 @@ small {
   max-width: 700px;
   width: 90%;
   padding: 40px;
+  top: 10%;
+  left: 10%;
   position: absolute;
-  top: 25%;
-  left: 25%;
+  border-radius: 5px;
   background: $ffblcontainerbackground;
   opacity: 1;
+  @media only screen and (min-width: 992px) {
+    top: 25%;
+    left: 25%;
+  }
 }
 
 .popup-close {
