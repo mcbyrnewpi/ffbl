@@ -5,44 +5,24 @@
 		<div class="col-sm-4 give-me-top-margin">
 		 	<%= link_to "Return to Message Board....", posts_path, class: "team-link" %>
 		</div>
-		<div class="col-sm-11 post-content">
-			<small><%= @post.user.name %> wants to talk about </small>
-			<small>"<%= @post.topic %>"</small>
-			<p><%= simple_format(@post.content) %></p>
-			<div class="post-footer">
-				<small>at <%= @post.created_at.strftime("%l:%M %P") %> on <%= @post.created_at.strftime("%b %-d, %Y") %></small>
-			</div>
-		</div>
 		
-		<% if @responses.count > 0 %>
-			<% @post.responses.each do |response| %>
-				<div class="col-sm-10 col-sm-offset-1 response-content">
-					<small><%= response.user.name %> replied...</small>
-					<p><%= simple_format(response.reply) %></p>
-					<div class="post-footer">
-						<small>at <%= response.created_at.strftime("%l:%M %P") %> on <%= response.created_at.strftime("%b %-d, %Y") %></small>
-					</div>
-				</div>
-			<% end %>
+		<%= render "post" %>
+		
+		<div class="response-section">
+			<div class="responses">
+				<%= render @responses %>
+			</div>
+
 			<% if logged_in? %>
 				<div class="col-sm-6 col-sm-offset-1 give-me-top-margin match-response-margin">
 					<%= render 'responses/response_form' %>
 				</div>
 			<% end %>
-			<div class="col-sm-10 col-sm-offset-1 match-response-margin give-me-top-margin space-my-bottom">
-			 	<%= link_to "Return to Message Board....", posts_path, class: "team-link" %>
-			</div>
 
-		<% elsif logged_in? %>
-			<div class="col-sm-6 give-me-top-margin">
-				<%= render 'responses/response_form' %>
-			</div>
 			<div class="col-sm-12 give-me-top-margin space-my-bottom">
 			 	<%= link_to "Return to Message Board....", posts_path, class: "team-link" %>
 			</div>
-
-		<% else %>
-		<% end %>
+		</div>
 		
 	</div>
 </div>

@@ -1,0 +1,7 @@
+<div class="col-sm-10 col-sm-offset-1 response-content">
+  <small><%= response.user.name %> replied...</small>
+  <p><%= simple_format(response.reply) %></p>
+  <div class="post-footer">
+    <small>at <%= response.created_at.strftime("%l:%M %P") %> on <%= response.created_at.strftime("%b %-d, %Y") %></small>
+  </div>
+</div>

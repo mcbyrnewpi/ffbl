@@ -1,0 +1,8 @@
+<div class="col-sm-11 post-content">
+  <small><%= @post.user.name %> wants to talk about </small>
+  <small>"<%= @post.topic %>"</small>
+  <p><%= simple_format(@post.content) %></p>
+  <div class="post-footer">
+    <small>at <%= @post.created_at.strftime("%l:%M %P") %> on <%= @post.created_at.strftime("%b %-d, %Y") %></small>
+  </div>
+</div>

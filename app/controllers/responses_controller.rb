@@ -4,8 +4,10 @@ class ResponsesController < ApplicationController
 	def create
 		@response = Response.new(response_params)
 		if @response.save
-			flash[:success] = "You have responded to this thread!"
-			redirect_to @response.post
+			respond_to do |format|
+        format.js
+        format.html { redirect_to @response.post }
+      end
 		else
 			flash[:danger] = "Response could not be created, please try again."
 			redirect_to @response.post

@@ -1,7 +1,7 @@
-<%= simple_form_for Response.new do |f| %>
+<%= simple_form_for Response.new, :remote => true do |f| %>
   <%= f.input :reply, label: "Reply:", :required => false %>
   <%= f.input :user_id, :as => :hidden, :input_html => { :value => current_user.id } %>
   <%= f.input :post_id, :as => :hidden, :input_html => { :value => @post.id } %>
-  <%= f.button :submit, class: "btn btn-cancel" %>
+  <%= f.button :submit, "Post Reply", class: "btn btn-cancel" %>
 
 <% end %>
