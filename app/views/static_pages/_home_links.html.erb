@@ -1,0 +1,12 @@
+<div class="col-sm-8 col-sm-offset-2">
+  <table class="table">
+    <tr>
+      <td><h2><%= link_to "My Team", user_path(current_user), class: "team-link" %></h2></td>
+      <td><h2><%= link_to "Message Board", posts_path, class: "team-link" %></h2></td>
+    </tr>
+    <tr>
+      <td><h2><%= link_to "Player Database", players_path, class: "team-link" %></h2></td>
+      <td><h2><%= link_to "Transactions", transactions_path, class: "team-link" %><h2></td>
+    </tr>
+  </table>
+</div>

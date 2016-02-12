@@ -6,8 +6,9 @@
 			<h1 class="space-my-bottom">FFBL Message Board</h1>
 		</div>
 		<div class="col-sm-4">
-				<%= link_to "Create a New Topic", new_post_path, class: "btn btn-cancel" %>
+				<%= link_to "Create a New Topic", '#', class: "btn btn-cancel post-button" %>
 		</div>
+
 		<div class="col-sm-6 col-sm-offset-2">
 			<%= will_paginate @posts, :page_links => false %>
 		</div>
@@ -32,5 +33,12 @@
 				<% end %>
 			</table>
 		</div>
+	</div>
+</div>
+
+<div class="post-topic-popup">
+	<div class="post-topic-popup-inner">
+		<%= link_to "x", '#', class: "popup-close" %>
+		<%= render 'posts/new_post_form' %>
 	</div>
 </div>

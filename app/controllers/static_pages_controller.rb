@@ -6,6 +6,7 @@ before_action :commish, only: [:commissioner]
     @transactions = Transaction.all.order("id DESC")
     @posts = Post.all.order("most_recent DESC")
     @commish_note = CommishNote.last
+    @post = Post.new
   end
 
   def about

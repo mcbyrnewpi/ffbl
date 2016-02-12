@@ -4,6 +4,7 @@ class PostsController < ApplicationController
 
   def index
     @posts = Post.paginate(:page => params[:page], :per_page => 25).order("most_recent DESC")
+    @post = Post.new
   end
 
   def show

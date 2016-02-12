@@ -344,6 +344,47 @@ small {
   font-size: 1em;
 }
 
+.post-topic-popup {
+  width: 100%;
+  height: 100%;
+  display: none;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.post-topic-popup-inner {
+  max-width: 700px;
+  width: 90%;
+  padding: 40px;
+  position: absolute;
+  top: 25%;
+  left: 25%;
+  background: $ffblcontainerbackground;
+  opacity: 1;
+}
+
+.popup-close {
+  width: 30px;
+  height: 30px;
+  padding-top: 4px;
+  display: inline-block;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  background: $ffblfontcolor;
+  font-size: 20px;
+  text-align: center;
+  line-height: 100%;
+  color: $ffblcontainerbackground;
+  border-radius: 50%;
+  &:hover {
+    text-decoration: none;
+    background: #fff;
+    color: #1919ff;
+  }
+}
 
 
 

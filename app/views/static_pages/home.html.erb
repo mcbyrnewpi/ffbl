@@ -6,37 +6,12 @@
 				<h3>Thanks for logging in, <%= current_user.name %>!</h3>
 				<h1>What would you like to do?</h1>
 			</div>
-			<div class="col-sm-8 col-sm-offset-2">
-				<table class="table">
-					<tr>
-						<td><h2><%= link_to "My Team", user_path(current_user), class: "team-link" %></h2></td>
-						<td><h2><%= link_to "Message Board", posts_path, class: "team-link" %></h2></td>
-					</tr>
-					<tr>
-						<td><h2><%= link_to "Player Database", players_path, class: "team-link" %></h2></td>
-						<td><h2><%= link_to "Transactions", transactions_path, class: "team-link" %><h2></td>
-					</tr>
-				</table>
-			</div>
+			<%= render 'home_links' %>
 		</div>
 	</div>
 
 	<% if @commish_note %>
-		<div class="container content-container">
-			<div class="row">
-				<div class="col-sm-12 pad-my-bottom center">
-					<h1>Message from the Commissioner</h1>
-				</div>
-
-				<div class="col-sm-8 col-sm-offset-2 pad-my-bottom space-my-bottom commish-note">
-					<h3 class="center give-me-small-top-padding pad-my-bottom"><%= @commish_note.created_at.strftime("- %B %-d, %Y -") %></h3>
-					<p><%= simple_format(@commish_note.commish_note_content) %></p>
-				</div>
-				<div class="col-sm-8 col-sm-offset-2 pad-my-bottom">
-					<p><%= link_to "View all commish messages....", commish_notes_path, class: "team-link" %></p>
-				</div>
-			</div>
-		</div>
+		<%= render 'commish_note' %>
 	<% end %>
 
 <% else %>
@@ -79,21 +54,33 @@
 	</div>
 </div>
 
+
+
 <% if logged_in? %>
 	<div class="container content-container">
 		<div class="row">
+
 			<div class="col-sm-12">
 				<h2>Recent Posts</h2>
 			</div>
 			<div class="col-sm-12">
-				<%= link_to "Create a New Topic", new_post_path, class: "btn btn-cancel" %>
+				<%= link_to "Create a New Topic", '#', class: "btn btn-cancel post-button" %>
 			</div>
+		
 			<div class="col-sm-12">
 				<table class="table">
 					<%= render 'posts/recent_posts' %>
 				</table>
 				<p><%= link_to "View all posts....", posts_path, class: "team-link" %></p>
 			</div>
+
+		</div>
+	</div>
+
+	<div class="post-topic-popup">
+		<div class="post-topic-popup-inner">
+			<%= link_to "x", '#', class: "popup-close" %>
+			<%= render 'posts/new_post_form' %>
 		</div>
 	</div>
 <% end %>
