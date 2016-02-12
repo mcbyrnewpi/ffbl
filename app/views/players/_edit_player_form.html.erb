@@ -34,7 +34,7 @@
 			<%= link_to "Cancel", user_path(@player.user), class: "btn btn-danger give-me-top-margin" %>
 
 		<% elsif @player.level_id == 3 || @player.level_id == 4 || @player.level_id == 5 %>
-			<%= f.association :level, :collection => Level.where("id != 2"), as: :radio_buttons, :label_method => lambda { |level| "#{level.league}" }, label: "To which level?" %>
+			<%= f.association :level, :collection => Level.where("id != 2 AND id != 6"), as: :radio_buttons, :label_method => lambda { |level| "#{level.league}" }, label: "To which level?" %>
 			<% if @player.dob.nil? %>
 				<%= f.input :dob, :include_blank => true, :start_year => 1985, :end_year => 2015, :order => [:month, :day, :year], label: "Date of Birth (if demoting)" %> 
 			<% end %>

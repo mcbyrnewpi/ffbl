@@ -8,7 +8,7 @@
     <% else %>
       <%= f.input :user_id, :as => :hidden, :input_html => { :value => current_user.id } %>
     <% end %>
-		<%= f.association :level, :collection => Level.where("id != 2"), as: :radio_buttons, :label_method => lambda { |level| "#{level.league}" }, label: "To which level?" %>
+		<%= f.association :level, :collection => Level.where("id != 2 AND id != 6"), as: :radio_buttons, :label_method => lambda { |level| "#{level.league}" }, label: "To which level?" %>
 		<%= f.button :submit, "Add Player", class: "btn btn-cancel" %>
 		<%= link_to "Cancel", all_unowned_path, class: "btn btn-danger" %>
 	<% end %>
