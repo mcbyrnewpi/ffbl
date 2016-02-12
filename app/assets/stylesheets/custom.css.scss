@@ -364,6 +364,7 @@ small {
   border-radius: 5px;
   background: $ffblcontainerbackground;
   opacity: 1;
+  border: 1px solid $ffblfontcolor;
   @media only screen and (min-width: 992px) {
     top: 25%;
     left: 25%;
