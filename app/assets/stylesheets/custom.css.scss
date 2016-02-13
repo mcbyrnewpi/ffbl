@@ -505,6 +505,15 @@ small {
   background-color: $ffblcontainerbackgroundlight;
 }
 
+@media only screen and (max-width: 992px) {
+  .document-mobile {
+    margin: auto;
+    margin-bottom: 25px;
+    width: 80%;
+    border-top: 1px solid $ffblfontcolor;
+  }
+}
+
 /****** CLEARFIX ******/
 
 .clearfix:after {

@@ -1,3 +1,42 @@
 <% provide(:title, "Documents") %>
 
-<h1>FFBL Documents n'such</h1>
+<div class="container content-container">
+  <div class="row">
+    <div class="col-sm-12 center pad-my-bottom">
+      <h1>Documents</h1>
+    </div>
+    <div class="col-md-4 center">
+      <h3>Supplemental Drafts</h3>
+      <div class="give-me-top-margin">  
+        <iframe src="https://docs.google.com/spreadsheets/d/1FxkKgJ_4vG-YKpA56MvbebPI6exSf4PJ6LU6j0wn7HU/pubhtml?widget=true&amp;headers=false"></iframe>
+      </div>
+      <div class="give-me-top-margin pad-my-bottom">
+        <%= link_to "Full Size Draft Results", "https://docs.google.com/spreadsheets/d/1FxkKgJ_4vG-YKpA56MvbebPI6exSf4PJ6LU6j0wn7HU/pubhtml", :target => "_blank", class: "btn btn-lg btn-cancel" %>
+      </div>
+    </div>
+
+    <div class="col-md-4 center">
+      <div class="document-mobile">
+      </div>
+      <h3>Expansion Drafts</h3>
+      <div class="give-me-top-margin">  
+        <iframe src="https://docs.google.com/spreadsheets/d/1KZ5kdC9d5LOKVvJTBt1_Waz1yx7emOWa_sSJWOjZISk/pubhtml?widget=true&amp;headers=false"></iframe>
+      </div>
+      <div class="give-me-top-margin pad-my-bottom">
+        <%= link_to "Full Size Draft Results", "https://docs.google.com/spreadsheets/d/1KZ5kdC9d5LOKVvJTBt1_Waz1yx7emOWa_sSJWOjZISk/pubhtml", :target => "_blank", class: "btn btn-lg btn-cancel" %>
+      </div>
+    </div>
+
+    <div class="col-md-4 center">
+      <div class="document-mobile">
+      </div>
+      <h3>Transactions</h3>
+      <div class="give-me-top-margin">  
+        <iframe src="https://docs.google.com/spreadsheets/d/1JoN435FiIOrRW0-lMIkknSzvC4ivPQg6W8-HChhOtlE/pubhtml?widget=true&amp;headers=false"></iframe>
+      </div>
+      <div class="give-me-top-margin pad-my-bottom">
+        <%= link_to "Full Size Transactions", "https://docs.google.com/spreadsheets/d/1JoN435FiIOrRW0-lMIkknSzvC4ivPQg6W8-HChhOtlE/pubhtml", :target => "_blank", class: "btn btn-lg btn-cancel" %>
+      </div>
+    </div>
+  </div>
+</div>
