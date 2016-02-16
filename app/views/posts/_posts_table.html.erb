@@ -1,0 +1,19 @@
+<table class="table">
+  <tr class="table-header">
+    <th>Topic</th>
+    <th>Replies</th>
+    <th>Recent Activity</th>
+  </tr>
+  <% @posts.each do |post| %>
+    <tr>
+      <td><h4><%= link_to post.topic, post_path(post), class: "post-link" %></h4>
+      <small> by <%= link_to post.user.name, user_path(post.user), class: "team-link" %> on <%= post.created_at.strftime("%b %-d, %Y") %></small></td>
+      <td><small><%= post.responses.count %> replies</small></td>
+      <% if post.responses.count > 0 %>
+        <td><small><%= post.responses.last.user.name %>, <%= time_ago_in_words(post.responses.last.created_at) %> ago</small></td>
+      <% else %>
+        <td></td>
+      <% end %>
+    </tr>
+  <% end %>
+</table>
