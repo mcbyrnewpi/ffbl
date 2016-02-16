@@ -1,0 +1,22 @@
+<table class="table">
+  <tr class="table-header">
+    <th>Title</br><small class="team-non-link">Author</small></td>
+    <th>Selector</th>
+    <th>Start</th>
+    <th>End</th>
+    <th>Most Recent Review</th>
+  </tr>
+  <% @books.each do |book| %>
+    <tr>
+      <td><%= link_to book.title, book_path(book), class: "team-link" %></br><small><%= book.author %></td>   
+      <td><%= book.selector %></td>
+      <td><%= book.start.strftime("%-m/%-d/%y") %></td>
+      <td><%= book.end.strftime("%-m/%-d/%y") %></td>
+      <% if !book.reviews.empty? %>
+        <td><small><%= time_ago_in_words(book.reviews.last.created_at) %> ago<small></td>
+      <% else %>
+        <td><small>No reviews yet</small></td>
+      <% end %>
+    </tr>
+  <% end %>
+</table>

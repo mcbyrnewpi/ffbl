@@ -20,7 +20,7 @@
 				<h1><%= @books.last.selector %></h1>
 			</div>
 
-			<% if !@books.empty? %>
+			<% if @books.last %>
 				<div class="col-sm-12 center space-my-bottom">
 					<h3>Current Selection:</h3>
 					<h2><%= link_to @books.last.title, book_path(@books.last), class: "team-link" %></h2>
