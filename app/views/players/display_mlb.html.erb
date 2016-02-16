@@ -19,35 +19,7 @@
 					<p><%= link_to "C", all_catchers_path, class: "team-link" %> | <%= link_to "1B", all_first_path, class: "team-link" %> | <%= link_to "2B", all_second_path, class: "team-link" %> | <%= link_to "3B", all_third_path, class: "team-link" %> | <%= link_to "SS", all_short_path, class: "team-link" %> | <%= link_to "OF", all_of_path, class: "team-link" %> | <%= link_to "SP", all_sp_path, class: "team-link" %> | <%= link_to "RP", all_rp_path, class: "team-link" %></p>
 				</div>
 			</div>
-			<% if @players.count == 0 %>
-				<h3>There are no players matching your search.</h3>
-				<% if logged_in? %>  
-					<p>Check your spelling and try again, or email mcbyrnewpi@yahoo.com to request this player be added to your team and/or the player database.</p>
-				<% end %>
-			<% else %>
-				<table class="table">
-					<% @players.where("level_id = 1 OR level_id = 2").each do |player| %>
-						<tr>
-							<td><%= link_to "#{player.last_name}, #{player.first_name}", player_path(player), class: "player-link" %></td>
-							<td><%= player.position.spot %></td>
-							<% if player.user_id %>
-								<td><%= link_to "#{player.user.team}", user_path(player.user), class: "team-link" %></td>
-								<% if player.level %>
-									<td><%= "#{player.level.league}" %></td>
-								<% else %>
-									<td></td>
-								<% end %>
-							<% elsif logged_in? %>
-								<td><%= button_to "Add Player", add_player_path(player), class: "btn btn-add", :method => :get %>
-								<td></td>	
-							<% else %>
-								<td></td>
-								<td></td>
-							<% end %>
-						</tr>
-					<% end %>
-				</table>
-			<% end %>
+			<%= render 'player_table' %>
 		</div>
 	</div>
 </div>

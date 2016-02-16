@@ -1,0 +1,35 @@
+<div class="col-sm-12 space-my-bottom center">
+  <h1><%= @player.first_name + " " + @player.last_name %></h1>
+</div>
+<% if logged_in? && current_user.admin? %>
+  <div class="col-sm-12 space-my-bottom center">
+    <%= link_to "Edit Player", edit_player_path(@player), class: "btn btn-drop" %>
+  </div>
+<% end %>
+<div class="col-sm-8 col-sm-offset-2">
+  <% if @player.dob %>
+    <p>DOB: <%= @player.dob.strftime("%-m/%-d/%y") %></p>
+  <% end %>
+  <p>Position: <%= @player.position.spot %></p>
+  <% if @player.user_id %>
+    <p>FFBL Team: <%= @player.user.team %>, <%= @player.level.league %></h3>
+  <% else %>
+    <h3 class="team-non-link">Currently a Free Agent</h3>
+    <% if logged_in? %>
+      <%= button_to "Add Player?", add_player_path(@player), class: "btn btn-add", :method => :get %>
+    <% end %>
+  <% end %>
+  <% if !@player.affiliation.blank? %>
+    <p>MLB Team: <%= @player.affiliation %></p>
+  <% end %>
+  <% if !@player.player_note.blank? %>
+    <div class="row">
+      <div class="col-sm-12">
+        <p class="underline-me">Additional Information:</p>
+      </div>
+      <div class="col-sm-10">
+        <p><%= simple_format(@player.player_note) %></p>
+      </div>
+    </div>
+  <% end %>
+</div>

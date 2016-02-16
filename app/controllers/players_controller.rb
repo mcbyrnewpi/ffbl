@@ -6,7 +6,7 @@ before_action :admin_user, only: [:new, :create]
 		if params[:search]
 			@players = Player.where("last_name ILIKE ? OR first_name ILIKE ?", "%#{(params[:search]).strip}%", "%#{(params[:search]).strip}%").order(:last_name)
 		else
-			@players = Player.all.order(:last_name)
+			@players = Player.where(position_id: 1..8)
 		end
 	end
 
@@ -83,19 +83,19 @@ before_action :admin_user, only: [:new, :create]
   end
 
   def display_mlb
-  	@players = Player.all.order(:last_name)
+  	@players = Player.where(level_id: 1..2)
   end
 
   def display_milb
-  	@players = Player.all.order(:last_name)
+    @players = Player.where(level_id: 3..5)
   end
 
   def display_sixtyday
-  	@players = Player.all.order(:last_name)
+  	@players = Player.where(level_id: 2)
   end
 
   def display_unowned
-  	@players = Player.all.order(:last_name)
+  	@players = Player.where(user_id: nil)
   end
 
   def drop_player

@@ -1,0 +1,34 @@
+<% if @players.count == 0 %>
+  <div class="center">
+    <h3>There are no players matching your search.</h3>
+    <% if logged_in? %>  
+      <p>Check your spelling and try again, or email ffblwebsite@gmail.com to request this player be added to your team and/or the player database.</p>
+    <% end %>
+  </div>
+<% else %>
+  <div class="center">
+    <small>If the player you are looking for is not listed, email ffblwebsite@gmail.com to have him added to the database and/or your team.</small>
+  </div>
+  <table class="table">
+    <% @players.order(:last_name).each do |player| %>
+      <tr>
+        <td><%= link_to "#{player.last_name}, #{player.first_name}", player_path(player), class: "player-link" %></td>
+        <td><%= player.position.spot %></td>
+        <% if player.user_id %>
+          <td><%= link_to "#{player.user.team}", user_path(player.user), class: "team-link" %></td>
+          <% if player.level %>
+            <td><%= "#{player.level.league}" %></td>
+          <% else %>
+            <td></td>
+          <% end %>
+        <% elsif logged_in? %>
+          <td><%= button_to "Add Player", add_player_path(player), class: "btn btn-add", :method => :get %>
+          <td></td> 
+        <% else %>
+          <td></td>
+          <td></td>
+        <% end %>
+      </tr>
+    <% end %>
+  </table>
+<% end %>
