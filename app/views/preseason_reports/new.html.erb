@@ -25,7 +25,6 @@
         <%= f.input :prospect10, label: false, :placeholder => "#10 Prospect Name, Position", :required => false %>
     </div>
     <div class="col-sm-6 col-sm-offset-3 center">
-
         <h3 class="give-me-top-margin pad-my-bottom">Future Projected Starting Lineup</h3>
         <%= f.input :proj_year, label: false, :placeholder => "Projection Year (ie. 2016)", :required => false %>
         <%= f.input :catch, label: false, :placeholder => "Catcher", :required => false %>
@@ -53,10 +52,8 @@
         <%= f.input :bench5, label: false, :placeholder => "Bench #5", :required => false %>
         <%= f.input :bench6, label: false, :placeholder => "Bench #6", :required => false %>
         <%= f.input :bench7, label: false, :placeholder => "Bench #7", :required => false %>
-
     </div>
     <div class="col-sm-6 col-sm-offset-3 pad-my-bottom">
-
         <h3 class="give-me-top-margin pad-my-bottom center">Top Prospects of Past 10 Years</h3>
         <p>Prospect 1 (Oldest)</p>
         <%= f.input :pyr1, label: false, :placeholder => "Year", :required => false %>
@@ -98,7 +95,6 @@
         <%= f.input :pyr10, label: false, :placeholder => "Year", :required => false %>
         <%= f.input :past_prospect10, label: false, :placeholder => "Name, Position", :required => false %>
         <%= f.input :pcurrent10, label: false, :placeholder => "Current Status", :required => false %>
-
     </div>
     <div class="col-sm-6 col-sm-offset-3 pad-my-bottom">
         <h3 class="give-me-top-margin pad-my-bottom center">Top Draft Picks of Past 10 Years</h3>
@@ -144,9 +140,7 @@
         <%= f.input :dpcurrent10, label: false, :placeholder => "Current Status", :required => false %>
     </div>
     <div class="col-sm-8 col-sm-offset-2 center">
-
         <%= f.button :submit, "Create Preseason Report", class: "btn btn-cancel" %>
-      
     </div>
     <% end %>
 
