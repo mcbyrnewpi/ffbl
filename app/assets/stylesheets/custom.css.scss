@@ -63,7 +63,13 @@ small {
   font-style: italic;
 }
 
+.indent-small {
+  padding-left: 15px;
+}
 
+.indent-large {
+  padding-left: 40px;
+}
 
 /****** LAYOUT ******/
 
@@ -515,7 +521,7 @@ small {
 }
 
 
-/****** HISTORY ******/
+/****** HISTORY/RULES ******/
 
 .history {
   p {
@@ -558,6 +564,16 @@ small {
     max-width: 100%;
     float: right;
     padding-left: 10px;
+  }
+}
+
+.minor-rule {
+  h4 {
+    padding-left: 15px;
+  }
+  ul {
+    padding-left: 40px;
+    list-style-type: none;
   }
 }
 
