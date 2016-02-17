@@ -1,4 +1,8 @@
 Rails.application.routes.draw do
+  get 'errors/not_found'
+
+  get 'errors/internal_server_error'
+
   get 'books/index'
 
   get 'books/new'
@@ -55,6 +59,8 @@ Rails.application.routes.draw do
   get  'cfhtr'              => 'static_pages#CFHTR'
   get  'cfhhof'             => 'static_pages#CFHHOF'
   get  'commissioner'       => 'static_pages#commissioner'
+  get  '/404'               => 'errors#not_found'
+  get  '/500'               => 'errors#internal_server_error'
   
   get  'players/:id/drop_player', to: 'players#drop_player', as: 'drop_player'
   get  'players/:id/add_player', to: 'players#add_player', as: 'add_player'

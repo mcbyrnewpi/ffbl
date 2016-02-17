@@ -71,6 +71,10 @@ small {
   padding-left: 40px;
 }
 
+
+
+
+
 /****** LAYOUT ******/
 
 .jumbotron {
@@ -122,6 +126,9 @@ small {
 .border-divide {
   border-bottom: 1px solid $ffblfontcolor;
 }
+
+
+
 
 
 /****** POSTS ******/
@@ -435,6 +442,9 @@ small {
 }
 
 
+
+
+
 /****** CUSTOM PAGES ******/
 
 .white-background {
@@ -519,6 +529,16 @@ small {
     border-top: 1px solid $ffblfontcolor;
   }
 }
+
+
+.error-page {
+  img {
+    max-width: 100%;
+    border-radius: 5px;
+  }
+}
+
+
 
 
 /****** HISTORY/RULES ******/
