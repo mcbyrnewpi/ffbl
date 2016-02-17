@@ -514,6 +514,53 @@ small {
   }
 }
 
+
+/****** HISTORY ******/
+
+.history {
+  p {
+    text-align: justify;
+  }
+  .img-center {
+    padding-top: 25px;
+    img {
+      height: 250px;
+      width: auto;
+      max-width: 100%;
+      display: block;
+      margin: auto;
+    }
+  }
+  .img-left-small {
+    height:  150px;
+    width: auto;
+    max-width: 100%;
+    float: left;
+    padding-right: 10px;
+  }
+  .img-left {
+    height:  200px;
+    width: auto;
+    max-width: 100%;
+    float: left;
+    padding-right: 10px;
+  }
+  .img-right-small {
+    height:  150px;
+    width: auto;
+    max-width: 100%;
+    float: right;
+    padding-left: 10px;
+  }
+  .img-right {
+    height:  200px;
+    width: auto;
+    max-width: 100%;
+    float: right;
+    padding-left: 10px;
+  }
+}
+
 /****** CLEARFIX ******/
 
 .clearfix:after {
