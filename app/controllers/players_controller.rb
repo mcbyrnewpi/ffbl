@@ -54,6 +54,7 @@ before_action :admin_user, only: [:new, :create]
 
     	if @player.user
     		@team_after = @player.user.team
+        @user_page = @player.user
     	else
     		@team_after = nil
     	end
@@ -72,7 +73,7 @@ before_action :admin_user, only: [:new, :create]
       
       flash[:success] = "#{@player.first_name} #{@player.last_name} has been changed forever, due to your actions..."
       
-      if current_user.admin?
+      if current_user.admin? && (@player.user != current_user)
         redirect_to user_path(@user_page)
       else
         redirect_to current_user

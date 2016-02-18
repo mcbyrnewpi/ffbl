@@ -1,7 +1,8 @@
 FactoryGirl.define do
   factory :review do
-    user nil
-book nil
+    thoughts { Faker::Lorem.paragraph }
+    user_id { 1 }
+    book_id { 1 }
   end
 
 end

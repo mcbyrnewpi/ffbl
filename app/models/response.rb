@@ -4,7 +4,9 @@ class Response < ActiveRecord::Base
 
   after_save :update_post_most_recent
 
-  validates :reply, presence: true, length: { minimum: 2 }
+  validates :reply,   presence: true, length: { minimum: 2 }
+  validates :user_id, presence: true
+  validates :post_id, presence: true
 
 
   private
