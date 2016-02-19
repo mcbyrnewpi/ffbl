@@ -51,4 +51,11 @@ RSpec.describe StaticPagesController, type: :controller do
     end
   end
 
+  describe "GET #commissioner" do
+    it "returns http redirect" do
+      get :commissioner
+      expect(response).to have_http_status(:redirect)
+    end
+  end
+
 end

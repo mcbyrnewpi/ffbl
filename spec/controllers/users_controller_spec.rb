@@ -18,9 +18,9 @@ RSpec.describe UsersController, type: :controller do
 
 
   describe "GET #new" do
-    it "renders the :new view" do
+    it "redirect when rendering the :new view with no admin user logged_in" do
       get :new
-      expect(response).to render_template :new
+      expect(response).to have_http_status(:redirect)
     end
   end
 
@@ -44,13 +44,9 @@ RSpec.describe UsersController, type: :controller do
 
   describe "POST #create" do
     context "with valid attributes" do
-      it "creates a new user" do
-        expect{ post :create, user: FactoryGirl.attributes_for(:user) }.to change(User, :count).by(1)
-      end
-
-      it "redirects to the new user" do
-        post :create, user: FactoryGirl.attributes_for(:user)
-        expect(response).to redirect_to User.last
+      it "does not creates a new user with no admin logged in" do
+        expect{ post :create, user: FactoryGirl.attributes_for(:user) }.to change(User, :count).by(0)
+        expect(response).to have_http_status(:redirect)
       end
     end
 
@@ -59,10 +55,6 @@ RSpec.describe UsersController, type: :controller do
         expect{ post :create, user: FactoryGirl.attributes_for(:invalid_user) }.to_not change(User, :count)
       end
 
-      it "renders the new method when unsuccessful" do
-        post :create, user: FactoryGirl.attributes_for(:invalid_user)
-        expect(response).to render_template :new
-      end
 
     end
   end

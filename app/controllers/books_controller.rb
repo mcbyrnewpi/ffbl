@@ -1,5 +1,6 @@
 class BooksController < ApplicationController
-  before_action :glctac_user, only: [:index, :new, :create, :show, :all_books]
+  before_action :glctac_user, only: [:index, :show, :all_books]
+  before_action :glctac_admin_user, only: [:new, :create]
 
   def index
   	@books = Book.all
@@ -36,5 +37,9 @@ class BooksController < ApplicationController
 
     def glctac_user
       redirect_to(root_url) unless logged_in? && current_user.glctac == true
+    end
+
+    def glctac_admin_user
+      redirect_to(root_url) unless logged_in? && current_user.admin? && current_user.glctac == true
     end
 end
