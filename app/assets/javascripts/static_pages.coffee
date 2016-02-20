@@ -6,3 +6,6 @@ $(document).on "page:change", ->
   $('.popup-close').click (event) ->
     event.preventDefault()
     $('.post-topic-popup').toggle()
+  $('.blue-hell-button').click (event) ->
+    event.preventDefault()
+    $('.blue-hell-content').toggle()

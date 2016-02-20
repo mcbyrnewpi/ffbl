@@ -541,6 +541,23 @@ small {
     max-width: 100%;
     border-radius: 5px;
   }
+  .blue-hell-content {
+    display: none;
+  }
+}
+
+.blue-hell-button {
+  color: $ffblcontainerbackground;
+  background: $ffblfontcolor;
+  font-size: 2.0em;
+  font-style: bold;
+  border: 2px solid $ffblcontainerbackgroundlight;
+  &:hover {
+    text-decoration: none;
+    color: #3c3cff;
+    background: #fff;
+    border: 2px solid $ffblfontcolor;
+  }
 }
 
 
