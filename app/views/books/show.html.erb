@@ -8,15 +8,18 @@
 				<h1 class="team-non-link"><%= @book.title %></h1>
 				<p>By: <%= @book.author %></p>
 				<p><small>Selection by <%= @book.selector %>, and read between <%= @book.start.strftime("%-m/%-d/%y") %> and <%= @book.end.strftime("%-m/%-d/%y") %>.</small></p>
-
 			</div>
-			<div class="col-sm-12 space-my-bottom">
-				<h2 class="pad-my-bottom">Summary:</h2>
+
+			<div class="col-md-12 center give-me-top-margin">
+				<h3>Description:</h3>
+			</div>
+
+			<div class="col-md-6 col-md-offset-3 space-my-bottom">
 				<p><%= simple_format(@book.summary) %></p>
 			</div>
 
 			<div class="col-sm-12 space-my-bottom">
-				<%= link_to "Reviews", "#", class: "btn btn-lg review-link reviews-link" %>
+				<%= link_to "Reviews", "#/", class: "btn btn-lg review-link reviews-link" %>
 			</div>
 
 			<div class="review-section">
