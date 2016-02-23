@@ -156,7 +156,7 @@
 			<table class="table">
 				<% @players.where(level_id: 5).each do |player| %>
 
-					<% if player.dob && ((Date.today.year - player.dob.year) > 25 && (Date.today.month - player.dob.month) >= 0  || Date.today.year - player.dob.year > 26) %>
+					<% if player.dob && ((Date.today.year - player.dob.year > 26) || ((Date.today.year - player.dob.year) > 25) && (Date.today.month - player.dob.month) >= 0  && (Date.today.day - player.dob.day >= 0)) %>
 						<tr class="milb-warning">
 					<% else %>
 						<tr>
@@ -202,7 +202,7 @@
 			<table class="table">
 				<% @players.where(level_id: 4).order(:position_id).each do |player| %>
 
-					<% if player.dob && ((Date.today.year - player.dob.year) > 24 && (Date.today.month - player.dob.month) >= 0  || Date.today.year - player.dob.year > 25) %>
+					<% if player.dob && ((Date.today.year - player.dob.year > 25) || ((Date.today.year - player.dob.year) > 24) && (Date.today.month - player.dob.month) >= 0  && (Date.today.day - player.dob.day >= 0)) %>
 						<tr class="milb-warning">
 					<% else %>
 						<tr>
@@ -248,7 +248,7 @@
 			<table class="table">
 				<% @players.where(level_id: 3).order(:position_id).each do |player| %>
 
-					<% if player.dob && ((Date.today.year - player.dob.year) > 22 && (Date.today.month - player.dob.month) >= 0 || Date.today.year - player.dob.year > 23) %>
+					<% if player.dob && ((Date.today.year - player.dob.year > 23) || ((Date.today.year - player.dob.year) > 22) && (Date.today.month - player.dob.month) >= 0  && (Date.today.day - player.dob.day >= 0)) %>
 						<tr class="milb-warning">
 					<% else %>
 						<tr>
