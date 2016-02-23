@@ -1,3 +1,27 @@
-# Place all the behaviors and hooks related to the matching controller here.
-# All this logic will automatically be available in application.js.
-# You can use CoffeeScript in this file: http://coffeescript.org/
+$(document).on "page:change", ->
+  $('#player_level_id_1').click (event) ->
+    event.stopPropagation()
+    $('.sixtyday').hide()
+    $('.dob').hide()
+  $('#player_level_id_2').click (event) ->
+    event.stopPropagation()
+    $('.sixtyday').show()
+    $('.dob').hide()
+  $('#player_level_id_3').click (event) ->
+    event.stopPropagation()
+    $('.sixtyday').hide()
+    $('.dob').show()
+  $('#player_level_id_4').click (event) ->
+    event.stopPropagation()
+    $('.sixtyday').hide()
+    $('.dob').show()
+  $('#player_level_id_5').click (event) ->
+    event.stopPropagation()
+    $('.sixtyday').hide()
+    $('.dob').show()
+  $('#player_level_id_6').click (event) ->
+    event.stopPropagation()
+    $('.sixtyday').hide()
+    $('.dob').show()
+
+  
