@@ -1,5 +1,6 @@
 <div class="col-sm-12 space-my-bottom center">
   <h1><%= @player.first_name + " " + @player.last_name %></h1>
+  <%= link_to "View Transaction History", "http://www.franklinfantasy.com/transactions?utf8=✓&search=#{@player.id}", class: "btn btn-cancel give-me-top-margin" %>
 </div>
 <% if logged_in? && current_user.admin? %>
   <div class="col-sm-12 space-my-bottom center">
