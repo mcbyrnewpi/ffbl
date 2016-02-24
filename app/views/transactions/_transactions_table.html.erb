@@ -45,7 +45,17 @@
       <td>60 Day DL</td>
       <td>MLB to 60 Day DL</td>
 
+    <% elsif transaction.league_before == "MLB" && transaction.league_after == "Yahoo! DL" %>
+      <td><%= "#{transaction.team_before}" %></td>
+      <td>Yahoo! DL</td>
+      <td>MLB to Yahoo! DL</td>
+
     <% elsif transaction.league_before == "60 Day DL" && transaction.league_after == "MLB" %>
+      <td><%= "#{transaction.team_after}" %></td>
+      <td>ACTIVATE</td>
+      <td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
+
+    <% elsif transaction.league_before == "Yahoo! DL" && transaction.league_after == "MLB" %>
       <td><%= "#{transaction.team_after}" %></td>
       <td>ACTIVATE</td>
       <td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>

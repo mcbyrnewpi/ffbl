@@ -9,7 +9,7 @@
 			<div class="col-sm-4">
 				<h1><%= @user.team %></h1>
 				<h4>Managed by: <%= @user.name %></h4>
-				<p>Current Roster Size:  <%= @players.where(level_id: 1..5).count %> players</p>
+				<p>Current Roster Size:  <%= @players.where("level_id != 6").count %> players</p>
 				<small>(<%= @user.transactions.all.count %> website transactions made)</small>
 				
 			</div>
@@ -49,7 +49,7 @@
 			<div class="col-sm-8 center">
 				<h1><%= @user.team %></h1>
 				<h4>Managed by: <%= @user.name %></h4>
-				<p>Current Roster Size:  <%= @players.where(level_id: 1..5).count %> players</p>
+				<p>Current Roster Size:  <%= @players.where("level_id != 6").count %> players</p>
 				<small>(<%= @user.transactions.all.count %> website transactions made)</small>
 				<% if @user.id == 3 %>
 					<div class="row">
@@ -82,10 +82,10 @@
 
 
 	<div class="row center content-container">
-		<% if @players.where(level_id: 1).count > 30 %>
+		<% if @players.where(level_id: 1).count > 25 %>
 			<div class="col-sm-12 roster-warning">
 				<h3>MLB Roster is in VIOLATION!!</h3>
-				<p>The maximum MLB roster size is 30 players (including MLB DL), and you currently have <%= @players.where(level_id: 1).count %>.  If this continues, random players will be removed from your roster until you are in compliance with the rules.</p>
+				<p>The maximum active MLB roster size is 25 players, and you currently have <%= @players.where(level_id: 1).count %>.  You are blocked from adding players until you are in compliance with the rules.</p>
 				<h3>STOP CHEATING PLEASE</h3>
 			</div>
 		<% end %>
@@ -109,29 +109,59 @@
 			</table>
 		</div>
 		<div class="col-sm-5">
-			<h3>60 Day DL</h3>
-			<table class="table">
-				<% @players.where(level_id: 2).order(:position_id).each do |player| %>
-					<tr>
-						<td><%= player.position.spot %></td>
-						<% if !player.player_note.blank? %>
-							<td><%= link_to "#{player.first_name} #{player.last_name} *", player_path(player), class: "player-link" %></br>
-							<% if player.activate %>
-								<small>Activate on or after <%= player.activate.strftime("%-m/%-d") %></small></td>
-							<% end %>
-						<% else %>
-							<td><%= link_to "#{player.first_name} #{player.last_name}", player_path(player), class: "player-link" %></br>
-							<% if player.activate %>
-								<small>Activate on or after <%= player.activate.strftime("%-m/%-d") %></small></td>
-							<% end %>
-						<% end %>
-						<% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>
-							<td><%= button_to "Activate", edit_player_path(player), :method => :get, class: "btn btn-add" %></td>
-							<td><%= button_to "Drop", drop_player_path(player), :method => :get, class: "btn btn-drop" %></td>
-						<% end %>
-					</tr>
+			<% if @players.where(level_id: 7).count > 0 %>
+				<% if @players.where(level_id: 7).count > 5 %>
+					<div class="col-sm-12 roster-warning">
+						<h3>Yahoo! DL VIOLATION!!</h3>
+						<p>There are 5 Yahoo! DL spots available, and you currently have <%= @players.where(level_id: 8).count %>.  You are blocked from adding any players until this is fixed..</p>
+						<h3>STOP CHEATING PLEASE</h3>
+					</div>
 				<% end %>
-			</table>
+
+				<h3>Yahoo! DL</h3>
+				<table class="table space-my-bottom">
+					<% @players.where(level_id: 7).order(:position_id).each do |player| %>
+						<tr>
+							<td><%= player.position.spot %></td>
+							<% if !player.player_note.blank? %>
+								<td><%= link_to "#{player.first_name} #{player.last_name} *", player_path(player), class: "player-link" %></br>
+							<% else %>
+								<td><%= link_to "#{player.first_name} #{player.last_name}", player_path(player), class: "player-link" %></br>
+							<% end %>
+							<% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>
+								<td><%= button_to "Activate", edit_player_path(player), :method => :get, class: "btn btn-add" %></td>
+								<td><%= button_to "Drop", drop_player_path(player), :method => :get, class: "btn btn-drop" %></td>
+							<% end %>
+						</tr>
+					<% end %>
+				</table>
+			<% end %>
+
+			<% if @players.where(level_id: 2).count >0 %>
+				<h3>60 Day DL</h3>
+				<table class="table">
+					<% @players.where(level_id: 2).order(:position_id).each do |player| %>
+						<tr>
+							<td><%= player.position.spot %></td>
+							<% if !player.player_note.blank? %>
+								<td><%= link_to "#{player.first_name} #{player.last_name} *", player_path(player), class: "player-link" %></br>
+								<% if player.activate %>
+									<small>Activate on or after <%= player.activate.strftime("%-m/%-d") %></small></td>
+								<% end %>
+							<% else %>
+								<td><%= link_to "#{player.first_name} #{player.last_name}", player_path(player), class: "player-link" %></br>
+								<% if player.activate %>
+									<small>Activate on or after <%= player.activate.strftime("%-m/%-d") %></small></td>
+								<% end %>
+							<% end %>
+							<% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>
+								<td><%= button_to "Activate", edit_player_path(player), :method => :get, class: "btn btn-add" %></td>
+								<td><%= button_to "Drop", drop_player_path(player), :method => :get, class: "btn btn-drop" %></td>
+							<% end %>
+						</tr>
+					<% end %>
+				</table>
+			<% end %>	
 		</div>
 	</div>
 
@@ -139,7 +169,7 @@
 		<% if @players.where(level_id: 3..5).count > 18 %>
 			<div class="col-sm-12 roster-warning">
 				<h3>MiLB Roster is in VIOLATION!!</h3>
-				<p>The maximum MiLB roster size is 18 players, and you currently have <%= @players.where(level_id: 3..5).count %>.  If this continues, random players will be removed from your roster until you are in compliance with the rules.</p>
+				<p>The maximum MiLB roster size is 18 players, and you currently have <%= @players.where(level_id: 3..5).count %>.  You are blocked from adding any players until you are in compliance with the rules.</p>
 				<h3>STOP CHEATING PLEASE</h3>
 			</div>
 		<% end %>

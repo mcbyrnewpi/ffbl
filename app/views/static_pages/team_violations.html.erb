@@ -10,18 +10,25 @@
 					<th class="center">Roster Size</th>
 					<th class="center">MLB</th>
 					<th class="center">MiLB</th>
+					<th class="center">Yahoo! DL</th>
 				</tr>
 				<% @users.each do |user| %>
 					<tr>
 						<td><%= link_to user.team, user_path(user), class: "team-link" %></td>
-						<td class="center"><%= user.players.where(level_id: 1..5).count %></td>
-						<% if user.players.all.where(level_id: 1).count > 30 %>
+						<td class="center"><%= user.players.where("level_id != 6").count %></td>
+						<% if user.players.all.where(level_id: 1).count > 25 %>
 							<td class="roster-warning center">VIOLATION</td>
 						<% else %>
 							<td class="center">OK</td>
 						<% end %>
 
 						<% if user.players.all.where(level_id: 3..5).count > 18 %>
+							<td class="roster-warning center">VIOLATION</td>
+						<% else %>
+							<td class="center">OK</td>
+						<% end %>
+
+						<% if user.players.all.where(level_id: 7).count > 5 %>
 							<td class="roster-warning center">VIOLATION</td>
 						<% else %>
 							<td class="center">OK</td>

@@ -22,6 +22,10 @@ $(document).on "page:change", ->
   $('#player_level_id_6').click (event) ->
     event.stopPropagation()
     $('.sixtyday').hide()
-    $('.dob').show()
+    $('.dob').hide()
+  $('#player_level_id_7').click (event) ->
+    event.stopPropagation()
+    $('.sixtyday').hide()
+    $('.dob').hide()
 
   
