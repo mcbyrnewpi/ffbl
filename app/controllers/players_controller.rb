@@ -84,7 +84,7 @@ before_action :admin_user, only: [:new, :create]
   end
 
   def display_mlb
-  	@players = Player.where("level_id == 1 OR level_id == 2 OR level_id == 7")
+  	@players = Player.where("level_id = 1 OR level_id = 2 OR level_id = 7")
   end
 
   def display_milb
