@@ -346,8 +346,8 @@
 			<div class="col-sm-12 center">
 				<h1>Recent Transactions</h1>
 			</div>
-			<div class="col-sm-12 center space-my-bottom">
-				<%= link_to "Full Transaction History", "http://www.franklinfantasy.com/transactions?utf8=✓&search=#{@user.team}", class: "btn btn-cancel give-me-top-margin" %>
+			<div class="col-sm-12 center">
+				<%= will_paginate @transactions, :page_links => false %>
 			</div>
 			<div class="col-sm-8 col-sm-offset-2">
 				<table class="table">
