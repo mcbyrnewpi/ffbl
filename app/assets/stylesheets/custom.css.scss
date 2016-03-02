@@ -425,6 +425,11 @@ small {
   opacity: 0.50;
 }
 
+.transaction-table {
+  table-layout: fixed;
+  word-wrap: break-word;
+}
+
 .preseason-table {
   caption {
     background-color: #990000;
