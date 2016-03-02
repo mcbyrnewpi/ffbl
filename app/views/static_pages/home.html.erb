@@ -44,12 +44,13 @@
 	<div class="row">
 		<div class="col-sm-12">
 			<h2>Recent Transactions</h2>
-			<div class="give-me-top-margin">
-				<table class="table">
-					<%= render 'transactions/recent_transactions' %>
-				</table>
-				<p><%= link_to "View all transactions....", transactions_path, class: "team-link" %></p>
-			</div>
+		</div>
+		<div class="col-sm-12 give-me-top-margin">
+			<table class="table">
+				<%= render 'transactions/recent_transactions' %>
+			</table>
+			<p><%= link_to "View all transactions....", transactions_path, class: "team-link" %></p>
+
 		</div>
 	</div>
 </div>

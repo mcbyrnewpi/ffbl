@@ -1,3 +1,10 @@
+<div class="col-sm-12 center">
+	<%= will_paginate @transactions, :page_links => false %>
+</div>
+
+<div class="col-sm-8 col-sm-offset-2">
+	<table class="table">
+
 <tr class="table-header">
 	<th>Player</th>
 	<th>Action</th>
@@ -61,4 +68,6 @@
 		<td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
 	</tr>
 <% end %>
+</table>
+</div>
 

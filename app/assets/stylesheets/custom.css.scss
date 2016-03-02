@@ -417,7 +417,8 @@ small {
 /****** TABLE ******/
 
 .table {
-  margin-top: 15px;
+  margin: 0px;
+  table-layout: fixed;
 }
 
 .table-header {
