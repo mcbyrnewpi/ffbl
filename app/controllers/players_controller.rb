@@ -39,6 +39,7 @@ before_action :admin_user, only: [:new, :create]
     if @player.user
     	@team_before = @player.user.team
       @user_page = @player.user
+      @user_id1 = @player.user.id
     else
     	@team_before = nil
     end
@@ -55,6 +56,7 @@ before_action :admin_user, only: [:new, :create]
     	if @player.user
     		@team_after = @player.user.team
         @user_page = @player.user
+        @user_id2 = @player.user.id
     	else
     		@team_after = nil
     	end
@@ -68,8 +70,15 @@ before_action :admin_user, only: [:new, :create]
       if @player.retro
         @player.update_attributes(activate: @player.retro + 60)
       end
+
+      if @user_id1
+        @user_id = @user_id1
+      elsif @user_id2
+        @user_id = @user_id2
+      end
+        
     	
-    	@transaction = Transaction.create(:player_id => @player.id, :user_id => current_user.id, :team_before => @team_before, :team_after => @team_after, :league_before => @league_before, :league_after => @league_after, :player_last_name => @player.last_name, :player_first_name => @player.first_name, :details => @player.trade_info)
+    	@transaction = Transaction.create(:player_id => @player.id, :user_id => @user_id, :team_before => @team_before, :team_after => @team_after, :league_before => @league_before, :league_after => @league_after, :player_last_name => @player.last_name, :player_first_name => @player.first_name, :details => @player.trade_info)
       
       flash[:success] = "#{@player.first_name} #{@player.last_name} has been changed forever, due to your actions..."
       
