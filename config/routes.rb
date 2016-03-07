@@ -44,7 +44,6 @@ Rails.application.routes.draw do
   get  'all_of'             => 'players#all_of'
   get  'all_rp'             => 'players#all_rp'
   get  'all_sp'             => 'players#all_sp'
-  get  'all_transactions'   => 'transactions#index'
   get  'team_violations'    => 'static_pages#team_violations'
   get  'tutorial'           => 'static_pages#tutorial'
   get  'glctac'             => 'books#index'
@@ -61,6 +60,8 @@ Rails.application.routes.draw do
   get  'commissioner'       => 'static_pages#commissioner'
   get  '/404'               => 'errors#not_found'
   get  '/500'               => 'errors#internal_server_error'
+  get  'transactions/adds'  => 'transactions#adds'
+  get  'transactions/drops' => 'transactions#drops'
   
   get  'players/:id/drop_player', to: 'players#drop_player', as: 'drop_player'
   get  'players/:id/add_player', to: 'players#add_player', as: 'add_player'

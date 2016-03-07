@@ -1,0 +1,40 @@
+<%= provide(:title, "All Adds") %>
+
+<div class= "container content-container">
+  <div class="row">
+    <div class="col-sm-8 col-sm-offset-4 center">
+      <h1>All FFBL Drops</h1>
+    </div>
+    <div class="col-sm-3 give-me-top-margin center relative-position">
+      <%= render 'transaction_search_form' %>
+    </div>
+    <div class="col-sm-8 col-sm-offset-4 center give-me-top-margin">
+      <%= will_paginate @transactions, :page_links => false %>
+      <h4><%= link_to "All Transactions", transactions_path, class: "team-link" %> | <%= link_to "Adds", transactions_adds_path, class: "team-link" %> | <%= link_to "Drops", transactions_drops_path, class: "team-link" %></h4>
+    </div>
+    <div class="col-sm-8 col-sm-offset-4">
+      <table class="table transaction-table">
+        <tr class="table-header">
+          <th>Player</th>
+          <th>Team</th>
+          <th>Action</th>
+          <th>Details</th>
+          <th></th>
+        </tr>
+        <% @transactions.drops.each do |transaction| %>
+          <tr>
+            <td><%= link_to "#{transaction.player.first_name} #{transaction.player.last_name}", player_path(transaction.player), class: "player-link" %></td>
+            <td><%= link_to "#{transaction.team_before}", user_path(transaction.user.id), class: "player-link" %></td>
+            <td>DROP</td>
+            <td>to FA</td>
+            <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
+          </tr>
+        <% end %>
+      </table>
+     
+      <div class="center">
+        <%= will_paginate @transactions, :page_links => false %>
+      </div>
+    </div>
+  </div>
+</div>

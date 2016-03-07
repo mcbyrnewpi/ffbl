@@ -2,7 +2,7 @@
 
 <div class= "container content-container">
 	<div class="row">
-		<div class="col-sm-8 col-sm-offset-4 space-my-bottom center">
+		<div class="col-sm-8 col-sm-offset-4 center">
 			<h1>All FFBL Website Transactions</h1>
 		</div>
 		<div class="col-sm-3 give-me-top-margin center relative-position">
@@ -10,6 +10,7 @@
 		</div>
 		<div class="col-sm-8 col-sm-offset-4 center give-me-top-margin">
 			<%= will_paginate @transactions, :page_links => false %>
+			<h4><%= link_to "All Transactions", transactions_path, class: "team-link" %> | <%= link_to "Adds", transactions_adds_path, class: "team-link" %> | <%= link_to "Drops", transactions_drops_path, class: "team-link" %></h4>
 		</div>
 		<div class="col-sm-8 col-sm-offset-4">
 

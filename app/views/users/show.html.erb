@@ -90,7 +90,7 @@
 			</div>
 		<% end %>
 		<div class="col-sm-7">
-			<h3>MLB Roster</h3>
+			<h3>MLB Roster (<%= @players.where(level_id: 1).count %>)</h3>
 			<table class="table">
 				<% @players.where(level_id: 1).order(:position_id).each do |player| %>
 					<tr>
@@ -118,7 +118,7 @@
 					</div>
 				<% end %>
 
-				<h3>Yahoo! DL</h3>
+				<h3>Yahoo! DL (<%= @players.where(level_id: 7).count %>)</h3>
 				<table class="table space-my-bottom">
 					<% @players.where(level_id: 7).order(:position_id).each do |player| %>
 						<tr>
@@ -138,7 +138,7 @@
 			<% end %>
 
 			<% if @players.where(level_id: 2).count >0 %>
-				<h3>60 Day DL</h3>
+				<h3>60 Day DL (<%= @players.where(level_id: 2).count %>)</h3>
 				<table class="table">
 					<% @players.where(level_id: 2).order(:position_id).each do |player| %>
 						<tr>
@@ -178,10 +178,10 @@
 			<% if !@user.aaa.nil? %>
 				<%= image_tag((@user.id).to_s + "aaa.PNG", :alt => @user.team + " Logo") %>
 				<h3><%= @user.aaa %></h3>
-				<p>AAA Team</p>
+				<p>AAA Team (<%= @players.where(level_id: 5).count %>)</p>
 			<% else %>
 				<%= image_tag((@user.id).to_s + "aaa.PNG", :alt => @user.team + " Logo") %>
-				<h3>AAA Team</h3>
+				<h3>AAA Team (<%= @players.where(level_id: 5).count %>)</h3>
 			<% end %>
 			<table class="table">
 				<% @players.where(level_id: 5).each do |player| %>
@@ -224,10 +224,10 @@
 			<% if !@user.aa.nil? %>
 				<%= image_tag((@user.id).to_s + "aa.PNG", :alt => @user.team + " Logo") %>
 				<h3><%= @user.aa %></h3>
-				<p>AA Team</p>
+				<p>AA Team (<%= @players.where(level_id: 4).count %>)</p>
 			<% else %>
 				<%= image_tag((@user.id).to_s + "aa.PNG", :alt => @user.team + " Logo") %>
-				<h3>AA Team</h3>
+				<h3>AA Team (<%= @players.where(level_id: 4).count %>)</h3>
 			<% end %>
 			<table class="table">
 				<% @players.where(level_id: 4).order(:position_id).each do |player| %>
@@ -270,10 +270,10 @@
 			<% if !@user.a.nil? %>
 				<%= image_tag((@user.id).to_s + "a.PNG", :alt => @user.team + " Logo") %>
 				<h3><%= @user.a %></h3>
-				<p>A Team</p>
+				<p>A Team (<%= @players.where(level_id: 3).count %>)</p>
 			<% else %>
 				<%= image_tag((@user.id).to_s + "a.PNG", :alt => @user.team + " Logo") %>
-				<h3>A Team</h3>
+				<h3>A Team (<%= @players.where(level_id: 3).count %>)</h3>
 			<% end %>
 			<table class="table">
 				<% @players.where(level_id: 3).order(:position_id).each do |player| %>

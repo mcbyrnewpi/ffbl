@@ -12,4 +12,12 @@ class TransactionsController < ApplicationController
 		@transaction = Transaction.find(params[:id])
 	end
 
+	def adds
+		@transactions = Transaction.adds.paginate(:page => params[:page], :per_page => 25).order("id DESC")
+	end
+
+	def drops
+		@transactions = Transaction.drops.paginate(:page => params[:page], :per_page => 25).order("id DESC")
+	end
+
 end
