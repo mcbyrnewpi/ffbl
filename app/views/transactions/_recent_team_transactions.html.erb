@@ -56,6 +56,14 @@
       <td>ACTIVATE</td>
       <td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
 
+    <% elsif transaction.league_before == "NA" && transaction.league_after != "NA" %>
+      <td>PROMOTE</td>
+      <td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
+
+    <% elsif transaction.league_before != "NA" && transaction.league_after == "NA" %>
+      <td>STASH</td>
+      <td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
+
 		<% elsif ((transaction.league_before == "MLB" && (transaction.league_after == "AAA" || transaction.league_after == "AA" || transaction.league_after == "A")) || (transaction.league_before == "AAA" && (transaction.league_after == "AA" || transaction.league_after == "A")) || (transaction.league_before == "AA" && (transaction.league_after == "A"))) %>
 			<td>DEMOTE</td>
 			<td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>

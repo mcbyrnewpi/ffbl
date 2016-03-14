@@ -11,6 +11,7 @@
 					<th class="center">MLB</th>
 					<th class="center">MiLB</th>
 					<th class="center">Yahoo! DL</th>
+					<th class="center">NA</th>
 				</tr>
 				<% @users.each do |user| %>
 					<tr>
@@ -29,6 +30,12 @@
 						<% end %>
 
 						<% if user.players.all.where(level_id: 7).count > 5 %>
+							<td class="roster-warning center">VIOLATION</td>
+						<% else %>
+							<td class="center">OK</td>
+						<% end %>
+
+						<% if user.players.all.where(level_id: 8).count > 2 %>
 							<td class="roster-warning center">VIOLATION</td>
 						<% else %>
 							<td class="center">OK</td>

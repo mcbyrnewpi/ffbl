@@ -109,11 +109,39 @@
 			</table>
 		</div>
 		<div class="col-sm-5">
+			<% if @players.where(level_id: 8).count > 0 %>
+				<% if @players.where(level_id: 8).count > 2 %>
+					<div class="col-sm-12 roster-warning">
+						<h3>NA PLAYER VIOLATION!!</h3>
+						<p>There are 2 NA spots available, and you currently have <%= @players.where(level_id: 8).count %>.  You are blocked from adding any players until this is fixed..</p>
+						<h3>STOP CHEATING PLEASE</h3>
+					</div>
+				<% end %>
+
+				<h3>NA Players (<%= @players.where(level_id: 8).count %>)</h3>
+				<table class="table space-my-bottom">
+					<% @players.where(level_id: 8).order(:position_id).each do |player| %>
+						<tr>
+							<td><%= player.position.spot %></td>
+							<% if !player.player_note.blank? %>
+								<td><%= link_to "#{player.first_name} #{player.last_name} *", player_path(player), class: "player-link" %></br>
+							<% else %>
+								<td><%= link_to "#{player.first_name} #{player.last_name}", player_path(player), class: "player-link" %></br>
+							<% end %>
+							<% if (logged_in? && @user.id == current_user.id) || (logged_in? && current_user.admin?) %>
+								<td><%= button_to "Activate", edit_player_path(player), :method => :get, class: "btn btn-add" %></td>
+								<td><%= button_to "Drop", drop_player_path(player), :method => :get, class: "btn btn-drop" %></td>
+							<% end %>
+						</tr>
+					<% end %>
+				</table>
+			<% end %>
+			
 			<% if @players.where(level_id: 7).count > 0 %>
 				<% if @players.where(level_id: 7).count > 5 %>
 					<div class="col-sm-12 roster-warning">
 						<h3>Yahoo! DL VIOLATION!!</h3>
-						<p>There are 5 Yahoo! DL spots available, and you currently have <%= @players.where(level_id: 8).count %>.  You are blocked from adding any players until this is fixed..</p>
+						<p>There are 5 Yahoo! DL spots available, and you currently have <%= @players.where(level_id: 7).count %>.  You are blocked from adding any players until this is fixed..</p>
 						<h3>STOP CHEATING PLEASE</h3>
 					</div>
 				<% end %>

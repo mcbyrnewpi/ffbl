@@ -13,6 +13,11 @@
   <p class="give-me-top-margin">Your roster is in violation at this time, so you are unable to add players.</p>
   <p class="give-me-top-margin">You have more than 5 players on the Yahoo! DL.  To fix this issue, stop cheating and activate a player.</p>
 
+<% elsif current_user.players.where(level_id: 8).count > 2 && !current_user.admin? %>
+  <h1>NAH</h1>
+  <p class="give-me-top-margin">Your roster is in violation at this time, so you are unable to add players.</p>
+  <p class="give-me-top-margin">You have more than 2 NA players on your roster.  To fix this issue, stop cheating and activate a player.</p>
+
 <% else %>
 	<%= simple_form_for @player do |f| %>
 		<% if current_user.admin? %>
