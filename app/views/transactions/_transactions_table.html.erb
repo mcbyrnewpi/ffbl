@@ -7,81 +7,99 @@
     <th></th>
   </tr>
   <% @transactions.each do |transaction| %>
-  <tr>
-    <td><%= link_to "#{transaction.player.first_name} #{transaction.player.last_name}", player_path(transaction.player), class: "player-link" %></td>
+    <tr>
+      
+      <% if (transaction.team_before != nil && transaction.team_after != nil) && (transaction.team_before != transaction.team_after) %>
+        <td><%= link_to "#{transaction.player.first_name} #{transaction.player.last_name}", player_path(transaction.player), class: "player-link" %></td>
+        <td><%= link_to "#{transaction.team_before}", user_path(transaction.user.id), class: "player-link" %></td>
+        <td><%= link_to "TRADE", transaction_path(transaction), class: "team-link" %></td>
+        <td><%= "to #{transaction.team_after}" %></td>
+        <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
 
-    <% if (transaction.team_before != nil && transaction.team_after != nil) && (transaction.team_before != transaction.team_after) %>
-      <td><%= link_to "#{transaction.team_before}", user_path(transaction.user.id), class: "player-link" %></td>
-      <td><%= link_to "TRADE", transaction_path(transaction), class: "team-link" %></td>
-      <td><%= "to #{transaction.team_after}" %></td>
-
-    <% elsif transaction.team_before == transaction.team_after && transaction.league_before == transaction.league_after %>
-      <td><%= link_to "#{transaction.team_before}", user_path(transaction.user.id), class: "player-link" %></td>
-      <td>INFO UPDATE</td>
-      <td>No Change</td>
-
-    <% elsif (transaction.team_before == transaction.team_after) && (transaction.league_before == "Draft Pick") && (transaction.league_after != "Draft Pick") %>
+      <% elsif (transaction.team_before == transaction.team_after) && (transaction.league_before == "Draft Pick") && (transaction.league_after != "Draft Pick") %>
+        <td><%= link_to "#{transaction.player.first_name} #{transaction.player.last_name}", player_path(transaction.player), class: "player-link" %></td>
         <td><%= link_to "#{transaction.team_before}", user_path(transaction.user.id), class: "player-link" %></td>
         <td>DRAFTED</td>
         <td><%= "to #{transaction.league_after}" %></td>
-    
-    <% elsif transaction.team_before == nil && (transaction.league_after == "MLB" || transaction.league_after == "AAA" || transaction.league_after == "AA" || transaction.league_after == "A") %>
-      <td><%= link_to "#{transaction.team_after}", user_path(transaction.user.id), class: "player-link" %></td>
-      <td>ADD</td>
-      <td><%= "to #{transaction.league_after}" %></td>
+        <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
+      
+      <% elsif transaction.team_before == nil && (transaction.league_after == "MLB" || transaction.league_after == "AAA" || transaction.league_after == "AA" || transaction.league_after == "A") %>
+        <td><%= link_to "#{transaction.player.first_name} #{transaction.player.last_name}", player_path(transaction.player), class: "player-link" %></td>
+        <td><%= link_to "#{transaction.team_after}", user_path(transaction.user.id), class: "player-link" %></td>
+        <td>ADD</td>
+        <td><%= "to #{transaction.league_after}" %></td>
+        <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
 
-    <% elsif (transaction.team_before == nil || transaction.league_before == "A" || transaction.league_before == "AA" || transaction.league_before == "AAA") && transaction.league_after == "60 Day DL" %>
-      <td>CHEATER</td>
-      <td>Can't pickup or promote, then immediately DL...</td>
-      <td>FIX IT NOW</td>
+      <% elsif (transaction.team_before == nil || transaction.league_before == "A" || transaction.league_before == "AA" || transaction.league_before == "AAA") && transaction.league_after == "60 Day DL" %>
+        <td><%= link_to "#{transaction.player.first_name} #{transaction.player.last_name}", player_path(transaction.player), class: "player-link" %></td>
+        <td>CHEATER</td>
+        <td>Can't pickup or promote, then immediately DL...</td>
+        <td>FIX IT NOW</td>
+        <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
 
-    <% elsif transaction.team_before != nil && transaction.team_after == nil %>
-      <td><%= link_to "#{transaction.team_before}", user_path(transaction.user.id), class: "player-link" %></td>
-      <td>DROP</td>
-      <td><%= "to FA" %></td>
+      <% elsif transaction.team_before != nil && transaction.team_after == nil %>
+        <td><%= link_to "#{transaction.player.first_name} #{transaction.player.last_name}", player_path(transaction.player), class: "player-link" %></td>
+        <td><%= link_to "#{transaction.team_before}", user_path(transaction.user.id), class: "player-link" %></td>
+        <td>DROP</td>
+        <td><%= "to FA" %></td>
+        <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
 
-    <% elsif transaction.league_before == "MLB" && transaction.league_after == "60 Day DL" %>
-      <td><%= link_to "#{transaction.team_before}", user_path(transaction.user.id), class: "player-link" %></td>
-      <td>60 Day DL</td>
-      <td>MLB to 60 Day DL</td>
+      <% elsif transaction.league_before == "MLB" && transaction.league_after == "60 Day DL" %>
+        <td><%= link_to "#{transaction.player.first_name} #{transaction.player.last_name}", player_path(transaction.player), class: "player-link" %></td>
+        <td><%= link_to "#{transaction.team_before}", user_path(transaction.user.id), class: "player-link" %></td>
+        <td>60 Day DL</td>
+        <td>MLB to 60 Day DL</td>
+        <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
 
-    <% elsif transaction.league_before == "MLB" && transaction.league_after == "Yahoo! DL" %>
-      <td><%= link_to "#{transaction.team_before}", user_path(transaction.user.id), class: "player-link" %></td>
-      <td>Yahoo! DL</td>
-      <td>MLB to Yahoo! DL</td>
+      <% elsif transaction.league_before == "MLB" && transaction.league_after == "Yahoo! DL" %>
+        <td><%= link_to "#{transaction.player.first_name} #{transaction.player.last_name}", player_path(transaction.player), class: "player-link" %></td>
+        <td><%= link_to "#{transaction.team_before}", user_path(transaction.user.id), class: "player-link" %></td>
+        <td>Yahoo! DL</td>
+        <td>MLB to Yahoo! DL</td>
+        <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
 
-    <% elsif transaction.league_before == "60 Day DL" && transaction.league_after == "MLB" %>
-      <td><%= link_to "#{transaction.team_before}", user_path(transaction.user.id), class: "player-link" %></td>
-      <td>ACTIVATE</td>
-      <td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
+      <% elsif transaction.league_before == "60 Day DL" && transaction.league_after == "MLB" %>
+        <td><%= link_to "#{transaction.player.first_name} #{transaction.player.last_name}", player_path(transaction.player), class: "player-link" %></td>
+        <td><%= link_to "#{transaction.team_before}", user_path(transaction.user.id), class: "player-link" %></td>
+        <td>ACTIVATE</td>
+        <td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
+        <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
 
-    <% elsif transaction.league_before == "Yahoo! DL" && transaction.league_after == "MLB" %>
-      <td><%= link_to "#{transaction.team_before}", user_path(transaction.user.id), class: "player-link" %></td>
-      <td>ACTIVATE</td>
-      <td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
+      <% elsif transaction.league_before == "Yahoo! DL" && transaction.league_after == "MLB" %>
+        <td><%= link_to "#{transaction.player.first_name} #{transaction.player.last_name}", player_path(transaction.player), class: "player-link" %></td>
+        <td><%= link_to "#{transaction.team_before}", user_path(transaction.user.id), class: "player-link" %></td>
+        <td>ACTIVATE</td>
+        <td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
+        <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
 
-    <% elsif transaction.league_before == "NA" && transaction.league_after != "NA" %>
-      <td><%= link_to "#{transaction.team_before}", user_path(transaction.user.id), class: "player-link" %></td>
-      <td>PROMOTE</td>
-      <td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
+      <% elsif transaction.league_before == "NA" && transaction.league_after != "NA" %>
+        <td><%= link_to "#{transaction.player.first_name} #{transaction.player.last_name}", player_path(transaction.player), class: "player-link" %></td>
+        <td><%= link_to "#{transaction.team_before}", user_path(transaction.user.id), class: "player-link" %></td>
+        <td>PROMOTE</td>
+        <td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
+        <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
 
-    <% elsif transaction.league_before != "NA" && transaction.league_after == "NA" %>
-      <td><%= link_to "#{transaction.team_before}", user_path(transaction.user.id), class: "player-link" %></td>
-      <td>STASH</td>
-      <td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
+      <% elsif transaction.league_before != "NA" && transaction.league_after == "NA" %>
+        <td><%= link_to "#{transaction.player.first_name} #{transaction.player.last_name}", player_path(transaction.player), class: "player-link" %></td>
+        <td><%= link_to "#{transaction.team_before}", user_path(transaction.user.id), class: "player-link" %></td>
+        <td>STASH</td>
+        <td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
+        <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
 
-    <% elsif ((transaction.league_before == "MLB" && (transaction.league_after == "AAA" || transaction.league_after == "AA" || transaction.league_after == "A")) || (transaction.league_before == "AAA" && (transaction.league_after == "AA" || transaction.league_after == "A")) || (transaction.league_before == "AA" && (transaction.league_after == "A"))) %>
-      <td><%= link_to "#{transaction.team_before}", user_path(transaction.user.id), class: "player-link" %></td>
-      <td>DEMOTE</td>
-      <td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
+      <% elsif transaction.league_before == "MLB" && (transaction.league_after == "AAA" || transaction.league_after == "AA" || transaction.league_after == "A") %>
+        <td><%= link_to "#{transaction.player.first_name} #{transaction.player.last_name}", player_path(transaction.player), class: "player-link" %></td>
+        <td><%= link_to "#{transaction.team_before}", user_path(transaction.user.id), class: "player-link" %></td>
+        <td>DEMOTE</td>
+        <td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
+        <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
 
-    <% elsif ((transaction.league_before == "A" && (transaction.league_after == "AA" || transaction.league_after == "AAA" || transaction.league_after == "MLB")) || (transaction.league_before == "AA" && (transaction.league_after == "AAA" || transaction.league_after == "MLB")) || (transaction.league_before == "AAA" && transaction.league_after == "MLB")) %>
-      <td><%= link_to "#{transaction.team_before}", user_path(transaction.user.id), class: "player-link" %></td>
-      <td>PROMOTE</td>
-      <td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
-    <% end %>
-
-    <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
-  </tr>
+      <% elsif (transaction.league_before == "A" || transaction.league_before == "AA" || transaction.league_before == "AAA") && transaction.league_after == "MLB" %>
+        <td><%= link_to "#{transaction.player.first_name} #{transaction.player.last_name}", player_path(transaction.player), class: "player-link" %></td>
+        <td><%= link_to "#{transaction.team_before}", user_path(transaction.user.id), class: "player-link" %></td>
+        <td>PROMOTE</td>
+        <td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
+        <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
+      <% end %>
+    </tr>
   <% end %>
 </table>

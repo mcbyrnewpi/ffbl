@@ -348,7 +348,7 @@
 			</div>
 			<div class="col-sm-6 center">
 				<table class="table">
-					<% @year1.order("id ASC").each do |player| %>
+					<% @year1.order("last_name").each do |player| %>
 						<tr>
 							<td><%= link_to "#{player.last_name} (#{player.first_name})", player_path(player), class: "player-link" %></td>
 						</tr>
@@ -358,7 +358,7 @@
 
 			<div class="col-sm-6 center">
 				<table class="table">
-					<% @year2.order("id ASC").each do |player| %>
+					<% @year2.order("last_name").each do |player| %>
 						<tr>
 							<td><%= link_to "#{player.last_name} (#{player.first_name})", player_path(player), class: "player-link" %></td>
 						</tr>
