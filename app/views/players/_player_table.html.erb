@@ -27,6 +27,9 @@
         <% elsif logged_in? %>
           <td><%= button_to "Add Player", add_player_path(player), class: "btn btn-add", :method => :get %>
           <td></td> 
+          <% if current_user.admin? %>
+            <td><%= link_to "Delete", player, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger" %></td>
+          <% end %>
         <% else %>
           <td></td>
           <td></td>
