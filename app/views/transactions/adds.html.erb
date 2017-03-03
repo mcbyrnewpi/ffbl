@@ -10,7 +10,7 @@
     </div>
     <div class="col-sm-8 col-sm-offset-4 center give-me-top-margin">
       <%= will_paginate @transactions, :page_links => false %>
-      <h4><%= link_to "All Transactions", transactions_path, class: "team-link" %> | <%= link_to "Adds", transactions_adds_path, class: "team-link" %> | <%= link_to "Drops", transactions_drops_path, class: "team-link" %></h4>
+      <h4><%= link_to "All Transactions", transactions_path, class: "team-link" %> | <%= link_to "Adds", transactions_adds_path, class: "team-link" %> | <%= link_to "Drops", transactions_drops_path, class: "team-link" %> | <%= link_to "Trades", transactions_trades_path, class: "team-link"%></h4>
     </div>
     <div class="col-sm-8 col-sm-offset-4">
       <table class="table transaction-table">

@@ -9,4 +9,5 @@ class Transaction < ActiveRecord::Base
 
   scope :adds, -> { where("team_before is null AND team_after is not null") }
   scope :drops, -> { where("team_before is not null AND team_after is null") }
+  scope :trades, -> { where("team_before is not null AND team_after is not null AND team_before <> team_after") }
 end

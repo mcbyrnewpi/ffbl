@@ -1,9 +1,9 @@
-<%= provide(:title, "All Adds") %>
+<%= provide(:title, "All Trades") %>
 
 <div class= "container content-container">
   <div class="row">
     <div class="col-sm-8 col-sm-offset-4 center">
-      <h1>All FFBL Drops</h1>
+      <h1>All FFBL Trades</h1>
     </div>
     <div class="col-sm-3 give-me-top-margin center relative-position">
       <%= render 'transaction_search_form' %>
@@ -21,12 +21,12 @@
           <th>Details</th>
           <th></th>
         </tr>
-        <% @transactions.drops.each do |transaction| %>
+        <% @transactions.trades.each do |transaction| %>
           <tr>
             <td><%= link_to "#{transaction.player.first_name} #{transaction.player.last_name}", player_path(transaction.player), class: "player-link" %></td>
             <td><%= link_to "#{transaction.team_before}", user_path(transaction.user.id), class: "player-link" %></td>
-            <td>DROP</td>
-            <td>to FA</td>
+            <td><%= link_to "TRADE", transaction_path(transaction), class: "team-link" %></td>
+            <td><%= "to #{transaction.team_after}" %></td>
             <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
           </tr>
         <% end %>

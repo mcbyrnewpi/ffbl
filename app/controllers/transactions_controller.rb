@@ -12,12 +12,22 @@ class TransactionsController < ApplicationController
 		@transaction = Transaction.find(params[:id])
 	end
 
+	def destroy
+    Transaction.find(params[:id]).destroy
+    flash[:success] = "Transaction deleted"
+    redirect_to transactions_path
+  end
+
 	def adds
 		@transactions = Transaction.adds.paginate(:page => params[:page], :per_page => 25).order("id DESC")
 	end
 
 	def drops
 		@transactions = Transaction.drops.paginate(:page => params[:page], :per_page => 25).order("id DESC")
+	end
+
+	def trades 
+		@transactions = Transaction.trades.paginate(:page => params[:page], :per_page => 25).order("id DESC")
 	end
 
 end

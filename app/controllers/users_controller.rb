@@ -12,8 +12,8 @@ class UsersController < ApplicationController
     @players = @user.players.all.order(:position_id)
     @transactions = Transaction.paginate(:page => params[:page], :per_page => 25).where("team_before = ? OR team_after = ?", @user.team, @user.team).order("id DESC")
     @preseason_report = @user.preseason_reports.last
-    @year1 = @players.where("last_name LIKE ?", "%2017")
-    @year2 = @players.where("last_name LIKE ?", "%2018")
+    @year1 = @players.where("last_name LIKE ?", "%2018")
+    @year2 = @players.where("last_name LIKE ?", "%2019")
   end
 
   def new

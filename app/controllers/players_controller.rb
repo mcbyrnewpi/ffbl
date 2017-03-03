@@ -1,6 +1,6 @@
 class PlayersController < ApplicationController
 before_action :logged_in_user, only: [:edit, :update]
-before_action :admin_user, only: [:new, :create]
+before_action :admin_user, only: [:new, :create, :destroy]
 
 	def index
 		if params[:search]
@@ -90,6 +90,12 @@ before_action :admin_user, only: [:new, :create]
     else
       render 'edit'
     end
+  end
+
+  def destroy
+    Player.find(params[:id]).destroy
+    flash[:success] = "Player deleted"
+    redirect_to players_path
   end
 
   def display_mlb

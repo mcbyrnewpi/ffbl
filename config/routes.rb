@@ -62,6 +62,7 @@ Rails.application.routes.draw do
   get  '/500'               => 'errors#internal_server_error'
   get  'transactions/adds'  => 'transactions#adds'
   get  'transactions/drops' => 'transactions#drops'
+  get  'transactions/trades' => 'transactions#trades'
   
   get  'players/:id/drop_player', to: 'players#drop_player', as: 'drop_player'
   get  'players/:id/add_player', to: 'players#add_player', as: 'add_player'
