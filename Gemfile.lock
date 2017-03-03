@@ -232,6 +232,7 @@ DEPENDENCIES
   guard-rspec
   jbuilder (~> 2.2.3)
   jquery-rails (~> 4.0.3)
+  nokogiri (~> 1.6.1)
   pg (= 0.17.1)
   rails (~> 4.2.2)
   rails_12factor (= 0.0.2)
