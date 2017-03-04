@@ -1,0 +1,28 @@
+<div class="col-sm-12 center">
+  <%= will_paginate @trades, :page_links => false %>
+</div>
+
+<div class="col-sm-8 col-sm-offset-2">
+  <table class="table transaction-table">
+
+<tr class="table-header">
+  <th>Player</th>
+  <th>From</th>
+  <th>To</th>
+  <th>Details</th>
+  <th></th>
+</tr>
+
+<% @trades.limit(10).each do |trade| %>
+  <tr>
+    
+    <td><%= link_to "#{trade.player.first_name} #{trade.player.last_name}", player_path(trade.player), class: "player-link" %></td>
+    <td><%= trade.team_before %></td>
+    <td><%= trade.team_after %></td>
+    <td><%= link_to "Full Details", transaction_path(trade), class: "team-link" %></td>
+    <td><small><%= trade.created_at.strftime("%l:%M %P") %>, <%= trade.created_at.strftime("%-m/%-d/%y") %><small></td>
+
+  </tr>
+<% end %>
+</table>
+</div>

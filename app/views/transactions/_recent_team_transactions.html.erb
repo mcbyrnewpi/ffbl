@@ -16,13 +16,7 @@
 	<tr>
 		
 		
-		<% if (transaction.team_before != nil && transaction.team_after != nil) && (transaction.team_before != transaction.team_after) %>
-			<td><%= link_to "#{transaction.player.first_name} #{transaction.player.last_name}", player_path(transaction.player), class: "player-link" %></td>
-			<td><%= link_to "TRADE", transaction_path(transaction), class: "team-link" %></td>
-			<td><%= "to #{transaction.team_after}" %></td>
-			<td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
-
-		<% elsif (transaction.team_before == transaction.team_after) && (transaction.league_before == "Draft Pick") && (transaction.league_after != "Draft Pick") %>
+		<% if (transaction.team_before == transaction.team_after) && (transaction.league_before == "Draft Pick") && (transaction.league_after != "Draft Pick") %>
 			<td><%= link_to "#{transaction.player.first_name} #{transaction.player.last_name}", player_path(transaction.player), class: "player-link" %></td>
 			<td>DRAFTED</td>
 			<td><%= "to #{transaction.league_after}" %></td>
