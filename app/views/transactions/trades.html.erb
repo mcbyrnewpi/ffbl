@@ -16,8 +16,8 @@
       <table class="table transaction-table">
         <tr class="table-header">
           <th>Player</th>
-          <th>Team</th>
-          <th>Action</th>
+          <th>From</th>
+          <th>To</th>
           <th>Details</th>
           <th></th>
         </tr>
@@ -25,8 +25,8 @@
           <tr>
             <td><%= link_to "#{transaction.player.first_name} #{transaction.player.last_name}", player_path(transaction.player), class: "player-link" %></td>
             <td><%= link_to "#{transaction.team_before}", user_path(transaction.user.id), class: "player-link" %></td>
-            <td><%= link_to "TRADE", transaction_path(transaction), class: "team-link" %></td>
-            <td><%= "to #{transaction.team_after}" %></td>
+            <td><%= transaction.team_after %></td>
+            <td><%= link_to "Full Details", transaction_path(transaction), class: "team-link" %></td>
             <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
           </tr>
         <% end %>
