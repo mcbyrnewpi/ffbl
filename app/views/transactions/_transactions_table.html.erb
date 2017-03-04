@@ -5,7 +5,7 @@
     <th>Action</th>
     <th>Details</th>
     <th></th>
-    <% if current_user.admin? %>
+    <% if logged_in? && current_user.admin? %>
       <th></th>
     <% end %>
   </tr>
@@ -18,7 +18,7 @@
         <td><%= link_to "TRADE", transaction_path(transaction), class: "team-link" %></td>
         <td><%= "to #{transaction.team_after}" %></td>
         <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
-        <% if current_user.admin? %>
+        <% if logged_in? && current_user.admin? %>
           <td><%= link_to "Delete", transaction, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger" %></td>
         <% end %>
 
@@ -28,7 +28,7 @@
         <td>DRAFTED</td>
         <td><%= "to #{transaction.league_after}" %></td>
         <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
-        <% if current_user.admin? %>
+        <% if logged_in? && current_user.admin? %>
           <td><%= link_to "Delete", transaction, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger" %></td>
         <% end %>
       
@@ -38,7 +38,7 @@
         <td>ADD</td>
         <td><%= "to #{transaction.league_after}" %></td>
         <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
-        <% if current_user.admin? %>
+        <% if logged_in? && current_user.admin? %>
           <td><%= link_to "Delete", transaction, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger" %></td>
         <% end %>
 
@@ -48,7 +48,7 @@
         <td>Can't pickup or promote, then immediately DL...</td>
         <td>FIX IT NOW</td>
         <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
-        <% if current_user.admin? %>
+        <% if logged_in? && current_user.admin? %>
           <td><%= link_to "Delete", transaction, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger" %></td>
         <% end %>
 
@@ -58,7 +58,7 @@
         <td>DROP</td>
         <td><%= "to FA" %></td>
         <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
-        <% if current_user.admin? %>
+        <% if logged_in? && current_user.admin? %>
           <td><%= link_to "Delete", transaction, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger" %></td>
         <% end %>
 
@@ -68,7 +68,7 @@
         <td>60 Day DL</td>
         <td>MLB to 60 Day DL</td>
         <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
-        <% if current_user.admin? %>
+        <% if logged_in? && current_user.admin? %>
           <td><%= link_to "Delete", transaction, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger" %></td>
         <% end %>
 
@@ -78,7 +78,7 @@
         <td>Yahoo! DL</td>
         <td>MLB to Yahoo! DL</td>
         <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
-        <% if current_user.admin? %>
+        <% if logged_in? && current_user.admin? %>
           <td><%= link_to "Delete", transaction, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger" %></td>
         <% end %>
 
@@ -88,7 +88,7 @@
         <td>ACTIVATE</td>
         <td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
         <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
-        <% if current_user.admin? %>
+        <% if logged_in? && current_user.admin? %>
           <td><%= link_to "Delete", transaction, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger" %></td>
         <% end %>
 
@@ -98,7 +98,7 @@
         <td>ACTIVATE</td>
         <td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
         <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
-        <% if current_user.admin? %>
+        <% if logged_in? && current_user.admin? %>
           <td><%= link_to "Delete", transaction, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger" %></td>
         <% end %>
 
@@ -108,7 +108,7 @@
         <td>PROMOTE</td>
         <td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
         <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
-        <% if current_user.admin? %>
+        <% if logged_in? && current_user.admin? %>
           <td><%= link_to "Delete", transaction, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger" %></td>
         <% end %>
 
@@ -118,7 +118,7 @@
         <td>STASH</td>
         <td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
         <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
-        <% if current_user.admin? %>
+        <% if logged_in? && current_user.admin? %>
           <td><%= link_to "Delete", transaction, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger" %></td>
         <% end %>
 
@@ -128,7 +128,7 @@
         <td>DEMOTE</td>
         <td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
         <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
-        <% if current_user.admin? %>
+        <% if logged_in? && current_user.admin? %>
           <td><%= link_to "Delete", transaction, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger" %></td>
         <% end %>
 
@@ -138,7 +138,7 @@
         <td>PROMOTE</td>
         <td><%= "#{transaction.league_before} to #{transaction.league_after}" %></td>
         <td><small><%= transaction.created_at.strftime("%l:%M %P") %>, <%= transaction.created_at.strftime("%-m/%-d/%y") %><small></td>
-        <% if current_user.admin? %>
+        <% if logged_in? && current_user.admin? %>
           <td><%= link_to "Delete", transaction, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger" %></td>
         <% end %>
       <% end %>

@@ -18,7 +18,7 @@
           <td><%= link_to "#{player.user.team}", user_path(player.user), class: "team-link" %></td>
           <% if player.level %>
             <td><%= "#{player.level.league}" %></td>
-            <% if current_user.admin? %>
+            <% if logged_in? && current_user.admin? %>
               <td><%= link_to "Delete", player, method: :delete, data: { confirm: "Are you sure?" }, class: "btn btn-danger" %></td>
             <% end %>
           <% else %>

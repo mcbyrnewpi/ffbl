@@ -50,7 +50,7 @@
 			<table class="table transaction-table">
 				<%= render 'transactions/recent_transactions' %>
 			</table>
-			<p><%= link_to "View all transactions....", transactions_path, class: "team-link" %></p>
+			<p><%= link_to "All Transactions", transactions_path, class: "team-link" %> | <%= link_to "Adds", transactions_adds_path, class: "team-link" %> | <%= link_to "Drops", transactions_drops_path, class: "team-link" %> | <%= link_to "Trades", transactions_trades_path, class: "team-link" %></p>
 		</div>
 	</div>
 </div>
