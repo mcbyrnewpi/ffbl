@@ -3,7 +3,7 @@ before_action :commish, only: [:commissioner]
 
   
   def home
-    @transactions = Transaction.all.order("id DESC")
+    @transactions = Transaction.adt.order("id DESC")
     @posts = Post.all.order("most_recent DESC")
     @commish_note = CommishNote.last
     @post = Post.new

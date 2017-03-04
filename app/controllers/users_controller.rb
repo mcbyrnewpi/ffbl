@@ -10,7 +10,7 @@ class UsersController < ApplicationController
   def show
     @user = User.find(params[:id])
     @players = @user.players.all.order(:position_id)
-    @transactions = Transaction.paginate(:page => params[:page], :per_page => 25).where("team_before = ? OR team_after = ?", @user.team, @user.team).order("id DESC")
+    @transactions = Transaction.adt.paginate(:page => params[:page], :per_page => 25).where("team_before = ? OR team_after = ?", @user.team, @user.team).order("id DESC")
     @preseason_report = @user.preseason_reports.last
     @year1 = @players.where("last_name LIKE ?", "%2018")
     @year2 = @players.where("last_name LIKE ?", "%2019")
