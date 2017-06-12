@@ -19,6 +19,16 @@
           <% end %>
         </div>
       </div>
+      <div class="container content-container">
+        <div class="row">
+          <div class="center col-sm-6">
+            <%= render 'players/player_search_form' %>
+          </div>
+          <div class="center col-sm-6">
+            <%= render 'transactions/transaction_search_form' %>
+          </div>
+        </div>
+      </div>
 
       <%= yield %>
       <%= render 'layouts/footer' %>

@@ -45,6 +45,15 @@ textarea {
   margin-bottom: 10px;
 }
 
+.record-container {
+  background: $ffblcontainerbackgroundlight;
+  border-radius: 10px;
+  border-top: 1px solid #cce6cc;
+  border-left: 2px solid #cce6cc;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
 .roster-warning {
   background: $ffblwarningcolor;
   color: #000;
