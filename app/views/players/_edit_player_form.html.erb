@@ -6,9 +6,7 @@
 		<%= f.association :position, as: :radio_buttons, :label_method => lambda { |position| "#{position.spot}" }, label: "Position (primary)", :required => false %>
 		<%= f.association :user, :label_method => lambda { |user| "#{user.team}" }, label: "Team (if Trade, team traded to)" %>
 		<%= f.association :level, as: :radio_buttons, :label_method => lambda { |level| "#{level.league}" }, label: "To which level?" %>
-		<% if @player.dob.nil? %>
-			<%= f.input :dob, :include_blank => true, :start_year => 1985, :end_year => 2015, :order => [:month, :day, :year], label: "Date of Birth (if demoting)" %> 
-		<% end %>
+		<%= f.input :dob, :include_blank => true, :start_year => 1985, :end_year => 2015, :order => [:month, :day, :year], label: "Date of Birth (if demoting)" %> 
 		<%= f.input :retro, :include_blank => true, :start_year => 2016, :order => [:month, :day, :year], label: "If 60 Day DL, date added:" %>
 		<%= f.input :trade_info, label: "Full Trade Details", :required => false %>
 		<%= f.button :submit, "Update #{@player.first_name} #{@player.last_name}?", class: "btn btn-cancel give-me-top-margin" %>
