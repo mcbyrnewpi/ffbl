@@ -24,6 +24,7 @@ class UsersController < ApplicationController
     @preseason_report = @user.preseason_reports.last
     @year1 = @players.where("last_name LIKE ?", "%2019")
     @year2 = @players.where("last_name LIKE ?", "%2020%")
+    @year3 = @players.where("last_name LIKE ?", "%2021%")
   end
 
   def new

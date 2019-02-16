@@ -33,6 +33,8 @@ before_action :admin_user, only: [:new, :create, :destroy]
     @player = Player.find(params[:id])
   end
 
+  # Player.find(id), Player.update_attribute(attribute, value)
+
 	def update
     @player = Player.find(params[:id])
     
