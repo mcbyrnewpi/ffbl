@@ -25,7 +25,7 @@
     <% else %>
       <%= f.input :user_id, :as => :hidden, :input_html => { :value => current_user.id } %>
     <% end %>
-		<%= f.association :level, :collection => Level.where("id != 2 AND id != 6 AND id != 7"), as: :radio_buttons, :label_method => lambda { |level| "#{level.league}" }, label: "To which level?" %>
+		<%= f.association :level, :collection => Level.where("id != 2 AND id != 6 AND id != 7"), as: :radio_buttons, :label_method => lambda { |level| "#{level.league}" }, label: "To which level?", :checked => 1 %>
     <div class="dob">
         <% if @player.dob.nil? %>
           <%= f.input :dob, :include_blank => true, :start_year => 1985, :end_year => 2015, :order => [:month, :day, :year], label: "Date of Birth", class: "milb-radio" %> 
