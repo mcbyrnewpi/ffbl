@@ -22,7 +22,7 @@ class UsersController < ApplicationController
                         OR (league_before LIKE 'MLB' AND league_after LIKE '%DL')").order("id DESC")
     @trades = Transaction.trades.paginate(:page => params[:page], :per_page => 10).where("team_before = ? OR team_after = ?", @user.team, @user.team).order("id DESC")
     @preseason_report = @user.preseason_reports.last
-    @year1 = @players.where("last_name LIKE ?", "%2020")
+    @year1 = @players.where("last_name LIKE ?", "%2020%")
     @year2 = @players.where("last_name LIKE ?", "%2021%")
     @year3 = @players.where("last_name LIKE ?", "%2022%")
   end
