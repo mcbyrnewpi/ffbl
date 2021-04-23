@@ -366,33 +366,5 @@
 				</table>
 			</div>
 		</div>
-	<% end %>
-
-	<% if @transactions.count == 0 %>
-	<% else %>
-		<div class="row content-container">
-			<div class="col-sm-12 center">
-				<h1>Recent Transactions</h1>
-			</div>
-			<div class="recent_team_transactions">
-				<%= render 'transactions/recent_team_transactions' %>
-			</div>
-
-		</div>
-	<% end %>
-
-	<% if @trades.count == 0 %>
-	<% else %>
-		<div class="row content-container">
-			<div class="col-sm-12 center">
-				<h1>Recent Trades</h1>
-			</div>
-			<div class="recent_team_transactions">
-				<%= render 'transactions/recent_team_trades' %>
-			</div>
-
-		</div>
-	<% end %>
-
-	
+	<% end %>	
 </div>
