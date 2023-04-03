@@ -49,6 +49,7 @@
 			<div class="col-sm-8 center">
 				<h1><%= @user.team %></h1>
 				<h4>Managed by: <%= @user.name %></h4>
+				<p><%= @year_prev %></p>
 				<p>Current Roster Size:  <%= @players.where("level_id != 6").count %> players</p>
 				<small>(<%= @user.transactions.all.count %> website transactions made)</small>
 				<% if @user.id == 3 %>
@@ -340,43 +341,74 @@
 			</table>
 		</div>
 	</div>
+	<% if @current_month <= 3 %>
+		<% if @players.where(level_id: 6).count > 0 %>
+			<div class="row content-container">
+				<div class="col-sm-12 center">
+					<h1>Draft Picks</h1>
+				</div>
+				<div class="col-sm-4 center">
+					<table class="table">
+						<% @year1.order("last_name").each do |player| %>
+							<tr>
+								<td><%= link_to "#{player.last_name} (#{player.first_name})", player_path(player), class: "player-link" %></td>
+							</tr>
+						<% end %>
+					</table>
+				</div>
 
-	<% if @players.where(level_id: 6).count > 0 %>
-		<div class="row content-container">
-			<div class="col-sm-12 center">
-				<h1>Draft Picks</h1>
-			</div>
-			<div class="col-sm-4 center">
-				<table class="table">
-					<% @year1.order("last_name").each do |player| %>
-						<tr>
-							<td><%= link_to "#{player.last_name} (#{player.first_name})", player_path(player), class: "player-link" %></td>
-						</tr>
-					<% end %>
-				</table>
-			</div>
+				<div class="col-sm-4 center">
+					<table class="table">
+						<% @year2.order("last_name").each do |player| %>
+							<tr>
+								<td><%= link_to "#{player.last_name} (#{player.first_name})", player_path(player), class: "player-link" %></td>
+							</tr>
+						<% end %>
+					</table>
+				</div>
 
-			<div class="col-sm-4 center">
-				<table class="table">
-					<% @year2.order("last_name").each do |player| %>
-						<tr>
-							<td><%= link_to "#{player.last_name} (#{player.first_name})", player_path(player), class: "player-link" %></td>
-						</tr>
-					<% end %>
-				</table>
-			</div>
+				<div class="col-sm-4 center">
+					<table class="table">
+						<% @year3.order("last_name").each do |player| %>
+							<tr>
+								<td><%= link_to "#{player.last_name} (#{player.first_name})", player_path(player), class: "player-link" %></td>
+							</tr>
+						<% end %>
+					</table>
+				</div>
 
-			<div class="col-sm-4 center">
-				<table class="table">
-					<% @year3.order("last_name").each do |player| %>
-						<tr>
-							<td><%= link_to "#{player.last_name} (#{player.first_name})", player_path(player), class: "player-link" %></td>
-						</tr>
-					<% end %>
-				</table>
+				
 			</div>
+		<% end %>
+	<% else %>
+		<% if @players.where(level_id: 6).count > 0 %>
+			<div class="row content-container">
+				<div class="col-sm-12 center">
+					<h1>Draft Picks</h1>
+				</div>
 
-			
-		</div>
-	<% end %>	
+				<div class="col-sm-6 center">
+					<table class="table">
+						<% @year2.order("last_name").each do |player| %>
+							<tr>
+								<td><%= link_to "#{player.last_name} (#{player.first_name})", player_path(player), class: "player-link" %></td>
+							</tr>
+						<% end %>
+					</table>
+				</div>
+
+				<div class="col-sm-6 center">
+					<table class="table">
+						<% @year3.order("last_name").each do |player| %>
+							<tr>
+								<td><%= link_to "#{player.last_name} (#{player.first_name})", player_path(player), class: "player-link" %></td>
+							</tr>
+						<% end %>
+					</table>
+				</div>
+
+				
+			</div>
+		<% end %>
+	<% end %>
 </div>
