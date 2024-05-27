@@ -12,7 +12,7 @@ gem 'sdoc',         '~> 0.4.0', group: :doc
 gem 'bcrypt'
 gem 'simple_form'
 gem 'will_paginate'
-gem 'nokogiri',     '~> 1.6.1'
+# gem 'nokogiri',     '~> 1.6.1'
 
 group :development, :test do
   gem 'sqlite3',     '~> 1.3.9'
