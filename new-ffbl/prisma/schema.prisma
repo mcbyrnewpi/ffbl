@@ -1,0 +1,510 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==========================================
+// ====== THE QUARANTINE (2015-2025) ========
+// ==========================================
+
+model LegacyBook {
+  id         Int            @id @default(autoincrement())
+  selector   String?        @db.VarChar
+  title      String?        @db.VarChar
+  author     String?        @db.VarChar
+  summary    String?
+  start      DateTime?      @db.Date
+  end        DateTime?      @db.Date
+  created_at DateTime       @db.Timestamp(6)
+  updated_at DateTime       @db.Timestamp(6)
+  reviews    LegacyReview[]
+
+  @@map("books")
+}
+
+model LegacyCommishNote {
+  id                   Int      @id @default(autoincrement())
+  commish_note_content String?
+  created_at           DateTime @db.Timestamp(6)
+  updated_at           DateTime @db.Timestamp(6)
+
+  @@map("commish_notes")
+}
+
+model LegacyLevel {
+  id         Int            @id @default(autoincrement())
+  league     String?        @db.VarChar
+  player_id  Int?
+  created_at DateTime       @db.Timestamp(6)
+  updated_at DateTime       @db.Timestamp(6)
+  players    LegacyPlayer[]
+
+  @@map("levels")
+}
+
+model LegacyPlayerType {
+  id         Int           @id @default(autoincrement())
+  kind       String?       @db.VarChar
+  player_id  Int?
+  created_at DateTime      @db.Timestamp(6)
+  updated_at DateTime      @db.Timestamp(6)
+  players    LegacyPlayer? @relation(fields: [player_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_b5f8c04bc8")
+
+  @@map("player_types")
+}
+
+model LegacyPlayer {
+  id           Int                 @id @default(autoincrement())
+  user_id      Int?
+  level_id     Int?
+  last_name    String?             @db.VarChar
+  first_name   String?             @db.VarChar
+  dob          DateTime?           @db.Date
+  retro        DateTime?           @db.Date
+  activate     DateTime?           @db.Date
+  created_at   DateTime            @db.Timestamp(6)
+  updated_at   DateTime            @db.Timestamp(6)
+  position_id  Int?
+  trade_info   String?
+  affiliation  String?             @db.VarChar
+  player_note  String?
+  player_types LegacyPlayerType[]
+  users        LegacyUser?         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_224cac07ce")
+  levels       LegacyLevel?        @relation(fields: [level_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_a986decdfd")
+  positions    LegacyPosition[]
+  transactions LegacyTransaction[]
+
+  @@index([level_id], map: "index_players_on_level_id")
+  @@index([user_id], map: "index_players_on_user_id")
+  @@map("players")
+}
+
+model LegacyPosition {
+  id         Int           @id @default(autoincrement())
+  player_id  Int?
+  spot       String?       @db.VarChar
+  created_at DateTime      @db.Timestamp(6)
+  updated_at DateTime      @db.Timestamp(6)
+  players    LegacyPlayer? @relation(fields: [player_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_8691b6d8ec")
+
+  @@index([player_id], map: "index_positions_on_player_id")
+  @@map("positions")
+}
+
+model LegacyPost {
+  id          Int              @id @default(autoincrement())
+  topic       String?          @db.VarChar
+  content     String?
+  user_id     Int?
+  created_at  DateTime         @db.Timestamp(6)
+  updated_at  DateTime         @db.Timestamp(6)
+  most_recent DateTime?        @db.Timestamp(6)
+  users       LegacyUser?      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_5b5ddfd518")
+  responses   LegacyResponse[]
+
+  @@index([user_id], map: "index_posts_on_user_id")
+  @@map("posts")
+}
+
+model LegacyPreseasonReport {
+  id              Int         @id @default(autoincrement())
+  report_title    String?     @db.VarChar
+  report_content  String?
+  prospect1       String?     @db.VarChar
+  prospect2       String?     @db.VarChar
+  prospect3       String?     @db.VarChar
+  prospect4       String?     @db.VarChar
+  prospect5       String?     @db.VarChar
+  prospect6       String?     @db.VarChar
+  prospect7       String?     @db.VarChar
+  prospect8       String?     @db.VarChar
+  prospect9       String?     @db.VarChar
+  prospect10      String?     @db.VarChar
+  catch           String?     @db.VarChar
+  first           String?     @db.VarChar
+  second          String?     @db.VarChar
+  third           String?     @db.VarChar
+  short           String?     @db.VarChar
+  of1             String?     @db.VarChar
+  of2             String?     @db.VarChar
+  of3             String?     @db.VarChar
+  util1           String?     @db.VarChar
+  util2           String?     @db.VarChar
+  sp1             String?     @db.VarChar
+  sp2             String?     @db.VarChar
+  sp3             String?     @db.VarChar
+  rp1             String?     @db.VarChar
+  rp2             String?     @db.VarChar
+  rp3             String?     @db.VarChar
+  p1              String?     @db.VarChar
+  p2              String?     @db.VarChar
+  bench1          String?     @db.VarChar
+  bench2          String?     @db.VarChar
+  bench3          String?     @db.VarChar
+  bench4          String?     @db.VarChar
+  bench5          String?     @db.VarChar
+  bench6          String?     @db.VarChar
+  bench7          String?     @db.VarChar
+  pyr1            Int?
+  pyr2            Int?
+  pyr3            Int?
+  pyr4            Int?
+  pyr5            Int?
+  pyr6            Int?
+  pyr7            Int?
+  pyr8            Int?
+  pyr9            Int?
+  pyr10           Int?
+  past_prospect1  String?     @db.VarChar
+  past_prospect2  String?     @db.VarChar
+  past_prospect3  String?     @db.VarChar
+  past_prospect4  String?     @db.VarChar
+  past_prospect5  String?     @db.VarChar
+  past_prospect6  String?     @db.VarChar
+  past_prospect7  String?     @db.VarChar
+  past_prospect8  String?     @db.VarChar
+  past_prospect9  String?     @db.VarChar
+  past_prospect10 String?     @db.VarChar
+  pcurrent1       String?     @db.VarChar
+  pcurrent2       String?     @db.VarChar
+  pcurrent3       String?     @db.VarChar
+  pcurrent4       String?     @db.VarChar
+  pcurrent5       String?     @db.VarChar
+  pcurrent6       String?     @db.VarChar
+  pcurrent7       String?     @db.VarChar
+  pcurrent8       String?     @db.VarChar
+  pcurrent9       String?     @db.VarChar
+  pcurrent10      String?     @db.VarChar
+  dpyr1           Int?
+  dpyr2           Int?
+  dpyr3           Int?
+  dpyr4           Int?
+  dpyr5           Int?
+  dpyr6           Int?
+  dpyr7           Int?
+  dpyr8           Int?
+  dpyr9           Int?
+  dpyr10          Int?
+  draft_pick1     String?     @db.VarChar
+  draft_pick2     String?     @db.VarChar
+  draft_pick3     String?     @db.VarChar
+  draft_pick4     String?     @db.VarChar
+  draft_pick5     String?     @db.VarChar
+  draft_pick6     String?     @db.VarChar
+  draft_pick7     String?     @db.VarChar
+  draft_pick8     String?     @db.VarChar
+  draft_pick9     String?     @db.VarChar
+  draft_pick10    String?     @db.VarChar
+  dpcurrent1      String?     @db.VarChar
+  dpcurrent2      String?     @db.VarChar
+  dpcurrent3      String?     @db.VarChar
+  dpcurrent4      String?     @db.VarChar
+  dpcurrent5      String?     @db.VarChar
+  dpcurrent6      String?     @db.VarChar
+  dpcurrent7      String?     @db.VarChar
+  dpcurrent8      String?     @db.VarChar
+  dpcurrent9      String?     @db.VarChar
+  dpcurrent10     String?     @db.VarChar
+  user_id         Int?
+  created_at      DateTime    @db.Timestamp(6)
+  updated_at      DateTime    @db.Timestamp(6)
+  proj_year       Int?
+  users           LegacyUser? @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_66fd51ddb2")
+
+  @@index([user_id], map: "index_preseason_reports_on_user_id")
+  @@map("preseason_reports")
+}
+
+model LegacyResponse {
+  id         Int         @id @default(autoincrement())
+  reply      String?
+  user_id    Int?
+  post_id    Int?
+  created_at DateTime    @db.Timestamp(6)
+  updated_at DateTime    @db.Timestamp(6)
+  posts      LegacyPost? @relation(fields: [post_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_06456afde5")
+  users      LegacyUser? @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_2bd9a0753e")
+
+  @@index([post_id], map: "index_responses_on_post_id")
+  @@index([user_id], map: "index_responses_on_user_id")
+  @@map("responses")
+}
+
+model LegacyReview {
+  id         Int         @id @default(autoincrement())
+  user_id    Int?
+  book_id    Int?
+  thoughts   String?
+  created_at DateTime    @db.Timestamp(6)
+  updated_at DateTime    @db.Timestamp(6)
+  users      LegacyUser? @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_74a66bd6c5")
+  books      LegacyBook? @relation(fields: [book_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_924a0b30ca")
+
+  @@index([book_id], map: "index_reviews_on_book_id")
+  @@index([user_id], map: "index_reviews_on_user_id")
+  @@map("reviews")
+}
+
+model LegacySchemaMigration {
+  version String @unique(map: "unique_schema_migrations") @db.VarChar
+
+  @@map("schema_migrations")
+}
+
+model LegacySidebet {
+  id         Int      @id @default(autoincrement())
+  over       String?  @db.VarChar
+  under      String?  @db.VarChar
+  bet_info   String?
+  stakes     String?  @db.VarChar
+  created_at DateTime @db.Timestamp(6)
+  updated_at DateTime @db.Timestamp(6)
+  winner     String?  @db.VarChar
+
+  @@map("sidebets")
+}
+
+model LegacyTransaction {
+  id                Int           @id @default(autoincrement())
+  team_after        String?       @db.VarChar
+  league_after      String?       @db.VarChar
+  user_id           Int?
+  player_id         Int?
+  created_at        DateTime      @db.Timestamp(6)
+  updated_at        DateTime      @db.Timestamp(6)
+  league_before     String?       @db.VarChar
+  team_before       String?       @db.VarChar
+  player_first_name String?       @db.VarChar
+  player_last_name  String?       @db.VarChar
+  details           String?
+  users             LegacyUser?   @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_77364e6416")
+  players           LegacyPlayer? @relation(fields: [player_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_rails_bfd36cb507")
+
+  @@index([player_id], map: "index_transactions_on_player_id")
+  @@index([user_id], map: "index_transactions_on_user_id")
+  @@map("transactions")
+}
+
+model LegacyUser {
+  id                Int                     @id @default(autoincrement())
+  name              String?                 @db.VarChar
+  email             String?                 @db.VarChar
+  team              String?                 @db.VarChar
+  password_digest   String?                 @db.VarChar
+  created_at        DateTime                @db.Timestamp(6)
+  updated_at        DateTime                @db.Timestamp(6)
+  remember_digest   String?                 @db.VarChar
+  a                 String?                 @db.VarChar
+  aa                String?                 @db.VarChar
+  aaa               String?                 @db.VarChar
+  about             String?
+  admin             Boolean?                @default(false)
+  glctac            Boolean?                @default(false)
+  varnum            Boolean?                @default(false)
+  commish           Boolean?                @default(false)
+  players           LegacyPlayer[]
+  posts             LegacyPost[]
+  preseason_reports LegacyPreseasonReport[]
+  responses         LegacyResponse[]
+  reviews           LegacyReview[]
+  transactions      LegacyTransaction[]
+
+  @@index([team], map: "index_users_on_team")
+  @@map("users")
+}
+
+// ==========================================
+// ====== THE MODERN ERA (2026 & BEYOND) ====
+// ==========================================
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+
+  role             Role    @default(OWNER)
+  isBookClubMember Boolean @default(false)
+
+  accounts Account[]
+  sessions Session[]
+
+  // Many-to-One: Multiple co-managers can belong to one tetouam
+  teamId String?
+  team   Team?   @relation(fields: [teamId], references: [id])
+
+  isPrimaryManager Boolean @default(false)
+
+  tradeApprovals TradeApproval[]
+}
+
+enum Role {
+  ADMIN
+  COMMISH
+  OWNER
+}
+
+model Team {
+  id      String  @id @default(cuid())
+  name    String  @unique
+  logoUrl String?
+  motto   String?
+
+  aaaAffiliateName String?
+  aaAffiliateName  String?
+  aAffiliateName   String?
+
+  requireCoManagerApproval Boolean @default(false)
+
+  managers      User[]
+  players       Player[]
+  originalPicks DraftPick[] @relation("OriginalPicks")
+  currentPicks  DraftPick[] @relation("CurrentPicks")
+
+  sentTrades     Trade[] @relation("SentTrades")
+  receivedTrades Trade[] @relation("ReceivedTrades")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Player {
+  id          String    @id @default(cuid())
+  firstName   String
+  lastName    String
+  mlbId       Int?      @unique
+  fangraphsId String?   @unique
+  birthdate   DateTime?
+  primaryPos  String?
+
+  teamId String?
+  team   Team?   @relation(fields: [teamId], references: [id])
+  level  Level?
+  status Status  @default(ACTIVE)
+
+  draftPicks   DraftPick[]
+  transactions Transaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum Level {
+  MLB
+  AAA
+  AA
+  A
+}
+
+enum Status {
+  ACTIVE
+  IL
+  IL_60
+  NA
+  SUSPENDED
+}
+
+model DraftPick {
+  id         String @id @default(cuid())
+  year       Int
+  round      Int
+  pickNumber Int?
+
+  originalOwnerId String
+  currentOwnerId  String
+
+  originalOwner Team @relation("OriginalPicks", fields: [originalOwnerId], references: [id])
+  currentOwner  Team @relation("CurrentPicks", fields: [currentOwnerId], references: [id])
+
+  playerId String?
+  player   Player? @relation(fields: [playerId], references: [id])
+}
+
+model Trade {
+  id              String @id @default(cuid())
+  status          String @default("PENDING")
+  proposingTeamId String
+  receivingTeamId String
+
+  proposingTeam Team @relation("SentTrades", fields: [proposingTeamId], references: [id])
+  receivingTeam Team @relation("ReceivedTrades", fields: [receivingTeamId], references: [id])
+
+  approvals TradeApproval[]
+
+  createdAt DateTime @default(now())
+}
+
+model TradeApproval {
+  id      String @id @default(cuid())
+  tradeId String
+  userId  String
+  status  String // APPROVED or REJECTED
+
+  trade Trade @relation(fields: [tradeId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@unique([tradeId, userId])
+}
+
+model Transaction {
+  id       String    @id @default(cuid())
+  type     TransType
+  playerId String
+  player   Player    @relation(fields: [playerId], references: [id])
+  details  String?
+
+  createdAt DateTime @default(now())
+}
+
+enum TransType {
+  ADD
+  DROP
+  TRADE
+  PROMOTE
+  DEMOTE
+  PLACE_ON_IL
+  ACTIVATE_FROM_IL
+  PLACE_ON_IL_60
+  ACTIVATE_FROM_IL_60
+  PLACE_ON_NA
+  ACTIVATE_FROM_NA
+}
