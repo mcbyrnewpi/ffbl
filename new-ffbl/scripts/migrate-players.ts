@@ -24,18 +24,25 @@ const legacyPositionMap: Record<number, string> = {
   6: 'OF',
   7: 'SP',
   8: 'RP'
-  // ID 9 ('Draft Pick') is intentionally omitted so it doesn't map to fielding positions
+};
+
+// 3. String Transformation Utility (Data Dictionary Rule)
+const toTitleCase = (str: string) => {
+  return str
+    .trim()
+    .toLowerCase()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
 async function migratePlayers() {
   console.log("🔄 Starting Idempotent Player Migration...");
 
-  // 3. Fetch all legacy players
+  // Fetch all legacy players
   const legacyPlayers = await prisma.legacyPlayer.findMany({
     include: {
-      users: true,      // The legacy team name/owner
-      levels: true,     // The legacy roster slot (MLB, AAA, etc.)
-      positions: true,  // The legacy positions join table
+      users: true,      
+      levels: true,     
+      positions: true,  
     }
   });
 
@@ -44,6 +51,7 @@ async function migratePlayers() {
   let createdCount = 0;
   let updatedCount = 0;
   let skippedCount = 0;
+  let draftPicksIsolated = 0; // New tracker for ID 9
 
   for (const lp of legacyPlayers) {
     if (!lp.first_name || !lp.last_name) {
@@ -51,7 +59,13 @@ async function migratePlayers() {
       continue;
     }
 
-    // 4. Map the Team
+    // 🚨 QUARANTINE DRAFT PICKS: If legacy position_id is 9, skip migrating as a Player
+    if (lp.position_id === 9) {
+      draftPicksIsolated++;
+      continue; 
+    }
+
+    // Map the Team
     let modernTeamId = null;
     if (lp.users?.team) {
       const team = await prisma.team.upsert({
@@ -62,7 +76,7 @@ async function migratePlayers() {
       modernTeamId = team.id;
     }
 
-    // 5. Map the Level
+    // Map the Level
     let modernLevel: Level | null = null;
     const legacyLvlStr = lp.levels?.league?.toUpperCase().trim();
     if (legacyLvlStr === 'MLB') modernLevel = Level.MLB;
@@ -70,39 +84,47 @@ async function migratePlayers() {
     else if (legacyLvlStr === 'AA') modernLevel = Level.AA;
     else if (legacyLvlStr === 'A') modernLevel = Level.A;
 
-    // 6. Map the Positions using the Rosetta Stone
+    // Map the Positions using the Rosetta Stone against lp.position_id
     const positionConnections: { abbrev: string }[] = [];
+    
+    // Grab the primary position from the LegacyPlayer table directly
+    if (lp.position_id) {
+      const primaryAbbrev = legacyPositionMap[lp.position_id];
+      if (primaryAbbrev) {
+        positionConnections.push({ abbrev: primaryAbbrev });
+      }
+    }
+
+    // Optional: If your LegacyPosition join table `spot` column holds string abbreviations (e.g., "OF"), catch those too
     if (lp.positions && lp.positions.length > 0) {
       for (const pos of lp.positions) {
-        
-        // ⚠️ IMPORTANT: If your legacy join table uses 'position_id' instead of 'id', change this!
-        const legacyPosId = pos.id; 
-        
-        const modernAbbrev = legacyPositionMap[legacyPosId];
-        
-        // Only connect if it's a valid mapped position (Ignores Draft Picks and missing mappings)
-        if (modernAbbrev) {
-          positionConnections.push({ abbrev: modernAbbrev });
+        if (pos.spot && isNaN(Number(pos.spot))) {
+          // Prevent duplicates if primary position already caught it
+          if (!positionConnections.find(p => p.abbrev === pos.spot)) {
+            positionConnections.push({ abbrev: pos.spot });
+          }
         }
       }
     }
 
-    // 7. UPSERT the Modern Player
+    // UPSERT the Modern Player
     try {
       const result = await prisma.player.upsert({
         where: { legacyId: lp.id }, 
         update: {
+          firstName: toTitleCase(lp.first_name),
+          lastName: toTitleCase(lp.last_name),
           teamId: modernTeamId,
           level: modernLevel,
           positions: {
-            set: [], // Clear old positions
+            set: [], 
             connect: positionConnections.length > 0 ? positionConnections : undefined
           }
         },
         create: {
           legacyId: lp.id,
-          firstName: lp.first_name.trim(),
-          lastName: lp.last_name.trim(),
+          firstName: toTitleCase(lp.first_name),
+          lastName: toTitleCase(lp.last_name),
           birthdate: lp.dob,
           teamId: modernTeamId,
           level: modernLevel,
@@ -128,9 +150,10 @@ async function migratePlayers() {
   console.log(`✨ Created: ${createdCount}`);
   console.log(`🔄 Updated: ${updatedCount}`);
   if (skippedCount > 0) console.log(`⏭️ Skipped (missing names): ${skippedCount}`);
+  console.log(`⚾ Draft Picks Isolated (position_id 9): ${draftPicksIsolated}`);
 }
 
-// 8. Execute and strictly clean up the pool
+// Execute and strictly clean up the pool
 migratePlayers()
   .catch((e) => {
     console.error("❌ Migration failed:", e);

@@ -376,7 +376,7 @@ model User {
   tradeApprovals TradeApproval[]
 
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 enum Role {
