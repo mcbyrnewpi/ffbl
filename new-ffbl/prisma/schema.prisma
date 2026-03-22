@@ -368,13 +368,15 @@ model User {
   accounts Account[]
   sessions Session[]
 
-  // Many-to-One: Multiple co-managers can belong to one tetouam
   teamId String?
   team   Team?   @relation(fields: [teamId], references: [id])
 
   isPrimaryManager Boolean @default(false)
 
   tradeApprovals TradeApproval[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum Role {
@@ -403,29 +405,50 @@ model Team {
   sentTrades     Trade[] @relation("SentTrades")
   receivedTrades Trade[] @relation("ReceivedTrades")
 
+  transactions Transaction[]
+  standings    SeasonStanding[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model Player {
-  id          String    @id @default(cuid())
-  firstName   String
-  lastName    String
-  mlbId       Int?      @unique
-  fangraphsId String?   @unique
-  birthdate   DateTime?
-  primaryPos  String?
+  id        String @id @default(cuid())
+  legacyId  Int?   @unique
+  firstName String
+  lastName  String
 
+  // External IDs for API Syncing
+  mlbId       Int?    @unique
+  fangraphsId String? @unique
+  yahooId     String? @unique
+
+  birthdate DateTime?
+
+  // Relations
   teamId String?
   team   Team?   @relation(fields: [teamId], references: [id])
+
+  // Many-to-Many with Positions
+  positions Position[]
+
   level  Level?
-  status Status  @default(ACTIVE)
+  status Status @default(ACTIVE)
 
   draftPicks   DraftPick[]
   transactions Transaction[]
+  tradeAssets  TradeAsset[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Position {
+  id      String   @id @default(cuid())
+  name    String   @unique // "Shortstop"
+  abbrev  String   @unique // "SS"
+  mlbCode String?
+  players Player[]
 }
 
 enum Level {
@@ -441,6 +464,7 @@ enum Status {
   IL_60
   NA
   SUSPENDED
+  RETIRED
 }
 
 model DraftPick {
@@ -457,11 +481,14 @@ model DraftPick {
 
   playerId String?
   player   Player? @relation(fields: [playerId], references: [id])
+
+  season      Season       @relation(fields: [year], references: [year])
+  tradeAssets TradeAsset[]
 }
 
 model Trade {
-  id              String @id @default(cuid())
-  status          String @default("PENDING")
+  id              String      @id @default(cuid())
+  status          TradeStatus @default(PENDING) // UPDATED: Uses Enum
   proposingTeamId String
   receivingTeamId String
 
@@ -469,20 +496,56 @@ model Trade {
   receivingTeam Team @relation("ReceivedTrades", fields: [receivingTeamId], references: [id])
 
   approvals TradeApproval[]
+  assets    TradeAsset[] // NEW: The actual items being traded
 
   createdAt DateTime @default(now())
 }
 
-model TradeApproval {
+model TradeAsset {
   id      String @id @default(cuid())
   tradeId String
-  userId  String
-  status  String // APPROVED or REJECTED
+  trade   Trade  @relation(fields: [tradeId], references: [id], onDelete: Cascade)
 
-  trade Trade @relation(fields: [tradeId], references: [id])
-  user  User  @relation(fields: [userId], references: [id])
+  fromTeamId String
+  toTeamId   String
+
+  fromTeamNameSnapshot String?
+  toTeamNameSnapshot   String?
+  playerNameSnapshot   String?
+  pickNameSnapshot     String? // e.g., "2027 1st Round Pick (Bridge Four)"
+
+  // An asset can be a player OR a draft pick
+  playerId String?
+  player   Player? @relation(fields: [playerId], references: [id])
+
+  draftPickId String?
+  draftPick   DraftPick? @relation(fields: [draftPickId], references: [id])
+}
+
+model TradeApproval {
+  id      String         @id @default(cuid())
+  tradeId String
+  userId  String
+  status  ApprovalStatus @default(PENDING) // UPDATED: Uses Enum
+
+  trade Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([tradeId, userId])
+}
+
+enum TradeStatus {
+  PENDING
+  APPROVED
+  VETOED
+  PROCESSED
+  CANCELLED
+}
+
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 model Transaction {
@@ -490,8 +553,11 @@ model Transaction {
   type     TransType
   playerId String
   player   Player    @relation(fields: [playerId], references: [id])
-  details  String?
 
+  teamId String?
+  team   Team?   @relation(fields: [teamId], references: [id])
+
+  details   String?
   createdAt DateTime @default(now())
 }
 
@@ -507,4 +573,41 @@ enum TransType {
   ACTIVATE_FROM_IL_60
   PLACE_ON_NA
   ACTIVATE_FROM_NA
+  RETIRE
+  UNRETIRE
+}
+
+model Season {
+  year              Int     @id
+  ffblChampion      String
+  playoffMvp        String
+  regularSeasonBest String
+  alChamp           String?
+  nlChamp           String?
+  mlbMvp            String
+  mlbCyYoung        String
+  mlbRoy            String
+
+  standings  SeasonStanding[]
+  draftPicks DraftPick[]
+
+  updatedAt DateTime @updatedAt
+}
+
+model SeasonStanding {
+  id     String @id @default(cuid())
+  year   Int
+  season Season @relation(fields: [year], references: [year])
+
+  teamId   String
+  team     Team   @relation(fields: [teamId], references: [id]) // NEW: Wired up the relation
+  teamName String
+  rank     Int
+
+  wins   Int
+  losses Int
+  ties   Int    @default(0)
+  pct    Float?
+
+  isPlayoffTeam Boolean @default(false)
 }
