@@ -2,10 +2,10 @@
 
 ## ⚾ 1. The Project Manifesto
 **Project Title:** FFBL Modernization (2026 Rebuild)  
-**Core Stack:** Next.js (App Router), Prisma 7, PostgreSQL, NextAuth.js, Tailwind CSS.  
+**Core Stack:** Next.js 15 (App Router), Prisma 7, PostgreSQL, NextAuth.js, Tailwind CSS.  
 **Architecture Strategy:** A "Dual-Era" database.
-* **The Quarantine (Legacy):** 2015–2025 data stored in lowercase tables (e.g., `players`, `users`) using `Int` IDs. This is treated as a strictly read-only historical archive.
-* **The Modern Era (Current):** 2026+ data stored in PascalCase tables (e.g., `Player`, `Team`) using `String` (CUID) IDs.
+* **The Quarantine (Legacy):** 2015–2025 data stored in lowercase tables (e.g., `players`, `users`, `transactions`) using `Int` IDs. This is treated as a strictly read-only historical archive.
+* **The Modern Era (Current):** 2026+ data stored in PascalCase tables (e.g., `Player`, `Team`, `Transaction`) using `String` (CUID) IDs.
 
 **Key Technical Rule:** All Modern `Player` records must store their original legacy ID in the `legacyId (Int @unique)` field to permanently maintain the link to the 10-year history.
 
@@ -37,39 +37,46 @@
 
 ---
 
-## ✅ 3. Completed Milestones (Phase 1: Data Migration)
-*Phase 1 was successfully completed in March 2026. The database is primed.*
-* **Position Seeding:** Modern `Position` table seeded with MLB scoring codes (1=SP, 2=C, 3=1B, etc.) and abbreviations (C, 1B, etc.).
+## ✅ 3. Completed Milestones 
+
+### Phase 1: Data Migration
+* **Position Seeding:** Modern `Position` table seeded with MLB scoring codes (1=SP, 2=C, 3=1B, etc.) and abbreviations.
 * **Player Migration:** 3555 active players successfully migrated and linked to teams/positions.
-* **User & Team Linkage:** 16 legacy users migrated. Modern `User` records created and successfully granted `isPrimaryManager` access to their respective `Team` records.
-* **Draft Pick Migration:** 160 valid future draft picks (2027 and 2028) migrated. Preserved complex trade histories by mapping `originalOwnerId` vs `currentOwnerId`.
-    * *Note on Data Cleansing:* 436 legacy records were isolated as "Draft Picks" (position_id 9). 120 of these were pre-2027 noise and intentionally purged. 156 were malformed/unmappable noise and ignored. 
-    * *Note on Franchise Rebrands:* A `TEAM_ALIAS_MAP` was utilized to map dead legacy names (e.g., "Scranton Yankees") to active modern teams (e.g., "Little Town Blues").
+* **User & Team Linkage:** 16 legacy users migrated. Modern `User` records created and successfully granted `isPrimaryManager` access.
+* **Draft Pick Migration:** 160 valid future draft picks (2027 and 2028) migrated. 
+    * *Note on Franchise Rebrands:* A `TEAM_ALIAS_MAP` was utilized to map dead legacy names to active modern teams.
+
+### Phase 2: API & Backend Logic (Part 1)
+* **Database Prep:** `schema.prisma` successfully updated with modern `Transaction`, `Trade`, and `TradeAsset` models.
+* **Prisma Singleton:** Established `lib/prisma.ts` to prevent connection exhaustion during hot-reloads.
+* **Identity:** `GET /api/users/me` — Fetches current user profile, team metadata, and full roster (currently mocked with hardcoded email until Phase 3).
+* **Roster Engine:** `GET /api/rosters/[teamId]` — Deep-nested fetch returning Players, Positions, and Draft Picks.
+* **Global Search:** `GET /api/players` — Search by `name`, filter by `level`, or filter by `unowned=true` (Free Agency).
+* **Mutations:** `PATCH /api/players/[playerId]` — Enabled live database updates for promotions, demotions, and team assignments.
 
 ---
 
 ## 🛠️ 4. Development Roadmap (The Work Ahead)
 
-### Phase 2: API & Backend Logic (CURRENT PHASE)
-* **The Trade Engine:** * `POST /api/trades/propose`: Logic to create `Trade` and `TradeAsset` records (handling both Players and Draft Picks).
+### Phase 2: API & Backend Logic (CURRENT)
+* **Transaction Logging (API Wiring):** Update the `PATCH /api/players/[playerId]` route to automatically generate a `Transaction` log (e.g., `TransType.PROMOTE`) whenever a player is moved.
+* **Roster Validation:** Enforce limits (e.g., max 40 players) within the `PATCH` route middleware.
+* **The Trade Engine:** * `POST /api/trades/propose`: Logic to create `Trade` and `TradeAsset` records.
     * `POST /api/trades/approve`: Logic for co-manager "double-lock" approval.
-* **Roster Management:**
-    * `GET /api/rosters/[teamId]`: Fetch full roster with health status, levels, and positions.
-    * `PATCH /api/players/move`: Move players between levels (MLB ↔ AAA) with validation limits.
-* **Historical API:** * `GET /api/history/books`: Fetch legacy book club reviews from the Quarantine tables.
-    * `GET /api/history/stats`: Aggregated query crossing Legacy and Modern tables.
+* **Historical API (The Quarantine Bridge):** * `GET /api/history/books`: Fetch legacy book club reviews from the Quarantine tables.
+    * `GET /api/history/posts`: Fetch legacy message board posts (`LegacyPost`).
+    * `GET /api/history/transactions`: A federated query stitching modern 2026+ `Transaction` records with legacy `LegacyTransaction` records using a player's `legacyId`.
 
 ### Phase 3: Frontend Development (Next.js)
-* **Auth UI:** Custom Sign-in page with NextAuth.js (Google/Discord integration matching on `email`).
+* **Auth UI:** Custom Sign-in page with NextAuth.js.
 * **The "War Room" (Dashboard):** Real-time view of trade offers, transaction feeds, and roster health.
-* **League Standings:** Modern view with "Snapshot" data from past seasons.
 * **Trade Proposer:** Draggable UI to select players/picks and send offers.
 
 ---
 
 ## ⚠️ 5. Critical Architecture & Session Notes
-* **Adapter Requirement:** Always initialize Prisma with: `new PrismaPg(pool as any)`. Edge functions or Next.js server components must strictly manage DB connections.
-* **Schema Updates on Live Tables:** If pushing a new required column (like `updatedAt`) to a table that already has rows, always add a default value temporarily (e.g., `@default(now()) @updatedAt`) to prevent Postgres constraint failures during `prisma db push`.
-* **Prisma Client Syncing:** If you add a new schema field (like `legacyId`) and a script throws an `Unknown argument` error, run `npx prisma generate` to sync the TypeScript client.
-* **Future Seasons:** 2026, 2027, and 2028 `Season` records have been generated to satisfy Draft Pick relational constraints. Award fields contain `"TBD"`.
-* **Database Integrity:** Do **NOT** run `prisma db push --force-reset`. It will permanently destroy the 10-year Quarantine archive. If Prisma reports drift, use the `migrate reset` and `psql` restore workflow (using `SET session_replication_role = 'replica';`).
+* **Next.js 15 Async Params (CRITICAL):** In Next.js 15, `params` and `searchParams` in Route Handlers are **Promises**. You must `await` them before accessing IDs (e.g., `const { teamId } = await params;`), or Prisma will receive `undefined`.
+* **Prisma Singleton:** Always import Prisma from `@/lib/prisma` in your routes, never initialize a `new PrismaClient()` directly in a route file.
+* **Path Aliasing & Terminal Rules:** Use single quotes when creating dynamic route folders in the terminal (e.g., `mkdir -p 'src/app/api/rosters/[teamId]'`) to bypass shell pattern matching.
+* **Schema Updates on Live Tables:** If pushing a new required column to a populated table, always add a temporary default value (e.g., `@default(now())`) to prevent Postgres constraint failures.
+* **Database Integrity:** Do **NOT** run `prisma db push --force-reset`. It will permanently destroy the 10-year Quarantine archive.
