@@ -395,6 +395,10 @@ model Team {
   aaAffiliateName  String?
   aAffiliateName   String?
 
+  aaaLogoUrl String?
+  aaLogoUrl  String?
+  aLogoUrl   String?
+
   requireCoManagerApproval Boolean @default(false)
 
   managers      User[]
