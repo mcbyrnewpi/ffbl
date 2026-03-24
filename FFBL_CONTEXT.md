@@ -46,23 +46,23 @@
 * **Draft Pick Migration:** 160 valid future draft picks (2027 and 2028) migrated. 
     * *Note on Franchise Rebrands:* A `TEAM_ALIAS_MAP` was utilized to map dead legacy names to active modern teams.
 
-### Phase 2: API & Backend Logic (Part 1)
-* **Database Prep:** `schema.prisma` successfully updated with modern `Transaction`, `Trade`, and `TradeAsset` models.
+### Phase 2: API & Backend Logic (Single-Player Engine)
+* **Database Prep:** `schema.prisma` successfully updated with modern `Transaction`, `Trade`, `TradeAsset`, and `LeagueSettings` models.
 * **Prisma Singleton:** Established `lib/prisma.ts` to prevent connection exhaustion during hot-reloads.
-* **Identity:** `GET /api/users/me` — Fetches current user profile, team metadata, and full roster (currently mocked with hardcoded email until Phase 3).
+* **Identity:** `GET /api/users/me` — Fetches current user profile, team metadata, and full roster.
 * **Roster Engine:** `GET /api/rosters/[teamId]` — Deep-nested fetch returning Players, Positions, and Draft Picks.
 * **Global Search:** `GET /api/players` — Search by `name`, filter by `level`, or filter by `unowned=true` (Free Agency).
-* **Mutations:** `PATCH /api/players/[playerId]` — Enabled live database updates for promotions, demotions, and team assignments.
+* **Mutations & Logging:** `PATCH /api/players/[playerId]` — Enabled live database updates for promotions/demotions, wrapped in a Prisma `$transaction` that simultaneously creates historical `Transaction` logs (e.g., `TransType.PROMOTE`).
+* **Dynamic Roster Validation (The Bouncer):** The `PATCH` route queries `LeagueSettings` to enforce active limits (e.g., 25-man MLB) and stash limits (IL, NA) dynamically. Commish can toggle `enforceRosterLimits` during the offseason.
+* **Bootstrap Architecture:** `prisma/seed.ts` is fully modularized to seed structural app requirements (`Positions` and `LeagueSettings`) using safe `upsert` logic.
 
 ---
 
 ## 🛠️ 4. Development Roadmap (The Work Ahead)
 
 ### Phase 2: API & Backend Logic (CURRENT)
-* **Transaction Logging (API Wiring):** Update the `PATCH /api/players/[playerId]` route to automatically generate a `Transaction` log (e.g., `TransType.PROMOTE`) whenever a player is moved.
-* **Roster Validation:** Enforce limits (e.g., max 40 players) within the `PATCH` route middleware.
 * **The Trade Engine:** * `POST /api/trades/propose`: Logic to create `Trade` and `TradeAsset` records.
-    * `POST /api/trades/approve`: Logic for co-manager "double-lock" approval.
+    * `POST /api/trades/approve`: Logic for co-manager "double-lock" approval, roster validation, and transaction execution.
 * **Historical API (The Quarantine Bridge):** * `GET /api/history/books`: Fetch legacy book club reviews from the Quarantine tables.
     * `GET /api/history/posts`: Fetch legacy message board posts (`LegacyPost`).
     * `GET /api/history/transactions`: A federated query stitching modern 2026+ `Transaction` records with legacy `LegacyTransaction` records using a player's `legacyId`.
@@ -75,8 +75,10 @@
 ---
 
 ## ⚠️ 5. Critical Architecture & Session Notes
-* **Next.js 15 Async Params (CRITICAL):** In Next.js 15, `params` and `searchParams` in Route Handlers are **Promises**. You must `await` them before accessing IDs (e.g., `const { teamId } = await params;`), or Prisma will receive `undefined`.
+* **Next.js 15 Async Params (CRITICAL):** In Next.js 15, `params` and `searchParams` in Route Handlers are **Promises**. You must `await` them before accessing IDs (e.g., `const { teamId } = await params;`).
 * **Prisma Singleton:** Always import Prisma from `@/lib/prisma` in your routes, never initialize a `new PrismaClient()` directly in a route file.
-* **Path Aliasing & Terminal Rules:** Use single quotes when creating dynamic route folders in the terminal (e.g., `mkdir -p 'src/app/api/rosters/[teamId]'`) to bypass shell pattern matching.
+* **Transactions for Multi-Writes:** Always use `prisma.$transaction(async (tx) => { ... })` when an API route updates a row and creates a log. If one fails, the whole operation rolls back.
+* **Bootstrapping vs. Migrating:** `prisma/seed.ts` is strictly for *structural data* required to boot the app (Positions, Settings). One-time data migrations (Legacy syncs) belong strictly in a separate `scripts/` folder so teammates don't accidentally run them locally.
+* **Path Aliasing & Terminal Rules:** Use single quotes when creating dynamic route folders in the terminal (e.g., `mkdir -p 'src/app/api/rosters/[teamId]'`).
 * **Schema Updates on Live Tables:** If pushing a new required column to a populated table, always add a temporary default value (e.g., `@default(now())`) to prevent Postgres constraint failures.
 * **Database Integrity:** Do **NOT** run `prisma db push --force-reset`. It will permanently destroy the 10-year Quarantine archive.

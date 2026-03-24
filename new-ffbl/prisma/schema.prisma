@@ -615,3 +615,21 @@ model SeasonStanding {
 
   isPlayoffTeam Boolean @default(false)
 }
+
+model LeagueSettings {
+  id                  Int      @id @default(1)
+  enforceRosterLimits Boolean  @default(true)
+  
+  // Active Roster Limits
+  mlbLimit            Int      @default(25)
+  aaaLimit            Int      @default(6)
+  aaLimit             Int      @default(6)
+  aLimit              Int      @default(6)
+
+  // Stash / Injured Limits
+  ilLimit             Int      @default(5)
+  il60Limit           Int?     // Optional (null means unlimited)
+  naLimit             Int      @default(2)
+
+  updatedAt           DateTime @updatedAt
+}

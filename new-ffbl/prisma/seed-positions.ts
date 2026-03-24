@@ -1,17 +1,6 @@
 import { PrismaClient } from '@prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
-import pg from 'pg';
-import 'dotenv/config';
 
-// 1. Setup the Adapter
-const connectionString = process.env.DATABASE_URL;
-const pool = new pg.Pool({ connectionString });
-
-// The (pool as any) bypasses that version mismatch error
-const adapter = new PrismaPg(pool as any); 
-const prisma = new PrismaClient({ adapter });
-
-async function main() {
+export async function seedPositions(prisma: PrismaClient) {
   const positions = [
     { name: 'Catcher', abbrev: 'C' },
     { name: 'First Base', abbrev: '1B' },
@@ -33,7 +22,3 @@ async function main() {
   }
   console.log('✅ Positions seeded.');
 }
-
-main()
-  .catch(e => console.error(e))
-  .finally(() => prisma.$disconnect());
