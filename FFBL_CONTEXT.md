@@ -2,7 +2,7 @@
 
 ## ⚾ 1. The Project Manifesto
 **Project Title:** FFBL Modernization (2026 Rebuild)  
-**Core Stack:** Next.js 15 (App Router), Prisma 7, PostgreSQL, NextAuth.js, Tailwind CSS.  
+**Core Stack:** Next.js 15 (App Router), Prisma 7, PostgreSQL, NextAuth.js, Tailwind CSS, Vercel AI SDK.  
 **Architecture Strategy:** A "Dual-Era" database.
 * **The Quarantine (Legacy):** 2015–2025 data stored in lowercase tables (e.g., `players`, `users`, `transactions`) using `Int` IDs. This is treated as a strictly read-only historical archive.
 * **The Modern Era (Current):** 2026+ data stored in PascalCase tables (e.g., `Player`, `Team`, `Transaction`) using `String` (CUID) IDs.
@@ -47,38 +47,43 @@
     * *Note on Franchise Rebrands:* A `TEAM_ALIAS_MAP` was utilized to map dead legacy names to active modern teams.
 
 ### Phase 2: API & Backend Logic (Single-Player Engine)
-* **Database Prep:** `schema.prisma` successfully updated with modern `Transaction`, `Trade`, `TradeAsset`, and `LeagueSettings` models.
 * **Prisma Singleton:** Established `lib/prisma.ts` to prevent connection exhaustion during hot-reloads.
 * **Identity:** `GET /api/users/me` — Fetches current user profile, team metadata, and full roster.
 * **Roster Engine:** `GET /api/rosters/[teamId]` — Deep-nested fetch returning Players, Positions, and Draft Picks.
 * **Global Search:** `GET /api/players` — Search by `name`, filter by `level`, or filter by `unowned=true` (Free Agency).
-* **Mutations & Logging:** `PATCH /api/players/[playerId]` — Enabled live database updates for promotions/demotions, wrapped in a Prisma `$transaction` that simultaneously creates historical `Transaction` logs (e.g., `TransType.PROMOTE`).
+* **Mutations & Logging:** `PATCH /api/players/[playerId]` — Enabled live database updates for promotions/demotions, wrapped in a Prisma `$transaction` that simultaneously creates historical `Transaction` logs.
 * **Dynamic Roster Validation (The Bouncer):** The `PATCH` route queries `LeagueSettings` to enforce active limits (e.g., 25-man MLB) and stash limits (IL, NA) dynamically. Commish can toggle `enforceRosterLimits` during the offseason.
 * **Bootstrap Architecture:** `prisma/seed.ts` is fully modularized to seed structural app requirements (`Positions` and `LeagueSettings`) using safe `upsert` logic.
+* **Trade Engine Prep:** Updated schema to an **Asset-Driven Multi-Team Architecture**. Added `expiresAt` for exploding offers, `isTradeLocked` for roster freezes, `TradeComment` for threaded negotiations, and `aiAnalysis` for caching LLM evaluations.
 
 ---
 
 ## 🛠️ 4. Development Roadmap (The Work Ahead)
 
 ### Phase 2: API & Backend Logic (CURRENT)
-* **The Trade Engine:** * `POST /api/trades/propose`: Logic to create `Trade` and `TradeAsset` records.
-    * `POST /api/trades/approve`: Logic for co-manager "double-lock" approval, roster validation, and transaction execution.
-* **Historical API (The Quarantine Bridge):** * `GET /api/history/books`: Fetch legacy book club reviews from the Quarantine tables.
-    * `GET /api/history/posts`: Fetch legacy message board posts (`LegacyPost`).
-    * `GET /api/history/transactions`: A federated query stitching modern 2026+ `Transaction` records with legacy `LegacyTransaction` records using a player's `legacyId`.
+* **The Multi-Team Trade Engine:** * `POST /api/trades/propose`: Asset-driven logic that supports 2-to-N team blockbusters. Creates `PENDING` trade, sets `expiresAt`, and locks players/picks (`isTradeLocked = true`).
+    * `POST /api/trades/approve`: Multi-manager approval logic. Verifies bouncer rules for all involved teams before executing transfers and generating `TransType.TRADE` logs.
+    * `POST /api/trades/comments`: Logic to post to the `TradeComment` threaded discussion.
+* **Historical API (The Quarantine Bridge):** * `GET /api/history/books` & `GET /api/history/posts`: Fetch legacy archives.
+    * `GET /api/history/transactions`: A federated query stitching modern 2026+ `Transaction` logs with legacy `LegacyTransaction` records via `legacyId`.
 
-### Phase 3: Frontend Development (Next.js)
-* **Auth UI:** Custom Sign-in page with NextAuth.js.
-* **The "War Room" (Dashboard):** Real-time view of trade offers, transaction feeds, and roster health.
-* **Trade Proposer:** Draggable UI to select players/picks and send offers.
+### Phase 3: The "Wow" Factor (Next-Gen Features)
+* **The AI GM Assistant (Gemini via Vercel AI SDK):**
+    * *Trade Evaluator:* Generates scouting reports on pending deals (cached in `aiAnalysis`).
+    * *Roster Hole Detection:* Scans the 16-team league to find ideal trade partners based on categorical surpluses/deficits.
+    * *Commish Bot:* Automated weekly power rankings written in a custom persona.
+    * *Guardrails:* Managed via the `aiCredits` field on the `User` model to prevent API spam.
+* **Live MLB StatsAPI Integration:**
+    * *Materialization:* Use the API to materialize new draftees into the database with 100% accurate DOBs and mlbIds.
+    * *Prospect Intel:* Sync with the undocumented MLB Pipeline endpoint to add "Top 100" badges and ETA dates directly to minor league rosters.
+* **Frictionless Auth & Comms Layer (NextAuth + Resend):**
+    * *Magic Links:* Allow managers without Gmail to log in seamlessly via email links (utilizing `VerificationToken` and `emailVerified`).
+    * *Transactional Emails:* Ping managers automatically when a trade is offered, expiring, or commented on (avoiding expensive SMS setups).
+* **The "War Room" (Dashboard):** Real-time frontend view of trade offers, transaction feeds, and a draggable trade proposer UI.
 
 ---
 
 ## ⚠️ 5. Critical Architecture & Session Notes
-* **Next.js 15 Async Params (CRITICAL):** In Next.js 15, `params` and `searchParams` in Route Handlers are **Promises**. You must `await` them before accessing IDs (e.g., `const { teamId } = await params;`).
-* **Prisma Singleton:** Always import Prisma from `@/lib/prisma` in your routes, never initialize a `new PrismaClient()` directly in a route file.
-* **Transactions for Multi-Writes:** Always use `prisma.$transaction(async (tx) => { ... })` when an API route updates a row and creates a log. If one fails, the whole operation rolls back.
-* **Bootstrapping vs. Migrating:** `prisma/seed.ts` is strictly for *structural data* required to boot the app (Positions, Settings). One-time data migrations (Legacy syncs) belong strictly in a separate `scripts/` folder so teammates don't accidentally run them locally.
-* **Path Aliasing & Terminal Rules:** Use single quotes when creating dynamic route folders in the terminal (e.g., `mkdir -p 'src/app/api/rosters/[teamId]'`).
-* **Schema Updates on Live Tables:** If pushing a new required column to a populated table, always add a temporary default value (e.g., `@default(now())`) to prevent Postgres constraint failures.
-* **Database Integrity:** Do **NOT** run `prisma db push --force-reset`. It will permanently destroy the 10-year Quarantine archive.
+* **Asset-Driven Trades:** Trades do not have a single `receivingTeamId`. The web of a trade is defined entirely by `fromTeamId` and `toTeamId` on individual `TradeAsset` records. This supports infinite-team trades.
+* **Lazy Evaluation for Expirations:** No chron jobs needed for exploding offers. When the Trade UI loads, instantly flip any `PENDING` trades to `CANCELLED` (and unlock their assets) if `expiresAt < now()`.
+* **Next.js 15 Async Params (CRITICAL):** `params` and `searchParams` in Route Handlers are **Promises**. You must `await` them before accessing IDs (e.g

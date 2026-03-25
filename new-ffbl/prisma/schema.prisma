@@ -374,6 +374,7 @@ model User {
   isPrimaryManager Boolean @default(false)
 
   tradeApprovals TradeApproval[]
+  tradeComments  TradeComment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -406,8 +407,8 @@ model Team {
   originalPicks DraftPick[] @relation("OriginalPicks")
   currentPicks  DraftPick[] @relation("CurrentPicks")
 
-  sentTrades     Trade[] @relation("SentTrades")
-  receivedTrades Trade[] @relation("ReceivedTrades")
+  assetsSent     TradeAsset[] @relation("AssetsSent")
+  assetsReceived TradeAsset[] @relation("AssetsReceived")
 
   transactions Transaction[]
   standings    SeasonStanding[]
@@ -428,6 +429,8 @@ model Player {
   yahooId     String? @unique
 
   birthdate DateTime?
+
+  isTradeLocked Boolean @default(false) // True if currently in a PENDING trade
 
   // Relations
   teamId String?
@@ -477,6 +480,8 @@ model DraftPick {
   round      Int
   pickNumber Int?
 
+  isTradeLocked Boolean @default(false) // True if currently in a PENDING trade
+
   originalOwnerId String
   currentOwnerId  String
 
@@ -491,16 +496,16 @@ model DraftPick {
 }
 
 model Trade {
-  id              String      @id @default(cuid())
-  status          TradeStatus @default(PENDING) // UPDATED: Uses Enum
-  proposingTeamId String
-  receivingTeamId String
+  id               String      @id @default(cuid())
+  status           TradeStatus @default(PENDING) // UPDATED: Uses Enum
+  initiatingTeamId String
 
-  proposingTeam Team @relation("SentTrades", fields: [proposingTeamId], references: [id])
-  receivingTeam Team @relation("ReceivedTrades", fields: [receivingTeamId], references: [id])
+  aiAnalysis Json?
+  expiresAt  DateTime?
 
   approvals TradeApproval[]
-  assets    TradeAsset[] // NEW: The actual items being traded
+  assets    TradeAsset[]
+  comments  TradeComment[]
 
   createdAt DateTime @default(now())
 }
@@ -513,6 +518,10 @@ model TradeAsset {
   fromTeamId String
   toTeamId   String
 
+  // Wire up the relations so Prisma can fetch the team data
+  fromTeam Team @relation("AssetsSent", fields: [fromTeamId], references: [id])
+  toTeam   Team @relation("AssetsReceived", fields: [toTeamId], references: [id])
+
   fromTeamNameSnapshot String?
   toTeamNameSnapshot   String?
   playerNameSnapshot   String?
@@ -524,6 +533,18 @@ model TradeAsset {
 
   draftPickId String?
   draftPick   DraftPick? @relation(fields: [draftPickId], references: [id])
+}
+
+model TradeComment {
+  id      String @id @default(cuid())
+  tradeId String
+  userId  String
+  content String @db.Text
+
+  trade Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
 }
 
 model TradeApproval {
@@ -617,19 +638,19 @@ model SeasonStanding {
 }
 
 model LeagueSettings {
-  id                  Int      @id @default(1)
-  enforceRosterLimits Boolean  @default(true)
-  
+  id                  Int     @id @default(1)
+  enforceRosterLimits Boolean @default(true)
+
   // Active Roster Limits
-  mlbLimit            Int      @default(25)
-  aaaLimit            Int      @default(6)
-  aaLimit             Int      @default(6)
-  aLimit              Int      @default(6)
+  mlbLimit Int @default(25)
+  aaaLimit Int @default(6)
+  aaLimit  Int @default(6)
+  aLimit   Int @default(6)
 
   // Stash / Injured Limits
-  ilLimit             Int      @default(5)
-  il60Limit           Int?     // Optional (null means unlimited)
-  naLimit             Int      @default(2)
+  ilLimit   Int  @default(5)
+  il60Limit Int? // Optional (null means unlimited)
+  naLimit   Int  @default(2)
 
-  updatedAt           DateTime @updatedAt
+  updatedAt DateTime @updatedAt
 }
