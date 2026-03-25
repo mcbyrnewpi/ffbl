@@ -1,11 +1,3 @@
-Here is the ultimate **"Master Developer Handbook."** I have merged the onboarding instructions of the `README.md` with the deep architectural brain of the `FFBL_CONTEXT.md` into one single, cohesive file.
-
-This is perfect to drop into the root of your project (you can name it `README.md` or `DEVELOPER_HANDBOOK.md`). It gives a new dev exactly what they need to start the app, while preserving all of our architectural rules and AI context at the bottom.
-
-Copy and paste this entire block:
-
------
-
 ````markdown
 # ⚾ FFBL Modernization (2026 Rebuild) - Master Project File
 
