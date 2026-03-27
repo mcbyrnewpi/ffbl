@@ -493,6 +493,9 @@ model DraftPick {
 
   season      Season       @relation(fields: [year], references: [year])
   tradeAssets TradeAsset[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model Trade {
@@ -508,6 +511,7 @@ model Trade {
   comments  TradeComment[]
 
   createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model TradeAsset {
@@ -533,6 +537,9 @@ model TradeAsset {
 
   draftPickId String?
   draftPick   DraftPick? @relation(fields: [draftPickId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model TradeComment {
@@ -545,16 +552,22 @@ model TradeComment {
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model TradeApproval {
   id      String         @id @default(cuid())
   tradeId String
   userId  String
-  status  ApprovalStatus @default(PENDING) // UPDATED: Uses Enum
+  status  ApprovalStatus @default(PENDING)
+
+  correspondingMoves Json?
 
   trade Trade @relation(fields: [tradeId], references: [id], onDelete: Cascade)
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 
   @@unique([tradeId, userId])
 }
