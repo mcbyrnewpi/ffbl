@@ -76,13 +76,31 @@ async function migratePlayers() {
       modernTeamId = team.id;
     }
 
-    // Map the Level
+    // Map the Level & Status
     let modernLevel: Level | null = null;
+    let modernStatus: Status = Status.ACTIVE; // Default to Active
+
     const legacyLvlStr = lp.levels?.league?.toUpperCase().trim();
-    if (legacyLvlStr === 'MLB') modernLevel = Level.MLB;
-    else if (legacyLvlStr === 'AAA') modernLevel = Level.AAA;
-    else if (legacyLvlStr === 'AA') modernLevel = Level.AA;
-    else if (legacyLvlStr === 'A') modernLevel = Level.A;
+    
+    if (legacyLvlStr === 'MLB') {
+      modernLevel = Level.MLB;
+    } else if (legacyLvlStr === 'AAA') {
+      modernLevel = Level.AAA;
+    } else if (legacyLvlStr === 'AA') {
+      modernLevel = Level.AA;
+    } else if (legacyLvlStr === 'A') {
+      modernLevel = Level.A;
+    } else if (legacyLvlStr === '60 DAY DL') {
+      modernLevel = Level.MLB; 
+      modernStatus = Status.IL_60;
+    } else if (legacyLvlStr === 'YAHOO! DL') {
+      modernLevel = Level.MLB;
+      modernStatus = Status.IL;
+    } else if (legacyLvlStr === 'NA') {
+      // NA prospects won't have a specific minor league level assigned
+      modernLevel = null;
+      modernStatus = Status.NA;
+    }
 
     // Map the Positions using the Rosetta Stone against lp.position_id
     const positionConnections: { abbrev: string }[] = [];
@@ -116,6 +134,7 @@ async function migratePlayers() {
           lastName: toTitleCase(lp.last_name),
           teamId: modernTeamId,
           level: modernLevel,
+          status: modernStatus, // 👈 ADDED HERE
           positions: {
             set: [], 
             connect: positionConnections.length > 0 ? positionConnections : undefined
@@ -128,7 +147,7 @@ async function migratePlayers() {
           birthdate: lp.dob,
           teamId: modernTeamId,
           level: modernLevel,
-          status: Status.ACTIVE,
+          status: modernStatus, // 👈 UPDATED HERE
           positions: {
             connect: positionConnections.length > 0 ? positionConnections : undefined
           }

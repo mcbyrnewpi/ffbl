@@ -61,6 +61,8 @@
     * Safely applies a "Roster Freeze" (`isTradeLocked = true`) to **all** involved Players and Draft Picks for team that proposed the trade.
     * Calculates `expiresAt` timestamps for exploding offers.
     * Implements "Double-Lock" co-manager logic by dynamically mapping `TradeApproval` tickets to individual `User`s instead of teams.
+    * `POST /api/trades/approve`: Multi-manager approval logic. Verifies bouncer rules for all involved teams before executing transfers and generating `TransType.TRADE` logs.
+    * `POST /api/trades/decline`: Decline logic. Puts the Trade into a CANCELLED state and reverts all assets back to being unlocked.
 
 ---
 
@@ -68,7 +70,6 @@
 
 ### Phase 2: API & Backend Logic (CURRENT)
 * **The Multi-Team Trade Engine:** 
-    * `POST /api/trades/approve`: Multi-manager approval logic. Verifies bouncer rules for all involved teams before executing transfers and generating `TransType.TRADE` logs.
     * `POST /api/trades/comments`: Logic to post to the `TradeComment` threaded discussion.
 * **Historical API (The Quarantine Bridge):** * `GET /api/history/books` & `GET /api/history/posts`: Fetch legacy archives.
     * `GET /api/history/transactions`: A federated query stitching modern 2026+ `Transaction` logs with legacy `LegacyTransaction` records via `legacyId`.
