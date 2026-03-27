@@ -9,12 +9,12 @@ export async function seedSettings(prisma: PrismaClient) {
     create: {
       id: 1,
       enforceRosterLimits: true,
-      mlbLimit: 40,
-      aaaLimit: 15,
-      aaLimit: 15,
-      aLimit: 15,
+      mlbLimit: 25,
+      aaaLimit: 6,
+      aaLimit: 6,
+      aLimit: 6,
       ilLimit: 5,
-      naLimit: 3,
+      naLimit: 2,
       il60Limit: null, // Unlimited 60-Day IL
     },
   });

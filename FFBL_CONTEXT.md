@@ -46,6 +46,7 @@
 * **Draft Pick Migration:** 160 valid future draft picks (2027 and 2028) migrated. 
     * *Note on Franchise Rebrands:* A `TEAM_ALIAS_MAP` was utilized to map dead legacy names to active modern teams.
 
+
 ### Phase 2: API & Backend Logic (Single-Player Engine)
 * **Prisma Singleton:** Established `lib/prisma.ts` to prevent connection exhaustion during hot-reloads.
 * **Identity:** `GET /api/users/me` — Fetches current user profile, team metadata, and full roster.
@@ -55,13 +56,18 @@
 * **Dynamic Roster Validation (The Bouncer):** The `PATCH` route queries `LeagueSettings` to enforce active limits (e.g., 25-man MLB) and stash limits (IL, NA) dynamically. Commish can toggle `enforceRosterLimits` during the offseason.
 * **Bootstrap Architecture:** `prisma/seed.ts` is fully modularized to seed structural app requirements (`Positions` and `LeagueSettings`) using safe `upsert` logic.
 * **Trade Engine Prep:** Updated schema to an **Asset-Driven Multi-Team Architecture**. Added `expiresAt` for exploding offers, `isTradeLocked` for roster freezes, `TradeComment` for threaded negotiations, and `aiAnalysis` for caching LLM evaluations.
+* **Trade Proposal Route (`POST /api/trades/propose`):**
+    * Supports infinite-team blockbusters via an asset-driven array.
+    * Safely applies a "Roster Freeze" (`isTradeLocked = true`) to **all** involved Players and Draft Picks for team that proposed the trade.
+    * Calculates `expiresAt` timestamps for exploding offers.
+    * Implements "Double-Lock" co-manager logic by dynamically mapping `TradeApproval` tickets to individual `User`s instead of teams.
 
 ---
 
 ## 🛠️ 4. Development Roadmap (The Work Ahead)
 
 ### Phase 2: API & Backend Logic (CURRENT)
-* **The Multi-Team Trade Engine:** * `POST /api/trades/propose`: Asset-driven logic that supports 2-to-N team blockbusters. Creates `PENDING` trade, sets `expiresAt`, and locks players/picks (`isTradeLocked = true`).
+* **The Multi-Team Trade Engine:** 
     * `POST /api/trades/approve`: Multi-manager approval logic. Verifies bouncer rules for all involved teams before executing transfers and generating `TransType.TRADE` logs.
     * `POST /api/trades/comments`: Logic to post to the `TradeComment` threaded discussion.
 * **Historical API (The Quarantine Bridge):** * `GET /api/history/books` & `GET /api/history/posts`: Fetch legacy archives.
