@@ -12,11 +12,23 @@ export default async function TeamLayout({ children, params }: { children: React
 
   if (!team) notFound();
 
+  // ⚡ Fetch fast counts for the related tables
+  const draftPickCount = await prisma.draftPick.count({
+    where: { currentOwnerId: id },
+  });
+  
+  const hofCount = await prisma.teamHallOfFame.count({
+    where: { teamId: id },
+  });
+
   // 🪣 Calculate Stats for the Header
   const stats = {
     mlb: team.players.filter(p => p.level === 'MLB' && p.status === 'ACTIVE').length,
     minors: team.players.filter(p => p.level !== 'MLB' && p.status === 'ACTIVE').length,
     il: team.players.filter(p => p.status !== 'ACTIVE' && p.status !== 'NA').length,
+    na: team.players.filter(p => p.status === 'NA').length,
+    picks: draftPickCount,
+    hof: hofCount,
   };
 
   return (
@@ -32,10 +44,15 @@ export default async function TeamLayout({ children, params }: { children: React
               <User size={16} /> Manager: {team.managers[0]?.name || 'Unmanaged'}
             </p>
           </div>
-          <div className="flex gap-3">
-            <StatBadge label="MLB Active" value={stats.mlb} />
-            <StatBadge label="Minors" value={stats.minors} />
-            <StatBadge label="IL" value={stats.il} color="text-red-600 bg-red-50 border-red-200" />
+          
+          {/* 📊 The Front Office Badges (Wrapped for smaller screens) */}
+          <div className="flex flex-wrap gap-2 md:gap-3">
+            <StatBadge label="MLB" value={stats.mlb} color="text-blue-700 bg-blue-50 border-blue-200" />
+            <StatBadge label="Minors" value={stats.minors} color="text-emerald-700 bg-emerald-50 border-emerald-200" />
+            <StatBadge label="IL" value={stats.il} color="text-red-700 bg-red-50 border-red-200" />
+            <StatBadge label="NA" value={stats.na} color="text-slate-600 bg-slate-100 border-slate-300" />
+            <StatBadge label="Picks" value={stats.picks} color="text-purple-700 bg-purple-50 border-purple-200" />
+            <StatBadge label="HOF" value={stats.hof} color="text-amber-700 bg-amber-50 border-amber-200" />
           </div>
         </header>
 
@@ -46,10 +63,17 @@ export default async function TeamLayout({ children, params }: { children: React
   );
 }
 
-function StatBadge({ label, value, color = "text-slate-700 bg-slate-100 border-slate-200" }: any) {
+// Added basic TypeScript interfaces to remove the `any` type!
+interface StatBadgeProps {
+  label: string;
+  value: number;
+  color?: string;
+}
+
+function StatBadge({ label, value, color = "text-slate-700 bg-slate-100 border-slate-200" }: StatBadgeProps) {
   return (
-    <div className={`px-4 py-2 rounded-lg border flex flex-col items-center min-w-[80px] ${color}`}>
-      <span className="text-[10px] uppercase font-bold opacity-70 mb-0.5">{label}</span>
+    <div className={`px-3 py-2 rounded-lg border flex flex-col items-center min-w-[64px] md:min-w-[72px] ${color}`}>
+      <span className="text-[10px] uppercase font-bold opacity-80 mb-0.5">{label}</span>
       <span className="text-lg font-black leading-none">{value}</span>
     </div>
   );

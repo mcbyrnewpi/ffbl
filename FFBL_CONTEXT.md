@@ -21,6 +21,7 @@
 | `dob` | `birthdate` | Standard DateTime transfer. |
 | `affiliation` | `level` | Maps "MLB", "AAA", etc., to `Level` Enum. |
 | `position_id` | `positions` (Relation) | ID-to-Abbreviation "Rosetta Stone" handshake (IDs 1-8). **ID 9 is strictly quarantined for Draft Picks.** |
+| N/A | `mlbId` | **NEW:** Sourced dynamically via MLB API Matchmaker script to enable live headshots. |
 
 ### User & Team Mapping
 | Legacy Field (`users`) | Modern Field (`User` / `Team`) | Logic / Transformation |
@@ -29,6 +30,7 @@
 | `name` | `User.name` | Display name. |
 | `team` | `Team.name` | Creates a unique `Team` entity; User linked via `teamId`. |
 | `commish` / `admin` | `User.role` | Maps `true` to `COMMISH` or `ADMIN` Enum; otherwise `OWNER`. |
+| `aaa`, `aa`, `a` | `aaaAffiliateName`, etc. | **NEW:** Maps custom FFBL franchise lore (e.g., "Balboa Island Bananas"). |
 
 ### Draft Pick Mapping (The 2027/2028 Parsing)
 * **Year & Round:** Extracted via Regex from legacy `players.last_name` (e.g., `"2027 Round 2"` -> `2027`, `2`).
@@ -39,13 +41,13 @@
 
 ## ✅ 3. Completed Milestones 
 
-### Phase 1: Data Migration
+### Phase 1: Data Migration & Hydration
 * **Position Seeding:** Modern `Position` table seeded with MLB scoring codes (1=SP, 2=C, 3=1B, etc.) and abbreviations.
 * **Player Migration:** 3555 active players successfully migrated and linked to teams/positions.
-* **User & Team Linkage:** 16 legacy users migrated. Modern `User` records created and successfully granted `isPrimaryManager` access.
 * **Draft Pick Migration:** 160 valid future draft picks (2027 and 2028) migrated. 
     * *Note on Franchise Rebrands:* A `TEAM_ALIAS_MAP` was utilized to map dead legacy names to active modern teams.
-
+* **Idempotent User & Affiliate Sync:** Mapped legacy users to their modern teams with strict NextAuth identity guards (`.trim().toLowerCase()`). Hydrated custom FFBL minor league affiliate names perfectly into the `Team` model.
+* **MLB ID Matchmaker:** Built and executed an automated script querying the MLB StatsAPI to match player names in the DB to official `mlbId` integers, enabling live `img.mlbstatic.com` headshots.
 
 ### Phase 2: API & Backend Logic (Single-Player Engine)
 * **Prisma Singleton:** Established `lib/prisma.ts` to prevent connection exhaustion during hot-reloads.
@@ -64,17 +66,23 @@
     * `POST /api/trades/approve`: Multi-manager approval logic. Verifies bouncer rules for all involved teams before executing transfers and generating `TransType.TRADE` logs.
     * `POST /api/trades/decline`: Decline logic. Puts the Trade into a CANCELLED state and reverts all assets back to being unlocked.
 
+### Phase 3: Frontend Foundations (App Router UI)
+* **Deep-Linked Routing:** Built a nested structure (`/teams/[id]` for Active Roster, `/teams/[id]/minors` for Farm System) to maintain team context (Header/Tabs) across views.
+* **Modular Components:** Extracted UI into reusable pieces (`RosterTable`, `RosterRow`, `DraftPicksTable`) to prevent spaghetti code and allow instant global design updates.
+* **The "Front Office" View:** Designed a 3-column `FarmSystem` grid that dynamically inherits custom FFBL affiliate names and handles empty states gracefully.
+* **Live Assets:** Wired up `RosterRow` to utilize the synced `mlbId` for rendering official high-res MLB player headshots.
+
 ---
 
 ## 🛠️ 4. Development Roadmap (The Work Ahead)
 
-### Phase 2: API & Backend Logic (CURRENT)
-* **The Multi-Team Trade Engine:** 
-    * `POST /api/trades/comments`: Logic to post to the `TradeComment` threaded discussion.
+### Phase 4: API & Trade Engine Completion
+* **The Multi-Team Trade Engine:** * `POST /api/trades/comments`: Logic to post to the `TradeComment` threaded discussion.
 * **Historical API (The Quarantine Bridge):** * `GET /api/history/books` & `GET /api/history/posts`: Fetch legacy archives.
     * `GET /api/history/transactions`: A federated query stitching modern 2026+ `Transaction` logs with legacy `LegacyTransaction` records via `legacyId`.
 
-### Phase 3: The "Wow" Factor (Next-Gen Features)
+### Phase 5: UI Polish & Next-Gen Features
+* **Manual MLB ID Sync Tool:** Build a Commish-only Server Action UI modal to handle "fuzzy matches" (e.g., "Luis Robert Jr." vs "Luis Robert") directly from the frontend.
 * **The AI GM Assistant (Gemini via Vercel AI SDK):**
     * *Trade Evaluator:* Generates scouting reports on pending deals (cached in `aiAnalysis`).
     * *Roster Hole Detection:* Scans the 16-team league to find ideal trade partners based on categorical surpluses/deficits.
@@ -88,9 +96,38 @@
     * *Transactional Emails:* Ping managers automatically when a trade is offered, expiring, or commented on (avoiding expensive SMS setups).
 * **The "War Room" (Dashboard):** Real-time frontend view of trade offers, transaction feeds, and a draggable trade proposer UI.
 
+
+## 🧠 Unified Player Search & Action Architecture
+
+To maintain a **DRY (Don't Repeat Yourself)** codebase and provide an elite UX, the application utilizes a centralized search logic that handles both local database records and real-time MLB API lookups.
+
+### 🔍 1. The Global Search Trigger
+Managers can initiate a search for any player (Active, Prospect, or Retired) from a universal search bar. The system first queries the local `Player` table.
+
+### 🛠️ 2. The "Self-Healing" Hybrid Check
+If a local player record is found but lacks an `mlbId`:
+* The system triggers a background search against `statsapi.mlb.com/api/v1/people/search`.
+* The user confirms the match, and the `mlbId` is permanently saved to the local database.
+* This ensures the "338 missing players" from the initial migration are fixed organically through usage.
+
+### 🚦 3. Contextual Action Routing
+Once a player is selected and the ID is verified, the UI dynamically renders actions based on the player's `Status` and `teamId`:
+
+| Player Status | Ownership | Primary Action | Resulting Flow |
+| :--- | :--- | :--- | :--- |
+| **RETIRED** | Any / None | `Induct to Ring of Honor` | Opens tribute modal; triggers career stats snapshot to `mlbRawData`. |
+| **ACTIVE** | `null` | `Add to Roster` | Moves player to the manager's team; triggers active stats sync. |
+| **ACTIVE** | `otherTeamId` | `Propose Trade` | Opens the Trade Constructor with that player pre-loaded. |
+| **ACTIVE** | `currentTeamId` | `Manage Player` | Routing to player detail for promotion/demotion/IL placement. |
+
+### ⚡ 4. The Smart Payload
+The backend intelligently determines the data requirement based on the action:
+* **Induction:** Fetches **Immutable Career Stats** (Total HRs, Lifetime AVG) and saves a permanent JSON snapshot to `mlbRawData`.
+* **Roster Add:** Fetches **Live Season Stats** and sets up a recurring nightly sync for active performance data.
+
+
 ---
 
 ## ⚠️ 5. Critical Architecture & Session Notes
 * **Asset-Driven Trades:** Trades do not have a single `receivingTeamId`. The web of a trade is defined entirely by `fromTeamId` and `toTeamId` on individual `TradeAsset` records. This supports infinite-team trades.
 * **Lazy Evaluation for Expirations:** No chron jobs needed for exploding offers. When the Trade UI loads, instantly flip any `PENDING` trades to `CANCELLED` (and unlock their assets) if `expiresAt < now()`.
-* **Next.js 15 Async Params (CRITICAL):** `params` and `searchParams` in Route Handlers are **Promises**. You must `await` them before accessing IDs (e.g
