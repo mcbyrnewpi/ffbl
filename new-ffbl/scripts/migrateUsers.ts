@@ -1,75 +1,59 @@
 import { PrismaClient, Role } from '@prisma/client';
-import { Pool } from 'pg';
-import { PrismaPg } from '@prisma/adapter-pg';
-
-// 1. Your passwordless URL
-const MIGRATION_DB_URL = "<REPLACE_WITH_DB_URL>"; 
-
-// 2. Create a standard Postgres connection pool
-const pool = new Pool({ connectionString: MIGRATION_DB_URL });
-
-// 3. Wrap it in the Prisma Adapter
-const adapter = new PrismaPg(pool);
-
-// 4. Hand the adapter to the Client!
-const prisma = new PrismaClient({ adapter });
+// ... (Keep your adapter/pool setup from before) ...
 
 async function main() {
-  console.log("🚀 Starting the Great Migration...");
+  console.log("🔄 Starting the Upsert Migration...");
 
-  // 1. Extract: Grab all the old users from the time capsule
   const legacyUsers = await prisma.legacyUser.findMany();
-  console.log(`Found ${legacyUsers.length} managers in the legacy system.`);
+  console.log(`Checking ${legacyUsers.length} legacy records...`);
 
   for (const oldUser of legacyUsers) {
-    // Skip if they didn't have a team name (maybe an old test account)
-    if (!oldUser.team) {
-      console.log(`⚠️ Skipping ${oldUser.name} - No team name found.`);
-      continue;
-    }
+    if (!oldUser.team) continue;
 
-    console.log(`Transforming ${oldUser.team}...`);
+    console.log(`Processing ${oldUser.team}...`);
 
-    // 2. Transform & Load: Create the Franchise (Team)
-    const newTeam = await prisma.team.create({
-      data: {
+    // 1. UPSERT THE TEAM (Match by Name)
+    const team = await prisma.team.upsert({
+      where: { name: oldUser.team },
+      update: {
+        aaaAffiliateName: oldUser.aaa, 
+        aaAffiliateName: oldUser.aa,
+        aAffiliateName: oldUser.a,
+      },
+      create: {
         name: oldUser.team,
         aaaAffiliateName: oldUser.aaa,
         aaAffiliateName: oldUser.aa,
         aAffiliateName: oldUser.a,
-        requireCoManagerApproval: false, // Defaulting to false for the migration
+        requireCoManagerApproval: false,
       },
     });
 
-    // Determine their new modern Role
+    // Determine Role
     let modernRole: Role = 'OWNER';
     if (oldUser.admin) modernRole = 'ADMIN';
     else if (oldUser.commish) modernRole = 'COMMISH';
 
-    // 3. Transform & Load: Create the Human (User) and link them to the team
-    await prisma.user.create({
-      data: {
+    // 2. UPSERT THE USER (Match by Email)
+    await prisma.user.upsert({
+      where: { email: oldUser.email },
+      update: {
+        role: modernRole,
+        teamId: team.id,
+        name: oldUser.name,
+      },
+      create: {
         name: oldUser.name,
         email: oldUser.email,
         role: modernRole,
-        isPrimaryManager: true, // They were solo owners in the old app!
-        teamId: newTeam.id,
-        // Notice: We do NOT bring over the old password_digest. 
-        // In the new app, they will log in securely with Auth.js via email or Google!
+        isPrimaryManager: true,
+        teamId: team.id,
       },
     });
 
-    console.log(`✅ Successfully migrated: ${oldUser.team} (Managed by ${oldUser.name})`);
+    console.log(`✅ Synced: ${oldUser.team} (Affiliates: ${oldUser.aaa || 'None'})`);
   }
 
-  console.log("🎉 Migration complete! Welcome to 2026.");
+  console.log("🎉 All data synced and nulls patched.");
 }
 
-main()
-  .catch((e) => {
-    console.error("❌ Migration failed:", e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });

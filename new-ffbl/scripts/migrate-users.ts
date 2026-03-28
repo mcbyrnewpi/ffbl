@@ -41,13 +41,22 @@ async function migrateUsers() {
       modernRole = Role.COMMISH;
     }
 
-    // 4. Ensure the Team exists and grab its ID
+    // 4. Ensure the Team exists and grab its ID (PATCHED for Affiliates)
     let modernTeamId = null;
     if (lu.team) {
       const team = await prisma.team.upsert({
         where: { name: lu.team.trim() },
-        update: {}, // Player script might have created it, this ensures we have the ID safely
-        create: { name: lu.team.trim() }
+        update: {
+          aaaAffiliateName: lu.aaa?.trim(),
+          aaAffiliateName: lu.aa?.trim(),
+          aAffiliateName: lu.a?.trim(),
+        }, 
+        create: { 
+          name: lu.team.trim(),
+          aaaAffiliateName: lu.aaa?.trim(),
+          aaAffiliateName: lu.aa?.trim(),
+          aAffiliateName: lu.a?.trim(),
+        }
       });
       modernTeamId = team.id;
     }

@@ -424,11 +424,19 @@ model Player {
   lastName  String
 
   // External IDs for API Syncing
-  mlbId       Int?    @unique
   fangraphsId String? @unique
   yahooId     String? @unique
 
   birthdate DateTime?
+
+  // ⚾ MLB API Integration Fields
+  mlbId         Int?    @unique
+  mlbRawData    Json?
+  
+  // 📈 High-Performance Scouting Fields
+  prospectRank   Int?
+  isTop100       Boolean  @default(false)
+  prospectEta    String? 
 
   isTradeLocked Boolean @default(false) // True if currently in a PENDING trade
 
