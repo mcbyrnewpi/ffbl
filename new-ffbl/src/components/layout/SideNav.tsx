@@ -5,6 +5,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Users, LayoutDashboard, ArrowRightLeft, Shield, Search, Menu, X } from 'lucide-react';
+import GlobalSearch from './GlobalSearch';
 
 export default function SideNav() {
   const [isOpen, setIsOpen] = useState(false);

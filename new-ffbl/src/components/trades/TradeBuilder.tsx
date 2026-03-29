@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { DndContext, closestCenter, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
+import { useRouter } from 'next/navigation';
 import TradeDropzone from './TradeDropzone';
 import DraggableAsset from './DraggableAsset';
+import TradeSummary from './TradeSummary';
 
 export type UIAsset = {
   id: string;             
@@ -22,7 +24,13 @@ interface Props {
 }
 
 export default function TradeBuilder({ initialTeams, initialPlayers, initialPicks }: Props) {
+  const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
+  
+  // UI States
+  const [isReviewing, setIsReviewing] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
@@ -58,6 +66,7 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
   const [viewingTeamId, setViewingTeamId] = useState(defaultOpponentId);
   const [activeAsset, setActiveAsset] = useState<UIAsset | null>(null);
 
+  // --- DND Handlers ---
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
     const draggedItem = assets.find(a => a.id === active.id);
@@ -102,11 +111,8 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
     setActiveAsset(null);
   };
 
-  // ⬅️ NEW: Logic to remove a team and eject their acquired assets
   const removeTeamFromTrade = (teamIdToRemove: string) => {
     setInvolvedTeamIds(prev => prev.filter(id => id !== teamIdToRemove));
-
-    // Send any players sitting in their block back to the roster list
     setAssets(prev => prev.map(asset => {
       if (asset.currentZone === `trade-block-${teamIdToRemove}`) {
         return { ...asset, currentZone: 'roster' };
@@ -117,12 +123,67 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
 
   const getTeamName = (id: string) => initialTeams.find(t => t.id === id)?.name || 'Unknown Team';
 
-  if (!isMounted) {
-    return <div className="min-h-screen"></div>;
+  // Derived state for the current snapshot of the trade
+  const rosterAssets = assets.filter(a => a.currentZone === 'roster' && a.sourceTeamId === viewingTeamId);
+  const tradeAssetsList = assets.filter(a => a.currentZone.startsWith('trade-block-'));
+  const isTradeValid = tradeAssetsList.length > 0;
+
+  // --- API Submission Handler ---
+  const handleProposeTrade = async () => {
+    setIsSubmitting(true);
+    
+    const tradeAssetsPayload = tradeAssetsList.map(a => {
+      const toTeamId = a.currentZone.replace('trade-block-', '');
+      return {
+        fromTeamId: a.sourceTeamId,
+        toTeamId: toTeamId,
+        playerId: a.type === 'PLAYER' ? a.dbId : undefined,
+        draftPickId: a.type === 'PICK' ? a.dbId : undefined,
+      };
+    });
+
+    try {
+      const response = await fetch('/api/trades/propose', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          initiatingTeamId: CURRENT_USER_TEAM_ID,
+          expiresInDays: 7,
+          assets: tradeAssetsPayload,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to propose trade');
+      
+      router.push('/trades?success=true');
+    } catch (error) {
+      console.error(error);
+      alert("Something went wrong proposing the trade.");
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!isMounted) return <div className="min-h-screen"></div>;
+
+  // ==========================================
+  // VIEW: REVIEW SUMMARY
+  // ==========================================
+  if (isReviewing) {
+    return (
+      <TradeSummary 
+        tradeAssetsList={tradeAssetsList}
+        involvedTeamIds={involvedTeamIds}
+        getTeamName={getTeamName}
+        onBack={() => setIsReviewing(false)}
+        onSubmit={handleProposeTrade}
+        isSubmitting={isSubmitting}
+      />
+    );
   }
 
-  const rosterAssets = assets.filter(a => a.currentZone === 'roster' && a.sourceTeamId === viewingTeamId);
-
+  // ==========================================
+  // VIEW: DND BUILDER
+  // ==========================================
   return (
     <DndContext 
       collisionDetection={closestCenter} 
@@ -130,92 +191,106 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
     >
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-120px)] min-h-[600px]">
-        
-        {/* Left Column: Master Roster Search */}
-        <div className="lg:col-span-1 bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col h-full overflow-hidden">
-          <h2 className="font-bold text-lg mb-2 text-slate-800 flex-shrink-0">Available Assets</h2>
+      <div className="flex flex-col h-[calc(100vh-120px)] min-h-[600px] relative">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-grow overflow-hidden">
           
-          <select 
-            className="w-full mb-4 p-2 border border-slate-300 rounded-md text-sm font-medium text-slate-700 bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none flex-shrink-0"
-            value={viewingTeamId}
-            onChange={(e) => setViewingTeamId(e.target.value)}
-          >
-            {initialTeams.map(team => (
-              <option key={team.id} value={team.id}>{team.name}</option>
-            ))}
-          </select>
-
-          <div className="flex-grow overflow-y-auto pr-2 custom-scrollbar">
-            <TradeDropzone id="roster" title="Team Roster">
-              {rosterAssets.map(asset => (
-                <DraggableAsset key={asset.id} asset={asset} />
+          {/* Left Column: Master Roster Search */}
+          <div className="lg:col-span-1 bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col h-full overflow-hidden">
+            <h2 className="font-bold text-lg mb-2 text-slate-800 flex-shrink-0">Available Assets</h2>
+            
+            <select 
+              className="w-full mb-4 p-2 border border-slate-300 rounded-md text-sm font-medium text-slate-700 bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none flex-shrink-0"
+              value={viewingTeamId}
+              onChange={(e) => setViewingTeamId(e.target.value)}
+            >
+              {initialTeams.map(team => (
+                <option key={team.id} value={team.id}>{team.name}</option>
               ))}
-              {rosterAssets.length === 0 && (
-                <div className="text-center text-slate-400 text-sm py-8 font-medium">
-                  No available assets left.
-                </div>
-              )}
-            </TradeDropzone>
+            </select>
+
+            <div className="flex-grow overflow-y-auto pr-2 custom-scrollbar pb-16">
+              <TradeDropzone id="roster" title="Team Roster">
+                {rosterAssets.map(asset => (
+                  <DraggableAsset key={asset.id} asset={asset} />
+                ))}
+                {rosterAssets.length === 0 && (
+                  <div className="text-center text-slate-400 text-sm py-8 font-medium">
+                    No available assets left.
+                  </div>
+                )}
+              </TradeDropzone>
+            </div>
+          </div>
+
+          {/* Right Columns: The Trade Blocks */}
+          <div className="lg:col-span-2 flex flex-col h-full overflow-y-auto pr-2 custom-scrollbar pb-16">
+             <div className="flex justify-between items-center mb-4 flex-shrink-0">
+               <h2 className="font-bold text-lg text-slate-800">Trade Blocks</h2>
+               
+               {involvedTeamIds.length < initialTeams.length && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:inline-block">Add Team:</span>
+                    <select 
+                      className="text-xs p-1.5 bg-white border border-slate-300 rounded-md outline-none text-slate-700 shadow-sm focus:border-blue-500"
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          setInvolvedTeamIds(prev => [...prev, e.target.value]);
+                          e.target.value = ""; 
+                        }
+                      }}
+                      value=""
+                    >
+                      <option value="" disabled>Select...</option>
+                      {initialTeams
+                        .filter(team => !involvedTeamIds.includes(team.id))
+                        .map(team => (
+                          <option key={team.id} value={team.id}>{team.name}</option>
+                        ))}
+                    </select>
+                  </div>
+                )}
+             </div>
+             
+             {/* DYNAMIC GRID */}
+             <div className={`grid grid-cols-1 gap-4 flex-grow content-start ${involvedTeamIds.length > 2 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
+               {involvedTeamIds.map(teamId => {
+                 const teamAssets = assets.filter(a => a.currentZone === `trade-block-${teamId}`);
+                 return (
+                   <TradeDropzone 
+                      key={teamId}
+                      id={`trade-block-${teamId}`} 
+                      teamId={teamId}
+                      title={`${getTeamName(teamId)} Receives`}
+                      onRemove={teamId !== CURRENT_USER_TEAM_ID ? () => removeTeamFromTrade(teamId) : undefined}
+                   >
+                     {teamAssets.map(asset => (
+                       <DraggableAsset key={asset.id} asset={asset} />
+                     ))}
+                     {teamAssets.length === 0 && (
+                       <div className="text-center text-slate-400 text-sm py-8 font-medium">
+                         Drag assets here
+                       </div>
+                     )}
+                   </TradeDropzone>
+                 );
+               })}
+             </div>
           </div>
         </div>
 
-        {/* Right Columns: The Trade Blocks */}
-        <div className="lg:col-span-2 flex flex-col h-full overflow-y-auto pr-2 custom-scrollbar">
-           
-           <div className="flex justify-between items-center mb-4 flex-shrink-0">
-             <h2 className="font-bold text-lg text-slate-800">Trade Blocks</h2>
-             
-             {involvedTeamIds.length < initialTeams.length && (
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:inline-block">Add Team:</span>
-                  <select 
-                    className="text-xs p-1.5 bg-white border border-slate-300 rounded-md outline-none text-slate-700 shadow-sm focus:border-blue-500"
-                    onChange={(e) => {
-                      if (e.target.value) {
-                        setInvolvedTeamIds(prev => [...prev, e.target.value]);
-                        e.target.value = ""; 
-                      }
-                    }}
-                    defaultValue=""
-                  >
-                    <option value="" disabled>Select...</option>
-                    {initialTeams
-                      .filter(team => !involvedTeamIds.includes(team.id))
-                      .map(team => (
-                        <option key={team.id} value={team.id}>{team.name}</option>
-                      ))}
-                  </select>
-                </div>
-              )}
-           </div>
-           
-           {/* DYNAMIC GRID */}
-           <div className={`grid grid-cols-1 gap-4 flex-grow content-start ${involvedTeamIds.length > 2 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
-             {involvedTeamIds.map(teamId => {
-               const teamAssets = assets.filter(a => a.currentZone === `trade-block-${teamId}`);
-               return (
-                 <TradeDropzone 
-                    key={teamId}
-                    id={`trade-block-${teamId}`} 
-                    teamId={teamId}
-                    title={`${getTeamName(teamId)} Receives`}
-                    // ⬅️ NEW: Only allow removal if it is NOT the main user's team
-                    onRemove={teamId !== CURRENT_USER_TEAM_ID ? () => removeTeamFromTrade(teamId) : undefined}
-                 >
-                   {teamAssets.map(asset => (
-                     <DraggableAsset key={asset.id} asset={asset} />
-                   ))}
-                   {teamAssets.length === 0 && (
-                     <div className="text-center text-slate-400 text-sm py-8 font-medium">
-                       Drag assets here
-                     </div>
-                   )}
-                 </TradeDropzone>
-               );
-             })}
-           </div>
-           
+        {/* Floating Action Bar */}
+        <div className="absolute bottom-4 right-4 bg-white p-3 rounded-xl shadow-lg border border-slate-200">
+          <button 
+            onClick={() => setIsReviewing(true)}
+            disabled={!isTradeValid}
+            className={`px-6 py-2 rounded-lg font-bold text-sm transition-all ${
+              isTradeValid 
+                ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm' 
+                : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+            }`}
+          >
+            Review Trade ({tradeAssetsList.length} Assets)
+          </button>
         </div>
 
       </div>

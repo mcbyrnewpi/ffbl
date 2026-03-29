@@ -1,4 +1,4 @@
-// src/app/api/trades/propose.ts
+// src/app/api/trades/propose/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -22,10 +22,51 @@ export async function POST(request: Request) {
       expiresAt.setDate(expiresAt.getDate() + expiresInDays);
     }
 
-    // 3. The Mega-Transaction
+    // 3. Extract all unique IDs needed for Snapshots
+    const teamIds = new Set<string>();
+    const playerIds = new Set<string>();
+    const pickIds = new Set<string>();
+
+    assets.forEach((asset: any) => {
+      teamIds.add(asset.fromTeamId);
+      teamIds.add(asset.toTeamId);
+      if (asset.playerId) playerIds.add(asset.playerId);
+      if (asset.draftPickId) pickIds.add(asset.draftPickId);
+    });
+
+    // 4. The Mega-Transaction
     const newTrade = await prisma.$transaction(async (tx) => {
       
-      // 👉 A: Create the Trade and nested Assets
+      // --- 🏗️ SNAPSHOT GATHERING ---
+      
+      // Fetch Teams
+      const teams = await tx.team.findMany({
+        where: { id: { in: Array.from(teamIds) } },
+        select: { id: true, name: true }
+      });
+      const teamMap = new Map(teams.map(t => [t.id, t.name]));
+
+      // Fetch Players
+      const players = await tx.player.findMany({
+        where: { id: { in: Array.from(playerIds) } },
+        select: { id: true, firstName: true, lastName: true }
+      });
+      const playerMap = new Map(players.map(p => [p.id, `${p.firstName} ${p.lastName}`]));
+
+      // Fetch Draft Picks (including the Original Owner for the lore string)
+      const picks = await tx.draftPick.findMany({
+        where: { id: { in: Array.from(pickIds) } },
+        include: { originalOwner: { select: { name: true } } }
+      });
+      
+      const pickMap = new Map(picks.map(p => {
+        // Helper to add 'st', 'nd', 'rd', 'th'
+        const suffix = ["st", "nd", "rd"][((p.round + 90) % 100 - 10) % 10 - 1] || "th";
+        const pickString = `${p.year} ${p.round}${suffix} Round Pick (${p.originalOwner.name})`;
+        return [p.id, pickString];
+      }));
+
+      // --- 🚀 A: Create the Trade and nested Assets ---
       const trade = await tx.trade.create({
         data: {
           initiatingTeamId,
@@ -37,6 +78,12 @@ export async function POST(request: Request) {
               toTeamId: asset.toTeamId,
               playerId: asset.playerId || null,
               draftPickId: asset.draftPickId || null,
+              
+              // Injecting the historical snapshots!
+              fromTeamNameSnapshot: teamMap.get(asset.fromTeamId) || 'Unknown Team',
+              toTeamNameSnapshot: teamMap.get(asset.toTeamId) || 'Unknown Team',
+              playerNameSnapshot: asset.playerId ? playerMap.get(asset.playerId) : null,
+              pickNameSnapshot: asset.draftPickId ? pickMap.get(asset.draftPickId) : null,
             })),
           },
         },
@@ -45,30 +92,30 @@ export async function POST(request: Request) {
         },
       });
 
-      // 👉 B: The Roster Freeze 🔒
-      const playerIds = trade.assets
+      // --- 🔒 B: The Roster Freeze ---
+      const tradePlayerIds = trade.assets
         .filter((a) => a.playerId && a.fromTeamId === initiatingTeamId)
         .map((a) => a.playerId as string);
         
-      const pickIds = trade.assets
+      const tradePickIds = trade.assets
         .filter((a) => a.draftPickId && a.fromTeamId === initiatingTeamId)
         .map((a) => a.draftPickId as string);
 
-      if (playerIds.length > 0) {
+      if (tradePlayerIds.length > 0) {
         await tx.player.updateMany({
-          where: { id: { in: playerIds } },
+          where: { id: { in: tradePlayerIds } },
           data: { isTradeLocked: true },
         });
       }
 
-      if (pickIds.length > 0) {
+      if (tradePickIds.length > 0) {
         await tx.draftPick.updateMany({
-          where: { id: { in: pickIds } },
+          where: { id: { in: tradePickIds } },
           data: { isTradeLocked: true },
         });
       }
 
-      // 👉 C: Figure out unique teams and create Approvals (Double-Lock Ready)
+      // --- 🔑 C: Figure out unique teams and create Approvals (Double-Lock Ready) ---
       const allTeamIds = trade.assets.flatMap((a) => [a.fromTeamId, a.toTeamId]);
       const uniqueTeamIds = [...new Set(allTeamIds)] as string[];
 
@@ -98,7 +145,7 @@ export async function POST(request: Request) {
         data: approvalData
       });
 
-      // 👉 Return the fully assembled trade out of the transaction
+      // --- 📦 Return the fully assembled trade out of the transaction ---
       return await tx.trade.findUnique({
         where: { id: trade.id },
         include: {
