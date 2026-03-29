@@ -56,7 +56,6 @@
 * **Global Search:** `GET /api/players` — Search by `name`, filter by `level`, or filter by `unowned=true` (Free Agency).
 * **Mutations & Logging:** `PATCH /api/players/[playerId]` — Enabled live database updates for promotions/demotions, wrapped in a Prisma `$transaction` that simultaneously creates historical `Transaction` logs.
 * **Dynamic Roster Validation (The Bouncer):** The `PATCH` route queries `LeagueSettings` to enforce active limits (e.g., 25-man MLB) and stash limits (IL, NA) dynamically. Commish can toggle `enforceRosterLimits` during the offseason.
-* **Bootstrap Architecture:** `prisma/seed.ts` is fully modularized to seed structural app requirements (`Positions` and `LeagueSettings`) using safe `upsert` logic.
 * **Trade Engine Prep:** Updated schema to an **Asset-Driven Multi-Team Architecture**. Added `expiresAt` for exploding offers, `isTradeLocked` for roster freezes, `TradeComment` for threaded negotiations, and `aiAnalysis` for caching LLM evaluations.
 * **Trade Proposal Route (`POST /api/trades/propose`):**
     * Supports infinite-team blockbusters via an asset-driven array.
@@ -70,18 +69,25 @@
 * **Deep-Linked Routing:** Built a nested structure (`/teams/[id]` for Active Roster, `/teams/[id]/minors` for Farm System) to maintain team context (Header/Tabs) across views.
 * **Modular Components:** Extracted UI into reusable pieces (`RosterTable`, `RosterRow`, `DraftPicksTable`) to prevent spaghetti code and allow instant global design updates.
 * **The "Front Office" View:** Designed a 3-column `FarmSystem` grid that dynamically inherits custom FFBL affiliate names and handles empty states gracefully.
-* **Live Assets:** Wired up `RosterRow` to utilize the synced `mlbId` for rendering official high-res MLB player headshots.
+* **Live Assets:** Wired up `RosterRow` to utilize the synced `mlbId` for rendering official high-res MLB player headshots (utilizing `unoptimized` for external API stability).
+* **The "War Room" Trade Builder (Frontend):**
+    * Built a fully responsive, app-like UI using `dnd-kit` to construct infinite-team blockbuster trades without endless page scrolling.
+    * Established a unified `UIAsset` React state to seamlessly handle dragging both Players and Draft Picks between dynamic `TradeDropzone` blocks.
+    * Implemented visual `<DragOverlay>` mechanics with illegal-move validation (preventing users from dropping assets into their current owner's block).
+    * Engineered dynamic dropdown states to add/remove opposing teams from a complex trade on the fly.
 
 ---
 
 ## 🛠️ 4. Development Roadmap (The Work Ahead)
 
 ### Phase 4: API & Trade Engine Completion
+* **War Room API Integration:** Connect the `TradeBuilder.tsx` frontend state to the `POST /api/trades/propose` backend route to successfully save blockbuster trades to the database.
 * **The Multi-Team Trade Engine:** * `POST /api/trades/comments`: Logic to post to the `TradeComment` threaded discussion.
 * **Historical API (The Quarantine Bridge):** * `GET /api/history/books` & `GET /api/history/posts`: Fetch legacy archives.
     * `GET /api/history/transactions`: A federated query stitching modern 2026+ `Transaction` logs with legacy `LegacyTransaction` records via `legacyId`.
 
 ### Phase 5: UI Polish & Next-Gen Features
+* **Mobile Drag-and-Drop Alternative:** Add a tap-friendly "Move Menu" to the `DraggableAsset` component to allow mobile users to assign players to trade blocks without physically dragging them across the screen.
 * **Manual MLB ID Sync Tool:** Build a Commish-only Server Action UI modal to handle "fuzzy matches" (e.g., "Luis Robert Jr." vs "Luis Robert") directly from the frontend.
 * **The AI GM Assistant (Gemini via Vercel AI SDK):**
     * *Trade Evaluator:* Generates scouting reports on pending deals (cached in `aiAnalysis`).
@@ -94,7 +100,6 @@
 * **Frictionless Auth & Comms Layer (NextAuth + Resend):**
     * *Magic Links:* Allow managers without Gmail to log in seamlessly via email links (utilizing `VerificationToken` and `emailVerified`).
     * *Transactional Emails:* Ping managers automatically when a trade is offered, expiring, or commented on (avoiding expensive SMS setups).
-* **The "War Room" (Dashboard):** Real-time frontend view of trade offers, transaction feeds, and a draggable trade proposer UI.
 
 
 ## 🧠 Unified Player Search & Action Architecture

@@ -23,6 +23,7 @@ export default function PlayerHeadshot({ player, className = "" }: Props) {
         src={src}
         alt={`${player.lastName} headshot`}
         fill
+        unoptimized
         className="object-cover object-top transition-opacity duration-300"
         sizes="(max-width: 768px) 50vw, 20vw"
         // 🛡️ The ultimate safety: If the URL 404s, switch to a local image
