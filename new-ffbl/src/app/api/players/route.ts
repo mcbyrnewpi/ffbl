@@ -79,3 +79,50 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Search failed" }, { status: 500 });
   }
 }
+
+// Add this to the bottom of: src/app/api/players/route.ts
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const { mlbId, firstName, lastName, mlbRawData } = body;
+
+    // 1. Basic Validation
+    if (!mlbId || !firstName || !lastName) {
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    // 2. Map the Position (if available)
+    // MLB API returns abbreviations like 'SS', 'P', '1B'. We connect it to our local Position model.
+    const posAbbrev = mlbRawData?.primaryPosition?.abbreviation;
+    const positionConnect = posAbbrev ? {
+      positions: {
+        connect: { abbrev: posAbbrev }
+      }
+    } : {};
+
+    // 3. Insert into the Database
+    const newPlayer = await prisma.player.create({
+      data: {
+        mlbId,
+        firstName,
+        lastName,
+        mlbRawData,
+        status: "ACTIVE", // Default new imports to active
+        ...positionConnect
+      }
+    });
+
+    return NextResponse.json(newPlayer, { status: 201 });
+
+  } catch (error: any) {
+    console.error("Failed to import player:", error);
+    
+    // Prisma unique constraint violation (P2002) means someone else just imported this mlbId
+    if (error.code === 'P2002') {
+      return NextResponse.json({ error: "Player with this MLB ID is already in the database." }, { status: 409 });
+    }
+    
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}

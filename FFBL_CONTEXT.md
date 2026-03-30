@@ -63,7 +63,10 @@ Once a player is selected, UI dynamically renders actions based on `Status` and 
 * **Identity & Rosters:** `GET /api/users/me` and `GET /api/rosters/[teamId]` endpoints built.
 * **Dynamic Roster Validation (The Bouncer):** `PATCH /api/players/[playerId]` queries `LeagueSettings` to enforce active limits (e.g., 25-man MLB) and stash limits (IL, NA) during promotions/demotions, logging `TransType` entries via Prisma `$transaction`.
 * **Deep-Linked Routing:** Nested structure (`/teams/[id]` for Active Roster, `/teams/[id]/minors` for Farm System) maintains team context across views.
-* **Live Assets:** `RosterRow` utilizes the synced `mlbId` for rendering official high-res MLB player headshots via Next/Image `unoptimized`.
+* **Live Assets:** `RosterRow` utilizes the synced `mlbId` for rendering official high-res MLB player headshots via Next/Image `unoptimized`. Bulletproof frontend `<img onError={...} />` fallback states added for 404s from the MLB CDN.
+* **Omni-Search & Importer:** `GET /api/players` successfully combines local DB search with live MLB API external fallback. `POST /api/players` enables importing brand-new prospects and international rookies straight into the local DB.
+* **Legacy Player Linker:** `PATCH /api/players/[playerId]` seamlessly merges unlinked legacy players with their official `mlbId` and raw data.
+* **"Player-First" Link Workflow:** `<MlbLinkModal />` integrated globally across `RosterView`, `RosterTable`, and `PlayerCard` to visually warn managers of unlinked legacy players and provide a 1-click sync interface (complete with local vs. MLB target comparison).
 
 ### Phase 3: The Multi-Team Trade Engine
 * **`POST /api/trades/propose`:** Supports infinite-team blockbusters. Captures historical string snapshots (`fromTeamNameSnapshot`, etc.) for legacy logging. Applies "Roster Freeze" (`isTradeLocked = true`) to initiating team assets. Dynamically maps `TradeApproval` tickets ("Double-Lock" prep).
@@ -106,3 +109,6 @@ Once a player is selected, UI dynamically renders actions based on `Status` and 
 * **Next.js 15 Async Params (CRITICAL):** `params` and `searchParams` in Route Handlers are **Promises**. You must `await` them before accessing IDs.
 * **Prisma Singleton:** Always import Prisma from `@/lib/prisma`.
 * **Transactions for Multi-Writes:** Always use `prisma.$transaction(async (tx) => { ... })` when an API route updates a row and creates a log.
+* **The MLB CDN Trick:** We *never* save image URLs to the database. We only save the `mlbId` and dynamically inject it into the `img.mlbstatic.com` string. If MLB doesn't have a photo yet, the frontend gracefully downgrades to local SVG placeholders.
+* **State-Lifting Modals:** Complex modals (like `MlbLinkModal`) are lifted to the highest necessary parent (e.g., `RosterView`) to prevent rendering redundant hidden HTML modals inside table rows or grid cards.
+* **Shohei Ohtani Rule:** Because `mlbId` is strictly `@unique`, legacy split players (e.g., Batter vs. Pitcher versions) will only have one linked profile.

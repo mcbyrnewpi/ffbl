@@ -1,7 +1,14 @@
+// src/components/teams/PlayerCard.tsx
 import PlayerHeadshot from './PlayerHeadshot';
+import { AlertTriangle } from 'lucide-react';
 
-export default function PlayerCard({ player }: { player: any }) {
-// 1. Dig into the JSON field we just defined
+interface PlayerCardProps {
+  player: any;
+  onLinkClick?: () => void;
+}
+
+export default function PlayerCard({ player, onLinkClick }: PlayerCardProps) {
+  // 1. Dig into the JSON field we just defined
   const rawData = player.mlbRawData as any;
   
   // 2. Prioritize the DB image, fallback to the generic MLB placeholder
@@ -9,8 +16,25 @@ export default function PlayerCard({ player }: { player: any }) {
     `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:brooks:no_headshot.png/w_213,q_auto:best/v1/people/${player.mlbId}/headshot/67/current`;
   
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden group">
-      <div className="relative h-40 overflow-hidden">
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden group relative">
+      
+      {/* THE TRIGGER: Floating in the top right over the image */}
+      {!player.mlbId && onLinkClick && (
+        <div className="absolute top-2 right-2 z-10">
+          <button 
+            onClick={(e) => {
+              e.stopPropagation(); // Prevents clicking this from triggering other card events
+              onLinkClick();
+            }}
+            className="text-amber-500 hover:text-amber-600 hover:bg-amber-50 p-1.5 rounded-full transition-colors flex items-center gap-1 shadow-md border border-amber-200 bg-white"
+            title="Link MLB Profile"
+          >
+            <AlertTriangle size={14} strokeWidth={2.5} />
+          </button>
+        </div>
+      )}
+
+      <div className="relative h-40 overflow-hidden bg-slate-100">
         {/* ⚾ The new smart headshot component */}
         <PlayerHeadshot 
           player={player} 
@@ -18,7 +42,7 @@ export default function PlayerCard({ player }: { player: any }) {
         />
         {/* Status Overlay for IL/NA */}
         {player.status !== 'ACTIVE' && (
-          <div className="absolute inset-0 bg-red-900/10 flex items-center justify-center">
+          <div className="absolute inset-0 bg-red-900/10 flex items-center justify-center z-0">
             <span className="bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg uppercase">
               {player.status}
             </span>
@@ -29,11 +53,11 @@ export default function PlayerCard({ player }: { player: any }) {
       {/* Player Info */}
       <div className="p-3">
         <div className="flex justify-between items-start mb-1">
-          <h3 className="font-black text-slate-800 leading-tight truncate">
+          <h3 className="font-black text-slate-800 leading-tight truncate pr-2">
             <span className="text-xs font-medium text-slate-500 block mb-0.5">{player.firstName}</span>
             {player.lastName}
           </h3>
-          <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
+          <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded shrink-0">
             {player.positions?.[0]?.abbrev || '??'}
           </span>
         </div>

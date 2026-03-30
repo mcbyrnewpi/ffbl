@@ -1,6 +1,7 @@
+// src/app/api/players/[playerId]/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { TransType } from '@prisma/client'; // Import your Enum from Prisma
+import { TransType } from '@prisma/client'; 
 
 export async function PATCH(
   request: Request,
@@ -20,15 +21,21 @@ export async function PATCH(
       return NextResponse.json({ error: "Player not found" }, { status: 404 });
     }
 
-    // 3. Setup the target variables (fallback to current state if not provided in the request)
+    // 3. Setup the target variables
     const newTeamId = body.teamId !== undefined ? body.teamId : currentPlayer.teamId;
     const newLevel = body.level !== undefined ? body.level : currentPlayer.level;
     const newStatus = body.status !== undefined ? body.status : currentPlayer.status;
+    
+    // NEW: Grab MLB Link data if provided in the request
+    const newMlbId = body.mlbId !== undefined ? body.mlbId : currentPlayer.mlbId;
+    const newMlbRawData = body.mlbRawData !== undefined ? body.mlbRawData : currentPlayer.mlbRawData;
 
     // 4. The "Detective" Logic: Figure out what type of transaction this is
     let transType: TransType | null = null;
     let details = "";
 
+    // Note: We don't trigger a 'TransType' log just for linking an MLB profile, 
+    // so this logic stays focused on actual roster moves.
     if (currentPlayer.teamId === null && newTeamId !== null) {
       transType = 'ADD';
       details = "Added from Free Agency";
@@ -36,7 +43,6 @@ export async function PATCH(
       transType = 'DROP';
       details = "Dropped to Free Agency";
     } else if (currentPlayer.level !== newLevel && newLevel !== null) {
-      // Simple logic to deduce Promote vs Demote using an array hierarchy
       const hierarchy = ['MLB', 'AAA', 'AA', 'A'];
       const oldIdx = currentPlayer.level ? hierarchy.indexOf(currentPlayer.level) : -1;
       const newIdx = hierarchy.indexOf(newLevel);
@@ -49,7 +55,7 @@ export async function PATCH(
       details = `Moved from ${currentPlayer.level || 'Unassigned'} to ${newLevel}`;
     }
 
-    // 🛡️ NEW: DUAL-CHECK ROSTER VALIDATION (Level & Status Limits)
+    // 🛡️ DUAL-CHECK ROSTER VALIDATION (Level & Status Limits)
     if (newTeamId && (newTeamId !== currentPlayer.teamId || newLevel !== currentPlayer.level || newStatus !== currentPlayer.status)) {
       
       const settings = await prisma.leagueSettings.findUnique({
@@ -86,7 +92,6 @@ export async function PATCH(
           if (newStatus === 'IL_60') statusLimit = settings.il60Limit;
           if (newStatus === 'NA') statusLimit = settings.naLimit;
 
-          // If statusLimit is null, it means it's unlimited (like our optional il60Limit)
           if (statusLimit !== null && currentStatusCount >= statusLimit) {
             return NextResponse.json(
               { error: "Stash Limit Exceeded", message: `Your ${newStatus} slots are full (Limit: ${statusLimit}).` }, 
@@ -99,15 +104,17 @@ export async function PATCH(
 
     // 5. Execute BOTH the update and the log simultaneously
     const result = await prisma.$transaction(async (tx) => {
-      // A. Update the Player
+      // A. Update the Player (Now includes MLB fields!)
       const updatedPlayer = await tx.player.update({
         where: { id: playerId },
         data: {
           teamId: newTeamId,
           level: newLevel,
           status: newStatus,
+          mlbId: newMlbId,           // <-- NEW
+          mlbRawData: newMlbRawData, // <-- NEW
         },
-        include: { team: true }, // Send back the team info so the UI can update
+        include: { team: true }, 
       });
 
       // B. Create the Transaction Log (if a valid move was detected)
@@ -116,7 +123,7 @@ export async function PATCH(
           data: {
             type: transType,
             playerId: playerId,
-            teamId: newTeamId || currentPlayer.teamId, // Log it against the team making the move
+            teamId: newTeamId || currentPlayer.teamId, 
             details: details,
           },
         });
@@ -127,8 +134,17 @@ export async function PATCH(
 
     return NextResponse.json(result);
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("PATCH Player Error:", error);
+    
+    // NEW: Safely catch duplicate MLB ID links
+    if (error.code === 'P2002') {
+      return NextResponse.json(
+        { error: "MLB ID Collision", message: "This MLB ID is already linked to another player in the database." }, 
+        { status: 409 }
+      );
+    }
+
     return NextResponse.json({ error: "Failed to update player" }, { status: 500 });
   }
 }

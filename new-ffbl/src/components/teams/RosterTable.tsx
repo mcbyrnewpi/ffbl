@@ -5,9 +5,10 @@ interface RosterTableProps {
   title: string;
   players: any[];
   headerColor: string;
+  onLinkClick?: (player: any) => void;
 }
 
-export default function RosterTable({ title, players, headerColor }: RosterTableProps) {
+export default function RosterTable({ title, players, headerColor, onLinkClick }: RosterTableProps) {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       {/* Table Header */}
@@ -28,7 +29,11 @@ export default function RosterTable({ title, players, headerColor }: RosterTable
           </thead>
           <tbody className="divide-y divide-slate-100">
             {players.map((player) => (
-              <RosterRow key={player.id} player={player} />
+              <RosterRow 
+                key={player.id} 
+                player={player} 
+                onLinkClick={onLinkClick ? () => onLinkClick(player) : undefined}
+              />
             ))}
             {players.length === 0 && (
               <tr>
