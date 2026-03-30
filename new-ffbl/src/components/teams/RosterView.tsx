@@ -22,7 +22,7 @@ export default function RosterView({ title, players, headerColor, view }: any) {
            <RosterTable 
              title={title}
              headerColor={headerColor}
-             players={players} 
+             players={players}
              onLinkClick={(player: any) => setPlayerToLink(player)} 
            />
         </div>

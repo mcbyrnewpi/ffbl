@@ -2,19 +2,28 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { createPortal } from 'react-dom';
+import { MILB_PARENT_MAP } from '@/lib/milb-map';
 
 interface Props {
   variant?: 'full' | 'icon';
 }
+
+// Helper to safely format dates from either the DB or the MLB API
+const formatDate = (dateString: string | null | undefined) => {
+  if (!dateString) return 'Unknown';
+  return new Date(dateString).toLocaleDateString();
+};
 
 export default function GlobalSearch({ variant = 'full' }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<any[]>([]);
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   
   // OS Detection & Client-Side Mounting
   const [modifierKey, setModifierKey] = useState('⌘');
@@ -38,6 +47,12 @@ export default function GlobalSearch({ variant = 'full' }: Props) {
     document.addEventListener("keydown", down);
     return () => document.removeEventListener("keydown", down);
   }, []);
+
+  // FORCE Modal to close on route change
+  useEffect(() => {
+    setIsOpen(false);
+    setQuery("");
+  }, [pathname, searchParams]);
 
   // Fetch results from our Omni-Search API
   useEffect(() => {
@@ -109,18 +124,20 @@ export default function GlobalSearch({ variant = 'full' }: Props) {
             </button>
           </div>
           
-          <div className="max-h-[400px] overflow-y-auto p-2 bg-slate-50/50 flex flex-col">
+          <div className="max-h-[450px] overflow-y-auto p-2 bg-slate-50/50 flex flex-col">
             {results.length > 0 ? (
               <>
                 {results.map(player => (
                   <div 
                     key={player.id}
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-white hover:shadow-sm cursor-pointer border border-transparent hover:border-slate-200 transition-all"
+                    className="flex items-center gap-3 p-3 rounded-xl hover:bg-white hover:shadow-sm cursor-pointer border border-transparent hover:border-slate-200 transition-all group"
                     onClick={() => {
                       setIsOpen(false);
+                      setQuery("");
                       router.push(`/players/${player.id}`);
                     }}
                   >
+                    {/* Headshot */}
                     <div className="w-12 h-12 bg-white rounded-full overflow-hidden relative shadow-sm border border-slate-200 flex-shrink-0">
                       {player.mlbId ? (
                         <Image 
@@ -133,28 +150,73 @@ export default function GlobalSearch({ variant = 'full' }: Props) {
                         </div>
                       )}
                     </div>
-                    <div className="flex-grow">
-                      <div className="font-bold text-slate-900 text-lg">{player.firstName} {player.lastName}</div>
-                      <div className="text-sm text-slate-500 font-medium">
-                        {player.team?.name ? (
-                          <span className="text-slate-700">{player.team.name}</span>
-                        ) : (
-                          <span className="text-emerald-600">Free Agent</span>
+                    
+                    {/* Rich Player Info */}
+                    <div className="flex-grow min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-slate-900 truncate text-lg">
+                          {player.firstName} {player.lastName}
+                        </span>
+                        {player.isExternal && (
+                          <span className="text-[9px] font-black bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded uppercase tracking-tighter">
+                            MLB DB
+                          </span>
                         )}
-                        <span className="mx-2 text-slate-300">•</span>
-                        {player.status}
+                      </div>
+                      
+                      {/* FFBL Status Row (Position • FFBL Team) */}
+                      <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-0.5">
+                        <span className="font-bold text-slate-700">
+                          {player.isExternal 
+                            ? player.mlbRawData?.primaryPosition?.abbreviation 
+                            : player.positions?.[0]?.abbrev || '??'}
+                        </span>
+                        <span>•</span>
+                        <span className={player.team?.name ? "text-blue-600 font-semibold" : "text-emerald-600 font-medium"}>
+                          {player.team?.name || 'Free Agent'}
+                        </span>
+                      </div>
+
+                      {/* ⚾ Real-Life Affiliate Row (Dedicated Line) */}
+                      {player.mlbRawData?.currentTeam?.name && (
+                        <div className="text-[11px] text-slate-500 mt-0.5 truncate">
+                          <span className="font-medium text-slate-600">
+                            {player.mlbRawData.currentTeam.name}
+                          </span>
+                          {/* MiLB Parent Branding */}
+                          {MILB_PARENT_MAP[player.mlbRawData.currentTeam.id] && (
+                            <span className="font-bold text-slate-400 ml-1">
+                              ({MILB_PARENT_MAP[player.mlbRawData.currentTeam.id].parentAbbrev})
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* DOB Row */}
+                      <div className="text-[10px] text-slate-400 mt-1 uppercase font-medium tracking-wide">
+                        Born: {formatDate(player.isExternal ? player.mlbRawData?.birthDate : (player.birthdate || player.dob))}
                       </div>
                     </div>
+
+                    {/* Local Status Badge */}
+                    {!player.isExternal && (
+                      <div className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded border border-slate-200 ml-auto flex-shrink-0 group-hover:bg-white transition-colors">
+                        {player.status}
+                      </div>
+                    )}
                   </div>
                 ))}
                 
-                {/* THE NEW ALWAYS-VISIBLE CTA */}
+                {/* THE ALWAYS-VISIBLE CTA (With Fixed Closure) */}
                 <div className="mt-2 pt-3 border-t border-slate-200 text-center">
                   <span className="text-xs text-slate-500 mr-2">Not seeing the right player?</span>
                   <button 
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
                       setIsOpen(false);
-                      router.push(`/players?name=${query}&searchMlb=true`);
+                      setQuery("");
+                      router.push(`/players?name=${encodeURIComponent(query)}&searchMlb=true`);
                     }}
                     className="text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline transition-colors"
                   >
@@ -170,9 +232,12 @@ export default function GlobalSearch({ variant = 'full' }: Props) {
                 <p className="text-slate-500 font-medium mb-4">No local matches for "{query}"</p>
                 <button 
                   className="bg-white border border-slate-200 shadow-sm text-blue-600 font-bold py-2 px-6 rounded-lg hover:bg-blue-50 hover:border-blue-200 transition-all" 
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     setIsOpen(false);
-                    router.push(`/players?name=${query}&searchMlb=true`);
+                    setQuery("");
+                    router.push(`/players?name=${encodeURIComponent(query)}&searchMlb=true`);
                   }}
                 >
                   Search MLB Database
@@ -186,7 +251,7 @@ export default function GlobalSearch({ variant = 'full' }: Props) {
           </div>
         </div>
       </div>,
-      document.body // <-- THIS IS THE MAGIC PORTAL DESTINATION
+      document.body
     );
   };
 

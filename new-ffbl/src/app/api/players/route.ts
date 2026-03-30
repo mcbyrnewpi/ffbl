@@ -80,36 +80,54 @@ export async function GET(request: Request) {
   }
 }
 
-// Add this to the bottom of: src/app/api/players/route.ts
-
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { mlbId, firstName, lastName, mlbRawData } = body;
+    const { mlbId, firstName, lastName } = body; // Notice we stop caring about the client's mlbRawData
 
-    // 1. Basic Validation
     if (!mlbId || !firstName || !lastName) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // 2. Map the Position (if available)
-    // MLB API returns abbreviations like 'SS', 'P', '1B'. We connect it to our local Position model.
-    const posAbbrev = mlbRawData?.primaryPosition?.abbreviation;
-    const positionConnect = posAbbrev ? {
+    // 🚀 THE HYDRATION STEP: Fetch the rich, heavy JSON profile directly from MLB
+    // ?hydrate=currentTeam forces MLB to include the actual team name string!
+    const mlbRes = await fetch(`https://statsapi.mlb.com/api/v1/people?personIds=${mlbIds}&hydrate=currentTeam,stats(group=[hitting,pitching,fielding],type=[yearByYear,season,career,projected])`);
+    const mlbData = await mlbRes.json();
+    
+    // Grab the first (and only) person from the response
+    const richMlbRawData = mlbData.people?.[0] || {};
+
+    // 1. Extract and Format Birthdate (using the rich data)
+    const rawBirthDate = richMlbRawData?.birthDate; 
+    const birthdate = rawBirthDate ? new Date(rawBirthDate) : null;
+
+    // 2. Map Position using the MLB Index Code
+    const mlbPosCode = richMlbRawData?.primaryPosition?.code;
+    const posAbbrev = richMlbRawData?.primaryPosition?.abbreviation;
+
+    const positionData = posAbbrev ? {
       positions: {
-        connect: { abbrev: posAbbrev }
+        connectOrCreate: {
+          where: { abbrev: posAbbrev },
+          create: { 
+            abbrev: posAbbrev, 
+            mlbCode: mlbPosCode,
+            name: richMlbRawData?.primaryPosition?.name || posAbbrev 
+          }
+        }
       }
     } : {};
 
     // 3. Insert into the Database
     const newPlayer = await prisma.player.create({
       data: {
-        mlbId,
+        mlbId: Number(mlbId),
         firstName,
         lastName,
-        mlbRawData,
-        status: "ACTIVE", // Default new imports to active
-        ...positionConnect
+        birthdate,
+        mlbRawData: richMlbRawData, // 💾 Save the highly-detailed JSON!
+        status: "ACTIVE",
+        ...positionData
       }
     });
 

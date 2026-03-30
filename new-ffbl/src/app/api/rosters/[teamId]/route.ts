@@ -16,6 +16,7 @@ export async function GET(
         players: {
           include: {
             positions: true, // Show if they are a P, SS, etc.
+            team: true,
           },
           orderBy: [
             { level: 'asc' },   // Group by MLB, then AAA, etc.

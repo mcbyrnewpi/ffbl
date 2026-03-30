@@ -7,7 +7,9 @@ export default async function TeamPage({ params }: { params: Promise<{ id: strin
     where: { id },
     include: {
       players: { 
-        include: { positions: true }, 
+        include: { 
+          positions: true,
+        }, 
         orderBy: [{ level: 'desc' }, { lastName: 'asc' }] 
       }
     }
@@ -15,9 +17,14 @@ export default async function TeamPage({ params }: { params: Promise<{ id: strin
 
   if (!team) return null;
 
-  const mlbActive = team.players.filter(p => p.level === 'MLB' && p.status === 'ACTIVE');
-  const naList = team.players.filter(p => p.status === 'NA');
-  const injuredList = team.players.filter(p => p.status !== 'ACTIVE' && p.status !== 'NA');
+  const playersWithTeam = team.players.map(p => ({
+    ...p,
+    team: { name: team.name }
+  }));
+
+  const mlbActive = playersWithTeam.filter(p => p.level === 'MLB' && p.status === 'ACTIVE');
+  const naList = playersWithTeam.filter(p => p.status === 'NA');
+  const injuredList = playersWithTeam.filter(p => p.status !== 'ACTIVE' && p.status !== 'NA');
 
   return (
     <div className="animate-in fade-in duration-500">
