@@ -1,14 +1,31 @@
+// src/components/layout/GlobalSearch.tsx
 "use client";
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { createPortal } from 'react-dom';
 
-export default function GlobalSearch() {
+interface Props {
+  variant?: 'full' | 'icon';
+}
+
+export default function GlobalSearch({ variant = 'full' }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<any[]>([]);
   const router = useRouter();
+  
+  // OS Detection & Client-Side Mounting
+  const [modifierKey, setModifierKey] = useState('⌘');
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    // Detect if the user is on a Mac or iOS device
+    const isMac = navigator.userAgent.includes('Macintosh') || navigator.userAgent.includes('Mac OS') || navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad');
+    setModifierKey(isMac ? '⌘' : 'Ctrl');
+  }, []);
 
   // Shortcut to open: Cmd+K or Ctrl+K
   useEffect(() => {
@@ -35,70 +52,148 @@ export default function GlobalSearch() {
     return () => clearTimeout(timer);
   }, [query]);
 
-  if (!isOpen) return (
-    <button 
-      onClick={() => setIsOpen(true)}
-      className="flex items-center gap-2 px-3 py-1.5 text-sm text-slate-400 border border-slate-200 rounded-md hover:bg-slate-50 transition-colors w-full lg:w-64"
-    >
-      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-      </svg>
-      <span>Search players...</span>
-      <kbd className="ml-auto hidden lg:inline-flex h-5 items-center gap-1 rounded border bg-slate-100 px-1.5 font-mono text-[10px] font-medium text-slate-500">
-        <span className="text-xs">⌘</span>K
-      </kbd>
-    </button>
-  );
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 bg-slate-900/50 backdrop-blur-sm px-4" onClick={() => setIsOpen(false)}>
-      <div className="w-full max-w-xl bg-white rounded-xl shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
-        <div className="p-4 border-b border-slate-100 flex items-center gap-3">
-          <svg className="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  // --- TRIGGER BUTTON LOGIC ---
+  const renderTrigger = () => {
+    if (variant === 'icon') {
+      return (
+        <button 
+          onClick={() => setIsOpen(true)}
+          className="p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-md transition-colors"
+          aria-label="Search players"
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
-          <input 
-            autoFocus
-            className="flex-grow outline-none text-lg text-slate-800 placeholder:text-slate-400"
-            placeholder="Type player name..."
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-          />
-          <button onClick={() => setIsOpen(false)} className="text-xs font-bold text-slate-400 uppercase hover:text-slate-600">Esc</button>
-        </div>
-        
-        <div className="max-h-[400px] overflow-y-auto p-2">
-          {results.length > 0 ? (
-            results.map(player => (
-              <div 
-                key={player.id}
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
-                onClick={() => {
-                  setIsOpen(false);
-                  router.push(`/players/${player.id}`);
-                }}
-              >
-                <div className="w-10 h-10 bg-slate-100 rounded-full overflow-hidden relative border border-slate-100">
-                  {player.mlbId && (
-                    <Image 
-                      src={`https://img.mlbstatic.com/mlb-photos/image/upload/d_people:brooks:default/w_120/v1/people/${player.mlbId}/headshot/silo/current.png`}
-                      alt={player.lastName} fill className="object-cover" unoptimized
-                    />
-                  )}
+        </button>
+      );
+    }
+
+    return (
+      <button 
+        onClick={() => setIsOpen(true)}
+        className="flex items-center gap-2 px-3 py-2 text-sm text-slate-400 bg-slate-950/50 border border-slate-700 rounded-lg hover:bg-slate-800 hover:text-slate-200 transition-colors w-full"
+      >
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        <span>Search players...</span>
+        {isMounted && (
+          <kbd className="ml-auto hidden lg:inline-flex h-5 items-center gap-1 rounded border border-slate-700 bg-slate-900 px-1.5 font-mono text-[10px] font-medium text-slate-400">
+            <span className="text-xs">{modifierKey}</span>K
+          </kbd>
+        )}
+      </button>
+    );
+  };
+
+  // --- THE MODAL (Teleported to document.body) ---
+  const renderModal = () => {
+    if (!isOpen || !isMounted) return null;
+
+    return createPortal(
+      <div className="fixed inset-0 z-[99999] flex items-start justify-center pt-24 bg-slate-900/80 backdrop-blur-md px-4" onClick={() => setIsOpen(false)}>
+        <div className="w-full max-w-xl bg-white rounded-xl shadow-2xl overflow-hidden ring-1 ring-slate-200" onClick={e => e.stopPropagation()}>
+          <div className="p-4 border-b border-slate-100 flex items-center gap-3">
+            <svg className="w-6 h-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input 
+              autoFocus
+              className="flex-grow outline-none text-xl text-slate-800 placeholder:text-slate-300 bg-transparent"
+              placeholder="Type a player's name..."
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+            />
+            <button onClick={() => setIsOpen(false)} className="text-xs font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded hover:bg-slate-200 hover:text-slate-600 transition-colors">
+              ESC
+            </button>
+          </div>
+          
+          <div className="max-h-[400px] overflow-y-auto p-2 bg-slate-50/50 flex flex-col">
+            {results.length > 0 ? (
+              <>
+                {results.map(player => (
+                  <div 
+                    key={player.id}
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-white hover:shadow-sm cursor-pointer border border-transparent hover:border-slate-200 transition-all"
+                    onClick={() => {
+                      setIsOpen(false);
+                      router.push(`/players/${player.id}`);
+                    }}
+                  >
+                    <div className="w-12 h-12 bg-white rounded-full overflow-hidden relative shadow-sm border border-slate-200 flex-shrink-0">
+                      {player.mlbId ? (
+                        <Image 
+                          src={`https://img.mlbstatic.com/mlb-photos/image/upload/d_people:brooks:default/w_120/v1/people/${player.mlbId}/headshot/silo/current.png`}
+                          alt={player.lastName} fill className="object-cover" unoptimized
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-slate-300">
+                          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-grow">
+                      <div className="font-bold text-slate-900 text-lg">{player.firstName} {player.lastName}</div>
+                      <div className="text-sm text-slate-500 font-medium">
+                        {player.team?.name ? (
+                          <span className="text-slate-700">{player.team.name}</span>
+                        ) : (
+                          <span className="text-emerald-600">Free Agent</span>
+                        )}
+                        <span className="mx-2 text-slate-300">•</span>
+                        {player.status}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                
+                {/* THE NEW ALWAYS-VISIBLE CTA */}
+                <div className="mt-2 pt-3 border-t border-slate-200 text-center">
+                  <span className="text-xs text-slate-500 mr-2">Not seeing the right player?</span>
+                  <button 
+                    onClick={() => {
+                      setIsOpen(false);
+                      router.push(`/players?name=${query}&searchMlb=true`);
+                    }}
+                    className="text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                  >
+                    Search MLB Database →
+                  </button>
                 </div>
-                <div className="flex-grow">
-                  <div className="font-bold text-slate-900">{player.firstName} {player.lastName}</div>
-                  <div className="text-xs text-slate-500">{player.team?.name || 'Free Agent'} • {player.status}</div>
+              </>
+            ) : query.length >= 3 ? (
+              <div className="p-10 text-center flex flex-col items-center justify-center">
+                <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-3">
+                  <svg className="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16l2.879-2.879m0 0a3 3 0 104.243-4.242 3 3 0 00-4.243 4.242zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                 </div>
+                <p className="text-slate-500 font-medium mb-4">No local matches for "{query}"</p>
+                <button 
+                  className="bg-white border border-slate-200 shadow-sm text-blue-600 font-bold py-2 px-6 rounded-lg hover:bg-blue-50 hover:border-blue-200 transition-all" 
+                  onClick={() => {
+                    setIsOpen(false);
+                    router.push(`/players?name=${query}&searchMlb=true`);
+                  }}
+                >
+                  Search MLB Database
+                </button>
               </div>
-            ))
-          ) : query.length >= 3 ? (
-            <div className="p-8 text-center text-slate-500">
-              No local matches. <button className="text-blue-600 font-bold hover:underline" onClick={() => router.push(`/players?name=${query}&searchMlb=true`)}>Search MLB Database →</button>
-            </div>
-          ) : null}
+            ) : (
+              <div className="p-8 text-center text-slate-400 text-sm">
+                Type at least 3 characters to search the local database.
+              </div>
+            )}
+          </div>
         </div>
-      </div>
-    </div>
+      </div>,
+      document.body // <-- THIS IS THE MAGIC PORTAL DESTINATION
+    );
+  };
+
+  return (
+    <>
+      {renderTrigger()}
+      {renderModal()}
+    </>
   );
 }

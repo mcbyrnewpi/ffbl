@@ -22,14 +22,18 @@ export default function SideNav() {
   return (
     <>
       {/* --- MOBILE TOP BAR --- */}
-      {/* Shows only on small screens, hides on medium (md) and up */}
       <div className="md:hidden bg-slate-900 text-white p-4 flex justify-between items-center sticky top-0 z-50">
         <span className="font-black tracking-tighter text-xl">
           FF<span className="text-blue-400">BL</span>
         </span>
-        <button onClick={() => setIsOpen(!isOpen)} className="p-1 hover:bg-slate-800 rounded">
-          {isOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
+        
+        {/* ACTION BUTTONS: Search Icon + Hamburger Menu */}
+        <div className="flex items-center gap-2">
+          <GlobalSearch variant="icon" />
+          <button onClick={() => setIsOpen(!isOpen)} className="p-1 hover:bg-slate-800 rounded text-slate-300 hover:text-white transition-colors">
+            {isOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
 
       {/* --- MOBILE OVERLAY MENU --- */}
@@ -40,7 +44,7 @@ export default function SideNav() {
               <Link
                 key={link.href}
                 href={link.href}
-                onClick={() => setIsOpen(false)} // Close menu when clicked
+                onClick={() => setIsOpen(false)} 
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium ${
                   pathname === link.href ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'
                 }`}
@@ -53,12 +57,16 @@ export default function SideNav() {
       )}
 
       {/* --- DESKTOP SIDEBAR --- */}
-      {/* Hides on small screens, shows as a fixed sidebar on medium (md) and up */}
       <aside className="hidden md:flex w-64 bg-slate-900 text-slate-300 flex-col sticky top-0 h-screen shrink-0">
         <div className="p-6">
           <span className="font-black tracking-tighter text-2xl text-white">
             FF<span className="text-blue-400">BL</span>
           </span>
+        </div>
+
+        {/* FULL SEARCH BAR */}
+        <div className="px-4 mb-6">
+          <GlobalSearch variant="full" />
         </div>
 
         <nav className="flex-1 px-4 space-y-2">
