@@ -1,5 +1,6 @@
 import { UIAsset } from './TradeBuilder';
 import TradeFlowDiagram from './TradeFlowDiagram';
+import { MILB_PARENT_MAP } from '@/lib/milb-map';
 
 interface TradeSummaryProps {
   tradeAssetsList: UIAsset[];
@@ -52,23 +53,63 @@ export default function TradeSummary({
 
             return (
               <div key={teamId} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <div className="bg-slate-800 text-white px-4 py-3 font-semibold">
+                <div className="bg-slate-800 text-white px-4 py-3 font-semibold text-sm tracking-wide">
                   {getTeamName(teamId)} Receives:
                 </div>
-                <div className="p-4 flex flex-col gap-3">
-                  {receivedAssets.map(asset => (
-                    <div key={asset.id} className="flex justify-between items-center border-b border-slate-100 pb-2 last:border-0 last:pb-0">
-                      <div>
-                        <div className="font-medium text-slate-900">{asset.name}</div>
-                        <div className="text-xs text-slate-500">From: {getTeamName(asset.sourceTeamId)}</div>
-                      </div>
-                      {asset.type === 'PLAYER' && (
-                        <div className="text-xs text-slate-400">
-                          {asset.meta?.prospectRank ? `Top 100 (#${asset.meta.prospectRank})` : 'Active Roster'}
+                <div className="p-0 flex flex-col">
+                  {receivedAssets.map(asset => {
+                    // ⚾ DATA EXTRACTION
+                    const player = asset.meta;
+                    const stats = player?.mlbRawData?.stats;
+                    
+                    const hitting = stats?.find((s: any) => s.type.displayName === 'season' && s.group.displayName === 'hitting')?.splits[0]?.stat;
+                    const pitching = stats?.find((s: any) => s.type.displayName === 'season' && s.group.displayName === 'pitching')?.splits[0]?.stat;
+
+                    return (
+                      <div key={asset.id} className="flex justify-between items-center border-b border-slate-100 p-4 last:border-0 hover:bg-slate-50 transition-colors">
+                        
+                        <div className="flex flex-col min-w-0">
+                          <div className="font-bold text-slate-900 text-sm flex items-center gap-2">
+                            {asset.type === 'PLAYER' ? '👤' : '🎫'} 
+                            <span className="truncate">{asset.name}</span>
+                          </div>
+                          
+                          {/* STATS LINE */}
+                          {asset.type === 'PLAYER' && (hitting || pitching) ? (
+                            <div className="text-[10px] font-bold text-blue-600 mt-0.5 tracking-tight">
+                              {hitting ? (
+                                <>{hitting.avg} AVG • {hitting.homeRuns} HR • {hitting.ops} OPS</>
+                              ) : (
+                                <>{pitching.era} ERA • {pitching.wins}-{pitching.losses} • {pitching.strikeOuts} K</>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-1">
+                              From {getTeamName(asset.sourceTeamId)}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  ))}
+
+                        {asset.type === 'PLAYER' ? (
+                          <div className="text-right flex flex-col items-end flex-shrink-0 ml-4">
+                            <span className="text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+                              {player?.positions?.[0]?.abbrev || player?.mlbRawData?.primaryPosition?.abbreviation || '??'}
+                            </span>
+                            <span className="text-[10px] text-slate-500 mt-1 max-w-[100px] truncate">
+                              {player?.mlbRawData?.currentTeam?.name || 'Free Agent'}
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="text-right flex-shrink-0 ml-4">
+                            <span className="text-[11px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded border border-amber-100">
+                              Draft Asset
+                            </span>
+                          </div>
+                        )}
+
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             );

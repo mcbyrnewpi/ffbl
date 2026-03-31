@@ -74,17 +74,18 @@ Once a player is selected, UI dynamically renders actions based on `Status` and 
 * **`POST /api/trades/decline`:** Instantly kills the trade, marks it `CANCELLED`, and unlocks all involved assets.
 
 ### Phase 4: The War Room (Frontend Trade UI)
-* **The Drag-and-Drop Builder (`TradeBuilder.tsx`):** Fully responsive UI using `dnd-kit` to construct trades. Prevents illegal drops.
-* **The Review State (`TradeSummary.tsx`):** Clean presentation component with receipt cards detailing acquired assets.
-* **The Flow Engine (`TradeFlowDiagram.tsx`):** Custom `@xyflow/react` implementation rendering a Left-to-Right bipartite graph. Groups Sending Teams left, Receiving Teams right, and routes beautifully colored bezier curves (`default`) through standalone Asset Nodes to completely eliminate overlapping lines.
+* **The Drag-and-Drop Builder (`TradeBuilder.tsx`):** Fully responsive UI using `dnd-kit` to construct trades. Prevents illegal drops. Includes inline asset removal ("X" button) to easily kick players out of trade blocks without dragging.
+* **Roster Filtering & Sorting:** Dynamic left-panel filters (All, Majors, Minors, Picks) with automatic A-Z sorting for rapid asset location during negotiations.
+* **The Review State (`TradeSummary.tsx`):** Clean presentation component with receipt cards detailing acquired assets. Dynamically extracts and displays live MLB season stats (AVG/HR/OPS or ERA/W-L/K) directly on the receipt cards.
+* **The Flow Engine (`TradeFlowDiagram.tsx`):** Custom `@xyflow/react` implementation rendering a Left-to-Right bipartite graph. Groups Sending Teams left, Receiving Teams right, sorts assets alphabetically by source team, and routes beautifully colored bezier curves (`default`) through standalone Asset Nodes (featuring dynamic stat ribbons) to completely eliminate overlapping lines.
 
 ---
 
 ## 🛠️ 5. Development Roadmap (The Work Ahead)
 
 ### Phase 5: UI Polish & Trade Enhancements
-* **Add Stats to Trade Summary:** Inject live season stats (AVG/HR or ERA/WHIP) into the `meta` object of the `UIAsset` payload to render quality indicators inside Trade Summary receipt cards.
 * **Trade Comments (`POST /api/trades/comments`):** Build threaded negotiation backend.
+* **Deep-Linked Trade Initiation:** Add URL parameter parsing (e.g., `?targetTeamId=xyz&targetPlayerId=123`) to auto-load specific assets into the War Room from external roster pages.
 * **Live MLB StatsAPI Integration:** Materialize new draftees. Sync with undocumented MLB Pipeline endpoint to add "Top 100" badges and ETA dates directly to minor league rosters.
 * **Mobile Move Menu:** Tap-friendly alternative to drag-and-drop.
 

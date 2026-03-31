@@ -23,13 +23,29 @@ const TEAM_COLORS = [
   '#06b6d4', // cyan-500
 ];
 
+// src/components/trades/TradeFlowDiagram.tsx
+
+/* ... existing imports ... */
+
 export default function TradeFlowDiagram({ tradeAssetsList, involvedTeamIds, getTeamName }: Props) {
 
   const { nodes, edges } = useMemo(() => {
     const newNodes: Node[] = [];
     const newEdges: Edge[] = [];
 
-    // --- 1. Calculate Asset Counts & Assign Colors ---
+    // --- 1. PRE-SORT THE ASSETS ---
+    // This ensures the "Outbound" lines from sending teams are clean and grouped
+    const sortedAssets = [...tradeAssetsList].sort((a, b) => {
+      // First sort by Team Name (to group them by sender)
+      const teamA = getTeamName(a.sourceTeamId);
+      const teamB = getTeamName(b.sourceTeamId);
+      if (teamA !== teamB) return teamA.localeCompare(teamB);
+      
+      // Then sort alphabetically by asset name within that team
+      return a.name.localeCompare(b.name);
+    });
+
+    // --- 2. Calculate Asset Counts & Assign Colors ---
     const outgoingCounts: Record<string, number> = {};
     const incomingCounts: Record<string, number> = {};
     const teamColorMap: Record<string, string> = {};
@@ -39,35 +55,41 @@ export default function TradeFlowDiagram({ tradeAssetsList, involvedTeamIds, get
       incomingCounts[id] = 0;
     });
 
-    tradeAssetsList.forEach(asset => {
+    sortedAssets.forEach(asset => {
       const toTeamId = asset.currentZone.replace('trade-block-', '');
       outgoingCounts[asset.sourceTeamId] += 1;
       incomingCounts[toTeamId] += 1;
     });
 
-    const sendingTeams = involvedTeamIds.filter(id => outgoingCounts[id] > 0);
-    const receivingTeams = involvedTeamIds.filter(id => incomingCounts[id] > 0);
+    // Sort sending teams alphabetically so they match the asset grouping order
+    const sendingTeams = involvedTeamIds
+      .filter(id => outgoingCounts[id] > 0)
+      .sort((a, b) => getTeamName(a).localeCompare(getTeamName(b)));
 
-    // Assign a unique color to each receiving team for tracing
+    const receivingTeams = involvedTeamIds
+      .filter(id => incomingCounts[id] > 0)
+      .sort((a, b) => getTeamName(a).localeCompare(getTeamName(b)));
+
+    // Assign unique colors
     receivingTeams.forEach((teamId, index) => {
       teamColorMap[teamId] = TEAM_COLORS[index % TEAM_COLORS.length];
     });
 
-    // --- 2. Layout Configuration ---
+    // --- 3. Layout Configuration ---
     const colLeftX = 50;
     const colMidX = 400;
     const colRightX = 750;
 
-    const assetSpacing = 65; // Slightly more breathing room
+    const assetSpacing = 65; 
     const teamSpacing = 160;
 
-    const totalAssetHeight = (tradeAssetsList.length - 1) * assetSpacing;
+    const totalAssetHeight = (sortedAssets.length - 1) * assetSpacing;
     const totalSendHeight = (sendingTeams.length - 1) * teamSpacing;
     const totalRecvHeight = (receivingTeams.length - 1) * teamSpacing;
 
     const centerY = Math.max(totalAssetHeight, totalSendHeight, totalRecvHeight) / 2 + 100;
 
-    // --- 3. Create Left Nodes (Sending Teams) ---
+    // --- 4. Create Left Nodes (Sending Teams) ---
     sendingTeams.forEach((teamId, index) => {
       const startY = centerY - (totalSendHeight / 2);
       const y = startY + (index * teamSpacing);
@@ -90,7 +112,7 @@ export default function TradeFlowDiagram({ tradeAssetsList, involvedTeamIds, get
         style: {
           background: '#1e293b', 
           color: 'white',
-          border: '2px solid #334155', // Neutral border for senders
+          border: '2px solid #334155',
           borderRadius: '0.5rem',
           width: 180,
           padding: '12px',
@@ -99,7 +121,7 @@ export default function TradeFlowDiagram({ tradeAssetsList, involvedTeamIds, get
       });
     });
 
-    // --- 4. Create Right Nodes (Receiving Teams) ---
+    // --- 5. Create Right Nodes (Receiving Teams) ---
     receivingTeams.forEach((teamId, index) => {
       const startY = centerY - (totalRecvHeight / 2);
       const y = startY + (index * teamSpacing);
@@ -123,19 +145,19 @@ export default function TradeFlowDiagram({ tradeAssetsList, involvedTeamIds, get
         style: {
           background: '#1e293b',
           color: 'white',
-          border: `2px solid ${teamColor}`, // Colored border to match incoming lines!
+          border: `2px solid ${teamColor}`,
           borderRadius: '0.5rem',
           width: 180,
           padding: '12px',
-          boxShadow: `0 4px 15px -3px ${teamColor}40`, // Subtle colored glow
+          boxShadow: `0 4px 15px -3px ${teamColor}40`,
         },
       });
     });
 
-    // --- 5. Create Middle Nodes (Assets) and Edges ---
+    // --- 6. Create Middle Nodes (Assets) and Edges ---
     const startAssetY = centerY - (totalAssetHeight / 2);
 
-    tradeAssetsList.forEach((asset, index) => {
+    sortedAssets.forEach((asset, index) => {
       const y = startAssetY + (index * assetSpacing);
       const assetId = `asset-${asset.id}`;
       const isPlayer = asset.type === 'PLAYER';
@@ -162,25 +184,25 @@ export default function TradeFlowDiagram({ tradeAssetsList, involvedTeamIds, get
         },
       });
 
-      // Edge 1: Sending Team -> Asset (Kept neutral/gray to focus on destination)
+      // Edge 1: Sender -> Asset (Grouped by team, so no overlapping)
       newEdges.push({
         id: `edge-out-${asset.id}`,
         source: `team-send-${asset.sourceTeamId}`,
         target: assetId,
-        type: 'default', // Sweeping Bezier curve
+        type: 'default',
         animated: true,
-        style: { stroke: '#cbd5e1', strokeWidth: 1.5 }, // Lighter slate
+        style: { stroke: '#cbd5e1', strokeWidth: 1.5 },
       });
 
-      // Edge 2: Asset -> Receiving Team (Colored to match the team!)
+      // Edge 2: Asset -> Receiver (Vibrant destinations)
       newEdges.push({
         id: `edge-in-${asset.id}`,
         source: assetId,
         target: `team-recv-${toTeamId}`,
-        type: 'default', // Sweeping Bezier curve
+        type: 'default',
         animated: true,
         markerEnd: { type: MarkerType.ArrowClosed, color: recvColor, width: 20, height: 20 },
-        style: { stroke: recvColor, strokeWidth: 3 }, // Thicker, vibrant line
+        style: { stroke: recvColor, strokeWidth: 3 },
       });
     });
 

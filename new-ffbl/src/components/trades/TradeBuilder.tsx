@@ -1,3 +1,4 @@
+// src/components/trades/TradeBuilder.tsx
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -65,6 +66,9 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
   const defaultOpponentId = initialTeams.find(t => t.id !== CURRENT_USER_TEAM_ID)?.id || '';
   const [viewingTeamId, setViewingTeamId] = useState(defaultOpponentId);
   const [activeAsset, setActiveAsset] = useState<UIAsset | null>(null);
+  
+  // 🔍 State to track which filter is active on the left sidebar
+  const [assetFilter, setAssetFilter] = useState<'ALL' | 'MAJORS' | 'MINORS' | 'PICKS'>('ALL');
 
   // --- DND Handlers ---
   const handleDragStart = (event: DragStartEvent) => {
@@ -124,9 +128,25 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
   const getTeamName = (id: string) => initialTeams.find(t => t.id === id)?.name || 'Unknown Team';
 
   // Derived state for the current snapshot of the trade
-  const rosterAssets = assets.filter(a => a.currentZone === 'roster' && a.sourceTeamId === viewingTeamId);
   const tradeAssetsList = assets.filter(a => a.currentZone.startsWith('trade-block-'));
   const isTradeValid = tradeAssetsList.length > 0;
+
+  // 🔤 Filter and Sort the available roster assets
+  const rosterAssets = assets
+    .filter(a => a.currentZone === 'roster' && a.sourceTeamId === viewingTeamId)
+    .filter(a => {
+      if (assetFilter === 'ALL') return true;
+      if (assetFilter === 'PICKS') return a.type === 'PICK';
+      
+      // ⚾ FIX: Define what belongs in the MAJORS tab (MLB level OR stashed on NA)
+      const isMajorLeaguer = a.meta?.level === 'MLB' || a.meta?.status === 'NA';
+      
+      if (assetFilter === 'MAJORS') return a.type === 'PLAYER' && isMajorLeaguer;
+      if (assetFilter === 'MINORS') return a.type === 'PLAYER' && !isMajorLeaguer;
+      
+      return true;
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   // --- API Submission Handler ---
   const handleProposeTrade = async () => {
@@ -198,15 +218,33 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
           <div className="lg:col-span-1 bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col h-full overflow-hidden">
             <h2 className="font-bold text-lg mb-2 text-slate-800 flex-shrink-0">Available Assets</h2>
             
-            <select 
-              className="w-full mb-4 p-2 border border-slate-300 rounded-md text-sm font-medium text-slate-700 bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none flex-shrink-0"
-              value={viewingTeamId}
-              onChange={(e) => setViewingTeamId(e.target.value)}
-            >
-              {initialTeams.map(team => (
-                <option key={team.id} value={team.id}>{team.name}</option>
-              ))}
-            </select>
+            {/* 🎛️ Dropdown and Filters Wrapper */}
+            <div className="space-y-3 mb-4 flex-shrink-0">
+              <select 
+                className="w-full p-2 border border-slate-300 rounded-md text-sm font-medium text-slate-700 bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none"
+                value={viewingTeamId}
+                onChange={(e) => setViewingTeamId(e.target.value)}
+              >
+                {initialTeams.map(team => (
+                  <option key={team.id} value={team.id}>{team.name}</option>
+                ))}
+              </select>
+
+              {/* 🔍 Filter Tabs */}
+              <div className="flex bg-slate-100 p-1 rounded-lg gap-1">
+                {(['ALL', 'MAJORS', 'MINORS', 'PICKS'] as const).map((f) => (
+                  <button
+                    key={f}
+                    onClick={() => setAssetFilter(f)}
+                    className={`flex-1 py-1.5 text-[10px] font-black uppercase tracking-tighter rounded transition-all ${
+                      assetFilter === f ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'
+                    }`}
+                  >
+                    {f}
+                  </button>
+                ))}
+              </div>
+            </div>
 
             <div className="flex-grow overflow-y-auto pr-2 custom-scrollbar pb-16">
               <TradeDropzone id="roster" title="Team Roster">
@@ -264,7 +302,15 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
                       onRemove={teamId !== CURRENT_USER_TEAM_ID ? () => removeTeamFromTrade(teamId) : undefined}
                    >
                      {teamAssets.map(asset => (
-                       <DraggableAsset key={asset.id} asset={asset} />
+                       <DraggableAsset 
+                          key={asset.id} 
+                          asset={asset} 
+                          onRemove={() => {
+                            setAssets(prev => prev.map(a => 
+                              a.id === asset.id ? { ...a, currentZone: 'roster' } : a
+                            ));
+                          }}
+                       />
                      ))}
                      {teamAssets.length === 0 && (
                        <div className="text-center text-slate-400 text-sm py-8 font-medium">

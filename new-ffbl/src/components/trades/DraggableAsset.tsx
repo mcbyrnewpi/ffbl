@@ -1,7 +1,15 @@
 import { useDraggable } from '@dnd-kit/core';
 import PlayerHeadshot from '../teams/PlayerHeadshot';
 
-export default function DraggableAsset({ asset, isOverlay = false }: { asset: any, isOverlay?: boolean }) {
+export default function DraggableAsset({ 
+  asset, 
+  isOverlay = false,
+  onRemove // ⬅️ NEW PROP
+}: { 
+  asset: any, 
+  isOverlay?: boolean,
+  onRemove?: () => void // ⬅️ NEW TYPE
+}) {
   // If this is the overlay, we append a suffix so dnd-kit doesn't get confused by duplicate IDs
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: isOverlay ? `${asset.id}-overlay` : asset.id,
@@ -36,7 +44,19 @@ export default function DraggableAsset({ asset, isOverlay = false }: { asset: an
             </div>
         </div>
 
-        <div className="flex items-center flex-shrink-0">
+        <div className="flex items-center flex-shrink-0 gap-1">
+            {/* ❌ NEW: Remove Button */}
+            {onRemove && !isOverlay && (
+              <button 
+                onPointerDown={(e) => e.stopPropagation()} // Stops dnd-kit from initiating a drag
+                onClick={(e) => { e.stopPropagation(); onRemove(); }}
+                className="p-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                title="Remove from block"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+              </button>
+            )}
+
             <div className="text-slate-300 px-1 hidden md:block">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
             </div>
@@ -85,7 +105,19 @@ export default function DraggableAsset({ asset, isOverlay = false }: { asset: an
           </div>
       </div>
       
-      <div className="flex items-center flex-shrink-0">
+      <div className="flex items-center flex-shrink-0 gap-1">
+          {/* ❌ NEW: Remove Button */}
+          {onRemove && !isOverlay && (
+            <button 
+              onPointerDown={(e) => e.stopPropagation()} // Stops dnd-kit from initiating a drag
+              onClick={(e) => { e.stopPropagation(); onRemove(); }}
+              className="p-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+              title="Remove from block"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+          )}
+
           <div className="text-slate-300 px-1 hidden md:block">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
           </div>
