@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { DndContext, closestCenter, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import TradeDropzone from './TradeDropzone';
 import DraggableAsset from './DraggableAsset';
 import TradeSummary from './TradeSummary';
@@ -26,6 +27,7 @@ interface Props {
 
 export default function TradeBuilder({ initialTeams, initialPlayers, initialPicks }: Props) {
   const router = useRouter();
+  const { data: session } = useSession();
   const [isMounted, setIsMounted] = useState(false);
   
   // UI States
@@ -54,13 +56,16 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
       name: `${dp.year} Round ${dp.round}`,
       sourceTeamId: dp.currentOwnerId,
       currentZone: 'roster',
-      meta: dp,
+      meta: {
+        ...dp,
+        originalTeamName: initialTeams.find(t => t.id === dp.originalOwnerId)?.name || 'Unknown Team'
+      },
     }));
 
     return [...playerAssets, ...pickAssets];
   });
 
-  const CURRENT_USER_TEAM_ID = 'cmn9gsbqt0008u7igjzdor01l';
+  const CURRENT_USER_TEAM_ID = (session?.user as any)?.teamId || '';
   const [involvedTeamIds, setInvolvedTeamIds] = useState<string[]>([CURRENT_USER_TEAM_ID]);
 
   const defaultOpponentId = initialTeams.find(t => t.id !== CURRENT_USER_TEAM_ID)?.id || '';

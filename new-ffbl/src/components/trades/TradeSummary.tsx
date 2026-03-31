@@ -1,45 +1,63 @@
+"use client";
+
 import { UIAsset } from './TradeBuilder';
 import TradeFlowDiagram from './TradeFlowDiagram';
-import { MILB_PARENT_MAP } from '@/lib/milb-map';
 
 interface TradeSummaryProps {
   tradeAssetsList: UIAsset[];
   involvedTeamIds: string[];
-  getTeamName: (id: string) => string;
+  getTeamName?: (id: string) => string;       // ⬅️ Made optional
+  teamDictionary?: Record<string, string>;    // ⬅️ Added for Server Components
   onBack?: () => void;
   onSubmit?: () => void;
   isSubmitting?: boolean;
+  title?: React.ReactNode; 
+  actionButtons?: React.ReactNode; 
 }
 
 export default function TradeSummary({
   tradeAssetsList,
   involvedTeamIds,
   getTeamName,
+  teamDictionary,
   onBack,
   onSubmit,
-  isSubmitting = false
+  isSubmitting = false,
+  title,
+  actionButtons
 }: TradeSummaryProps) {
+  
+  // ⚾ Safe resolver that handles both Client (function) and Server (dictionary) props
+  const resolveTeamName = (id: string) => {
+    if (teamDictionary) return teamDictionary[id] || 'Unknown Team';
+    if (getTeamName) return getTeamName(id);
+    return 'Unknown Team';
+  };
+
   return (
     <div className="max-w-5xl mx-auto py-8">
-      {onBack && (
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-slate-900">Review Trade Proposal</h1>
+      {/* Dynamic Header */}
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-slate-900">
+          {title || "Review Trade Proposal"}
+        </h1>
+        {onBack && (
           <button 
             onClick={onBack}
             className="text-sm font-medium text-slate-500 hover:text-slate-800"
           >
-            ← Back to Builder
+            &larr; Back to Builder
           </button>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* TOP SECTION: React Flow Diagram (Hidden on Mobile) */}
+      {/* TOP SECTION: React Flow Diagram */}
       <div className="hidden lg:block bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8">
         <h2 className="text-lg font-bold text-slate-800 mb-6">Asset Flow</h2>
         <TradeFlowDiagram 
           tradeAssetsList={tradeAssetsList}
           involvedTeamIds={involvedTeamIds}
-          getTeamName={getTeamName}
+          getTeamName={resolveTeamName} // ⬅️ Use the new resolver here
         />
       </div>
 
@@ -54,11 +72,10 @@ export default function TradeSummary({
             return (
               <div key={teamId} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                 <div className="bg-slate-800 text-white px-4 py-3 font-semibold text-sm tracking-wide">
-                  {getTeamName(teamId)} Receives:
+                  {resolveTeamName(teamId)} Receives: {/* ⬅️ Use the new resolver here */}
                 </div>
                 <div className="p-0 flex flex-col">
                   {receivedAssets.map(asset => {
-                    // ⚾ DATA EXTRACTION
                     const player = asset.meta;
                     const stats = player?.mlbRawData?.stats;
                     
@@ -67,14 +84,12 @@ export default function TradeSummary({
 
                     return (
                       <div key={asset.id} className="flex justify-between items-center border-b border-slate-100 p-4 last:border-0 hover:bg-slate-50 transition-colors">
-                        
                         <div className="flex flex-col min-w-0">
                           <div className="font-bold text-slate-900 text-sm flex items-center gap-2">
-                            {asset.type === 'PLAYER' ? '👤' : '🎫'} 
+                            {asset.type === 'PLAYER' ? '👤' : '🎯'} 
                             <span className="truncate">{asset.name}</span>
                           </div>
                           
-                          {/* STATS LINE */}
                           {asset.type === 'PLAYER' && (hitting || pitching) ? (
                             <div className="text-[10px] font-bold text-blue-600 mt-0.5 tracking-tight">
                               {hitting ? (
@@ -85,7 +100,7 @@ export default function TradeSummary({
                             </div>
                           ) : (
                             <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest mt-1">
-                              From {getTeamName(asset.sourceTeamId)}
+                              From {resolveTeamName(asset.sourceTeamId)} {/* ⬅️ Use the new resolver here */}
                             </div>
                           )}
                         </div>
@@ -106,7 +121,6 @@ export default function TradeSummary({
                             </span>
                           </div>
                         )}
-
                       </div>
                     );
                   })}
@@ -118,8 +132,8 @@ export default function TradeSummary({
       </div>
 
       {/* BOTTOM SECTION: CTA */}
-      {onSubmit && (
-        <div className="flex justify-end pt-4 border-t border-slate-200">
+      <div className="flex justify-end pt-4 border-t border-slate-200 gap-3">
+        {actionButtons ? actionButtons : onSubmit && (
           <button 
             onClick={onSubmit}
             disabled={isSubmitting}
@@ -127,8 +141,8 @@ export default function TradeSummary({
           >
             {isSubmitting ? 'Processing...' : 'Propose Trade'}
           </button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

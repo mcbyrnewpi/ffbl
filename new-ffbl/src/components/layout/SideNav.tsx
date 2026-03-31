@@ -1,15 +1,16 @@
-// src/components/layout/SideNav.tsx
 'use client';
 
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Users, LayoutDashboard, ArrowRightLeft, Shield, Search, Menu, X } from 'lucide-react';
+import { Users, LayoutDashboard, ArrowRightLeft, Shield, Search, Menu, X, LogOut, LogIn } from 'lucide-react';
 import GlobalSearch from './GlobalSearch';
+import { useSession, signIn, signOut } from 'next-auth/react'; // ⬅️ NEW IMPORTS
 
 export default function SideNav() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const { data: session, status } = useSession(); // ⬅️ GET SESSION
 
   const navLinks = [
     { href: '/', icon: <LayoutDashboard size={18} />, label: 'Dashboard' },
@@ -27,7 +28,6 @@ export default function SideNav() {
           FF<span className="text-blue-400">BL</span>
         </span>
         
-        {/* ACTION BUTTONS: Search Icon + Hamburger Menu */}
         <div className="flex items-center gap-2">
           <GlobalSearch variant="icon" />
           <button onClick={() => setIsOpen(!isOpen)} className="p-1 hover:bg-slate-800 rounded text-slate-300 hover:text-white transition-colors">
@@ -39,7 +39,7 @@ export default function SideNav() {
       {/* --- MOBILE OVERLAY MENU --- */}
       {isOpen && (
         <div className="md:hidden fixed inset-0 top-[60px] bg-slate-900 z-40 flex flex-col p-4 border-t border-slate-800">
-          <nav className="flex flex-col gap-2">
+          <nav className="flex flex-col gap-2 flex-grow">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -64,7 +64,6 @@ export default function SideNav() {
           </span>
         </div>
 
-        {/* FULL SEARCH BAR */}
         <div className="px-4 mb-6">
           <GlobalSearch variant="full" />
         </div>
@@ -83,8 +82,33 @@ export default function SideNav() {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-slate-800 text-xs text-slate-500 text-center">
-          v1.0.4 - 2026 Season
+        {/* 🔐 USER PROFILE BOTTOM BAR */}
+        <div className="p-4 border-t border-slate-800">
+          {status === 'loading' ? (
+             <div className="text-xs text-slate-500 animate-pulse">Loading session...</div>
+          ) : session ? (
+            <div className="flex flex-col gap-1">
+              <div className="text-xs font-bold text-white truncate" title={session.user.name || session.user.email}>
+                {session.user.name || session.user.email}
+              </div>
+              <div className="text-[10px] text-slate-400 font-medium uppercase tracking-widest mb-2">
+                {(session.user as any).role || 'OWNER'}
+              </div>
+              <button 
+                onClick={() => signOut()} 
+                className="flex items-center gap-2 text-xs text-slate-400 hover:text-white transition-colors w-fit"
+              >
+                <LogOut size={14} /> Sign Out
+              </button>
+            </div>
+          ) : (
+            <button 
+              onClick={() => signIn()} 
+              className="flex items-center gap-2 text-sm font-bold text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              <LogIn size={16} /> Sign In
+            </button>
+          )}
         </div>
       </aside>
     </>

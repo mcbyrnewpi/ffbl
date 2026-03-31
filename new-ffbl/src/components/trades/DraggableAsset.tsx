@@ -40,7 +40,7 @@ export default function DraggableAsset({
             </div>
             <div className="min-w-0">
               <div className="font-bold text-[11px] md:text-xs text-slate-800 truncate">{asset.name}</div>
-              <div className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">Draft Pick</div>
+              <div className="text-[8px] font-bold text-slate-400 uppercase tracking-wider">{asset.meta?.originalTeamName ? `${asset.meta.originalTeamName}` : 'Draft Pick'}</div>
             </div>
         </div>
 
