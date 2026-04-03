@@ -60,24 +60,23 @@ Once a player is selected, UI dynamically renders actions based on `Status` and 
 * **MLB Raw Data Deep-Sync (`sync-mlb-raw-data.ts`):** Fetches full JSON profiles for matched players, saving to `mlbRawData`. Dynamically flags players with a `RETIRED` status to clean up the free-agent pool.
 
 ### Phase 2: API, Roster Engine, & Frontend Foundations
-* **Identity & Rosters:** `GET /api/users/me` and `GET /api/rosters/[teamId]` endpoints built.
-* **Dynamic Roster Validation (The Bouncer):** `PATCH /api/players/[playerId]` queries `LeagueSettings` to enforce active limits (e.g., 25-man MLB) and stash limits (IL, NA) during promotions/demotions, logging `TransType` entries via Prisma `$transaction`.
-* **Deep-Linked Routing:** Nested structure (`/teams/[id]` for Active Roster, `/teams/[id]/minors` for Farm System) maintains team context across views.
-* **Live Assets:** `RosterRow` utilizes the synced `mlbId` for rendering official high-res MLB player headshots via Next/Image `unoptimized`. Bulletproof frontend `<img onError={...} />` fallback states added for 404s from the MLB CDN.
-* **Omni-Search & Importer:** `GET /api/players` successfully combines local DB search with live MLB API external fallback. `POST /api/players` enables importing brand-new prospects and international rookies straight into the local DB.
-* **Legacy Player Linker:** `PATCH /api/players/[playerId]` seamlessly merges unlinked legacy players with their official `mlbId` and raw data.
-* **"Player-First" Link Workflow:** `<MlbLinkModal />` integrated globally across `RosterView`, `RosterTable`, and `PlayerCard` to visually warn managers of unlinked legacy players and provide a 1-click sync interface (complete with local vs. MLB target comparison).
+* **Identity, Settings, & Rosters:** `GET /api/users/me`, `GET /api/settings`, and `GET /api/rosters/[teamId]` endpoints built.
+* **Dynamic Roster Validation (The Bouncer):** `PATCH /api/players/[playerId]` queries `LeagueSettings` to enforce active limits and stash limits (IL, NA) during promotions/demotions, logging `TransType` entries via Prisma `$transaction`.
+* **Deep-Linked Routing & Collapsible UI:** Nested structure maintains team context. Roster sections utilize a `CollapsibleSection` client wrapper for clean, toggleable views with dynamic count badges to reduce visual clutter on massive franchise pages.
+* **Live Assets:** `RosterRow` utilizes the synced `mlbId` for rendering official high-res MLB player headshots via Next/Image `unoptimized`. Bulletproof frontend `<img onError={...} />` fallback states added.
+* **Omni-Search & Importer:** Combines local DB search with live MLB API external fallback.
+* **"Player-First" Link Workflow:** `<MlbLinkModal />` integrated globally to visually warn managers of unlinked legacy players and provide a 1-click sync interface.
 
 ### Phase 3: The Multi-Team Trade Engine
-* **`POST /api/trades/propose`:** Supports infinite-team blockbusters. Captures historical string snapshots (`fromTeamNameSnapshot`, etc.) for legacy logging. Applies "Roster Freeze" (`isTradeLocked = true`) to initiating team assets. Dynamically maps `TradeApproval` tickets ("Double-Lock" prep).
-* **`POST /api/trades/approve`:** The Execution Engine. Safely updates individual manager tickets. Only when *all* tickets are `APPROVED` does the `$transaction` fire to transfer assets, unlock them, and generate `TransType.TRADE` historical logs.
-* **`POST /api/trades/decline`:** Instantly kills the trade, marks it `CANCELLED`, and unlocks all involved assets.
+* **`POST /api/trades/propose`:** Supports infinite-team blockbusters. Captures historical string snapshots for legacy logging. Safely handles **Counter Offers** by killing the old trade (`CANCELLED`) and dropping its padlocks before establishing the new deal. Automatically locks primary trade assets AND `escrowPlayerIds` from corresponding moves. 
+* **`POST /api/trades/approve`:** The Execution Engine. Extracts and locks Escrow assets for the approving manager. When *all* tickets are `APPROVED`, the `$transaction` fires to transfer assets, execute corresponding level/status changes, unlock all players, and generate historical logs.
+* **`POST /api/trades/decline`:** Instantly kills the trade, marks it `CANCELLED`, and dynamically scans all `TradeApproval` tickets to unlock primary assets AND any pending escrow moves.
 
 ### Phase 4: The War Room (Frontend Trade UI)
-* **The Drag-and-Drop Builder (`TradeBuilder.tsx`):** Fully responsive UI using `dnd-kit` to construct trades. Prevents illegal drops. Includes inline asset removal ("X" button) to easily kick players out of trade blocks without dragging.
-* **Roster Filtering & Sorting:** Dynamic left-panel filters (All, Majors, Minors, Picks) with automatic A-Z sorting for rapid asset location during negotiations.
-* **The Review State (`TradeSummary.tsx`):** Clean presentation component with receipt cards detailing acquired assets. Dynamically extracts and displays live MLB season stats (AVG/HR/OPS or ERA/W-L/K) directly on the receipt cards.
-* **The Flow Engine (`TradeFlowDiagram.tsx`):** Custom `@xyflow/react` implementation rendering a Left-to-Right bipartite graph. Groups Sending Teams left, Receiving Teams right, sorts assets alphabetically by source team, and routes beautifully colored bezier curves (`default`) through standalone Asset Nodes (featuring dynamic stat ribbons) to completely eliminate overlapping lines.
+* **The Drag-and-Drop Builder (`TradeBuilder.tsx`):** Fully responsive UI using `dnd-kit`. Clickable team zones trigger dynamic left-panel context filters. Features a **Counter Offer Engine** that reads URL parameters (`?counter=id`), fetches the locked assets using Prisma `OR` bypasses, and auto-populates the trade blocks.
+* **The Escrow System (`CorrespondingMovesModal`):** "The Bouncer" integrated directly into the trade flow. Intercepts proposal/approval clicks via `trade-utils.ts`, projects roster math across all levels (MLB, AAA, AA, A, IL, NA), and forces users to map out corresponding moves (drops/demotions) before pinging the API.
+* **The Trade Dashboard (`page.tsx`):** Centralized hub for pending and completed trades. Dynamically groups assets using `reduce` by `toTeamId` to render complex blockbusters as clean, vertical-stacked "Receives" lists.
+* **The Flow Engine (`TradeFlowDiagram.tsx`):** Custom `@xyflow/react` implementation rendering a Left-to-Right bipartite graph, routing perfectly curved lines through standalone Asset Nodes with dynamic stat ribbons.
 
 ---
 
@@ -85,7 +84,7 @@ Once a player is selected, UI dynamically renders actions based on `Status` and 
 
 ### Phase 5: UI Polish & Trade Enhancements
 * **Trade Comments (`POST /api/trades/comments`):** Build threaded negotiation backend.
-* **Deep-Linked Trade Initiation:** Add URL parameter parsing (e.g., `?targetTeamId=xyz&targetPlayerId=123`) to auto-load specific assets into the War Room from external roster pages.
+* **Deep-Linked Trade Initiation:** Add URL parameter parsing (e.g., `?addPlayer=123`) to auto-load specific assets into the War Room from external roster pages, mirroring the Counter Offer architecture.
 * **Live MLB StatsAPI Integration:** Materialize new draftees. Sync with undocumented MLB Pipeline endpoint to add "Top 100" badges and ETA dates directly to minor league rosters.
 * **Mobile Move Menu:** Tap-friendly alternative to drag-and-drop.
 
@@ -106,10 +105,9 @@ Once a player is selected, UI dynamically renders actions based on `Status` and 
 
 ## ⚠️ 6. Critical Architecture & Session Notes
 * **Asset-Driven Trades:** Trades do not have a single `receivingTeamId`. The web of a trade is defined entirely by `fromTeamId` and `toTeamId` on individual `TradeAsset` records.
+* **Escrow Locks:** When a manager agrees to drop/demote a player as a condition of a trade, that player receives an `isTradeLocked = true` padlock just like the players actually changing teams.
 * **Lazy Evaluation for Expirations:** No chron jobs needed. When the Trade UI loads, instantly flip any `PENDING` trades to `CANCELLED` (and unlock their assets) if `expiresAt < now()`.
 * **Next.js 15 Async Params (CRITICAL):** `params` and `searchParams` in Route Handlers are **Promises**. You must `await` them before accessing IDs.
-* **Prisma Singleton:** Always import Prisma from `@/lib/prisma`.
-* **Transactions for Multi-Writes:** Always use `prisma.$transaction(async (tx) => { ... })` when an API route updates a row and creates a log.
-* **The MLB CDN Trick:** We *never* save image URLs to the database. We only save the `mlbId` and dynamically inject it into the `img.mlbstatic.com` string. If MLB doesn't have a photo yet, the frontend gracefully downgrades to local SVG placeholders.
-* **State-Lifting Modals:** Complex modals (like `MlbLinkModal`) are lifted to the highest necessary parent (e.g., `RosterView`) to prevent rendering redundant hidden HTML modals inside table rows or grid cards.
+* **Prisma Relational Includes:** If a UI component needs nested data (like a player's `positions` array), you must explicitly define `include: { positions: true }` in the Server Component fetch.
+* **The MLB CDN Trick:** We *never* save image URLs to the database. We only save the `mlbId` and dynamically inject it into the `img.mlbstatic.com` string.
 * **Shohei Ohtani Rule:** Because `mlbId` is strictly `@unique`, legacy split players (e.g., Batter vs. Pitcher versions) will only have one linked profile.

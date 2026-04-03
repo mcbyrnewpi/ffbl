@@ -8,6 +8,8 @@ import { useSession } from 'next-auth/react';
 import TradeDropzone from './TradeDropzone';
 import DraggableAsset from './DraggableAsset';
 import TradeSummary from './TradeSummary';
+import CorrespondingMovesModal from './CorrespondingMovesModal';
+import { checkNeedsCorrespondingMoves } from '@/lib/trade-utils';
 
 export type UIAsset = {
   id: string;             
@@ -23,9 +25,10 @@ interface Props {
   initialTeams: any[];
   initialPlayers: any[];
   initialPicks: any[];
+  initialCounterTrade?: any | null; // ⬅️ NEW PROP
 }
 
-export default function TradeBuilder({ initialTeams, initialPlayers, initialPicks }: Props) {
+export default function TradeBuilder({ initialTeams, initialPlayers, initialPicks, initialCounterTrade }: Props) {
   const router = useRouter();
   const { data: session } = useSession();
   const [isMounted, setIsMounted] = useState(false);
@@ -33,19 +36,40 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
   // UI States
   const [isReviewing, setIsReviewing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [expiresInDays, setExpiresInDays] = useState<number>(7);
+
+  // Modal & Settings States
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [leagueSettings, setLeagueSettings] = useState<any>(null);
 
   useEffect(() => {
     setIsMounted(true);
+    fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => setLeagueSettings(data))
+      .catch(err => console.error("Failed to fetch settings", err));
   }, []);
 
   const [assets, setAssets] = useState<UIAsset[]>(() => {
+    // ⬅️ NEW: Helper to find if an asset was in the counter trade
+    const getZone = (type: string, dbId: string) => {
+      if (!initialCounterTrade) return 'roster';
+      
+      const foundAsset = initialCounterTrade.assets.find((a: any) => 
+        (type === 'PLAYER' && a.playerId === dbId) || 
+        (type === 'PICK' && a.draftPickId === dbId)
+      );
+      
+      return foundAsset ? `trade-block-${foundAsset.toTeamId}` : 'roster';
+    };
+
     const playerAssets: UIAsset[] = initialPlayers.map(p => ({
       id: `player-${p.id}`,
       type: 'PLAYER',
       dbId: p.id,
       name: `${p.firstName} ${p.lastName}`,
       sourceTeamId: p.teamId,
-      currentZone: 'roster', 
+      currentZone: getZone('PLAYER', p.id), // ⬅️ UPDATED
       meta: p,
     }));
 
@@ -55,7 +79,7 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
       dbId: dp.id,
       name: `${dp.year} Round ${dp.round}`,
       sourceTeamId: dp.currentOwnerId,
-      currentZone: 'roster',
+      currentZone: getZone('PICK', dp.id), // ⬅️ UPDATED
       meta: {
         ...dp,
         originalTeamName: initialTeams.find(t => t.id === dp.originalOwnerId)?.name || 'Unknown Team'
@@ -66,13 +90,22 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
   });
 
   const CURRENT_USER_TEAM_ID = (session?.user as any)?.teamId || '';
-  const [involvedTeamIds, setInvolvedTeamIds] = useState<string[]>([CURRENT_USER_TEAM_ID]);
+  
+  // ⬅️ UPDATED: Pre-populate involved teams if countering
+  const [involvedTeamIds, setInvolvedTeamIds] = useState<string[]>(() => {
+    if (initialCounterTrade) {
+      const allTeams = initialCounterTrade.assets.flatMap((a: any) => [a.fromTeamId, a.toTeamId]);
+      const uniqueTeams = Array.from(new Set(allTeams)) as string[];
+      if (!uniqueTeams.includes(CURRENT_USER_TEAM_ID)) uniqueTeams.push(CURRENT_USER_TEAM_ID);
+      return uniqueTeams;
+    }
+    return [CURRENT_USER_TEAM_ID];
+  });
 
   const defaultOpponentId = initialTeams.find(t => t.id !== CURRENT_USER_TEAM_ID)?.id || '';
   const [viewingTeamId, setViewingTeamId] = useState(defaultOpponentId);
   const [activeAsset, setActiveAsset] = useState<UIAsset | null>(null);
   
-  // 🔍 State to track which filter is active on the left sidebar
   const [assetFilter, setAssetFilter] = useState<'ALL' | 'MAJORS' | 'MINORS' | 'PICKS'>('ALL');
 
   // --- DND Handlers ---
@@ -96,9 +129,7 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
     if (newZoneId.startsWith('trade-block-')) {
       const receivingTeamId = newZoneId.replace('trade-block-', '');
       
-      if (receivingTeamId === draggedAsset.sourceTeamId) {
-        return; 
-      }
+      if (receivingTeamId === draggedAsset.sourceTeamId) return; 
 
       setInvolvedTeamIds(prev => {
         const newTeams = new Set(prev);
@@ -109,41 +140,33 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
     }
 
     setAssets(prev => prev.map(asset => {
-      if (asset.id === assetId) {
-        return { ...asset, currentZone: newZoneId };
-      }
+      if (asset.id === assetId) return { ...asset, currentZone: newZoneId };
       return asset;
     }));
   };
 
-  const handleDragCancel = () => {
-    setActiveAsset(null);
-  };
+  const handleDragCancel = () => setActiveAsset(null);
 
   const removeTeamFromTrade = (teamIdToRemove: string) => {
     setInvolvedTeamIds(prev => prev.filter(id => id !== teamIdToRemove));
     setAssets(prev => prev.map(asset => {
-      if (asset.currentZone === `trade-block-${teamIdToRemove}`) {
-        return { ...asset, currentZone: 'roster' };
-      }
+      if (asset.currentZone === `trade-block-${teamIdToRemove}`) return { ...asset, currentZone: 'roster' };
       return asset;
     }));
   };
 
   const getTeamName = (id: string) => initialTeams.find(t => t.id === id)?.name || 'Unknown Team';
 
-  // Derived state for the current snapshot of the trade
+  // Derived state
   const tradeAssetsList = assets.filter(a => a.currentZone.startsWith('trade-block-'));
   const isTradeValid = tradeAssetsList.length > 0;
 
-  // 🔤 Filter and Sort the available roster assets
   const rosterAssets = assets
     .filter(a => a.currentZone === 'roster' && a.sourceTeamId === viewingTeamId)
     .filter(a => {
       if (assetFilter === 'ALL') return true;
       if (assetFilter === 'PICKS') return a.type === 'PICK';
       
-      // ⚾ FIX: Define what belongs in the MAJORS tab (MLB level OR stashed on NA)
       const isMajorLeaguer = a.meta?.level === 'MLB' || a.meta?.status === 'NA';
       
       if (assetFilter === 'MAJORS') return a.type === 'PLAYER' && isMajorLeaguer;
@@ -153,28 +176,42 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
     })
     .sort((a, b) => a.name.localeCompare(b.name));
 
-  // --- API Submission Handler ---
-  const handleProposeTrade = async () => {
-    setIsSubmitting(true);
-    
-    const tradeAssetsPayload = tradeAssetsList.map(a => {
-      const toTeamId = a.currentZone.replace('trade-block-', '');
-      return {
-        fromTeamId: a.sourceTeamId,
-        toTeamId: toTeamId,
-        playerId: a.type === 'PLAYER' ? a.dbId : undefined,
-        draftPickId: a.type === 'PICK' ? a.dbId : undefined,
-      };
-    });
+  // --- Map assets for the API payload and Modal ---
+  const formattedAssetsForModal = tradeAssetsList.map(a => ({
+    fromTeamId: a.sourceTeamId,
+    toTeamId: a.currentZone.replace('trade-block-', ''),
+    playerId: a.type === 'PLAYER' ? a.dbId : null,
+    draftPickId: a.type === 'PICK' ? a.dbId : null,
+    meta: a.meta
+  }));
 
+  // --- API Submission Handlers ---
+  const handleProposeClick = async () => {
+    setIsSubmitting(true);
+    const needsMoves = await checkNeedsCorrespondingMoves(CURRENT_USER_TEAM_ID, formattedAssetsForModal, leagueSettings);
+    
+    if (needsMoves) {
+      setIsSubmitting(false);
+      setIsModalOpen(true); // Pop open the escrow modal
+    } else {
+      executeProposal(null); // No drops needed, fire instantly!
+    }
+  };
+
+  const executeProposal = async (correspondingMoves: any) => {
+    setIsSubmitting(true);
+    setIsModalOpen(false);
+    
     try {
       const response = await fetch('/api/trades/propose', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           initiatingTeamId: CURRENT_USER_TEAM_ID,
-          expiresInDays: 7,
-          assets: tradeAssetsPayload,
+          expiresInDays: expiresInDays, 
+          assets: formattedAssetsForModal,
+          correspondingMoves,
+          counteringTradeId: initialCounterTrade?.id // ⬅️ NEW: Pass counter ID to API
         }),
       });
 
@@ -194,15 +231,55 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
   // VIEW: REVIEW SUMMARY
   // ==========================================
   if (isReviewing) {
+    const reviewFooterControls = (
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">Expires:</label>
+          <select 
+            value={expiresInDays}
+            onChange={(e) => setExpiresInDays(Number(e.target.value))}
+            className="p-2 border border-slate-300 rounded-lg text-sm bg-white font-medium text-slate-700 focus:outline-none focus:border-blue-500 shadow-sm"
+          >
+            <option value={1}>1 Day</option>
+            <option value={2}>2 Days</option>
+            <option value={3}>3 Days</option>
+            <option value={4}>4 Days</option>
+            <option value={5}>5 Days</option>
+            <option value={6}>6 Days</option>
+            <option value={7}>7 Days</option>
+            <option value={14}>14 Days</option>
+            <option value={0}>Never</option>
+          </select>
+        </div>
+        <button 
+          onClick={handleProposeClick} 
+          disabled={isSubmitting}
+          className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-sm transition-colors disabled:opacity-50 flex items-center gap-2"
+        >
+          {isSubmitting ? 'Processing...' : 'Propose Trade'}
+        </button>
+      </div>
+    );
+
     return (
-      <TradeSummary 
-        tradeAssetsList={tradeAssetsList}
-        involvedTeamIds={involvedTeamIds}
-        getTeamName={getTeamName}
-        onBack={() => setIsReviewing(false)}
-        onSubmit={handleProposeTrade}
-        isSubmitting={isSubmitting}
-      />
+      <>
+        <TradeSummary 
+          tradeAssetsList={tradeAssetsList}
+          involvedTeamIds={involvedTeamIds}
+          getTeamName={getTeamName}
+          onBack={() => setIsReviewing(false)}
+          actionButtons={reviewFooterControls}
+        />
+
+        <CorrespondingMovesModal 
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onConfirm={executeProposal}
+          teamId={CURRENT_USER_TEAM_ID}
+          tradeAssets={formattedAssetsForModal}
+          settings={leagueSettings}
+        />
+      </>
     );
   }
 
@@ -223,7 +300,6 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
           <div className="lg:col-span-1 bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col h-full overflow-hidden">
             <h2 className="font-bold text-lg mb-2 text-slate-800 flex-shrink-0">Available Assets</h2>
             
-            {/* 🎛️ Dropdown and Filters Wrapper */}
             <div className="space-y-3 mb-4 flex-shrink-0">
               <select 
                 className="w-full p-2 border border-slate-300 rounded-md text-sm font-medium text-slate-700 bg-slate-50 focus:ring-2 focus:ring-blue-500 outline-none"
@@ -235,7 +311,6 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
                 ))}
               </select>
 
-              {/* 🔍 Filter Tabs */}
               <div className="flex bg-slate-100 p-1 rounded-lg gap-1">
                 {(['ALL', 'MAJORS', 'MINORS', 'PICKS'] as const).map((f) => (
                   <button
@@ -294,42 +369,55 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
                 )}
              </div>
              
-             {/* DYNAMIC GRID */}
-             <div className={`grid grid-cols-1 gap-4 flex-grow content-start ${involvedTeamIds.length > 2 ? 'md:grid-cols-3' : 'md:grid-cols-2'}`}>
+             {/* DYNAMIC GRID - STACKED VERTICALLY */}
+             <div className="flex flex-col gap-6 flex-grow content-start">
                {involvedTeamIds.map(teamId => {
                  const teamAssets = assets.filter(a => a.currentZone === `trade-block-${teamId}`);
+                 const isViewing = viewingTeamId === teamId; 
+
                  return (
-                   <TradeDropzone 
-                      key={teamId}
-                      id={`trade-block-${teamId}`} 
-                      teamId={teamId}
-                      title={`${getTeamName(teamId)} Receives`}
-                      onRemove={teamId !== CURRENT_USER_TEAM_ID ? () => removeTeamFromTrade(teamId) : undefined}
+                   <div 
+                     key={teamId}
+                     onClickCapture={(e) => {
+                        if ((e.target as HTMLElement).closest('button')) return;
+                        setViewingTeamId(teamId);
+                     }}
+                     className={`rounded-xl cursor-pointer transition-all duration-200 ${
+                       isViewing 
+                         ? 'ring-2 ring-blue-500 shadow-md ring-offset-2' 
+                         : 'hover:ring-2 hover:ring-slate-300 hover:ring-offset-2 opacity-95 hover:opacity-100'
+                     }`}
                    >
-                     {teamAssets.map(asset => (
-                       <DraggableAsset 
-                          key={asset.id} 
-                          asset={asset} 
-                          onRemove={() => {
-                            setAssets(prev => prev.map(a => 
-                              a.id === asset.id ? { ...a, currentZone: 'roster' } : a
-                            ));
-                          }}
-                       />
-                     ))}
-                     {teamAssets.length === 0 && (
-                       <div className="text-center text-slate-400 text-sm py-8 font-medium">
-                         Drag assets here
-                       </div>
-                     )}
-                   </TradeDropzone>
+                     <TradeDropzone 
+                        id={`trade-block-${teamId}`} 
+                        teamId={teamId}
+                        title={`${getTeamName(teamId)} Receives`}
+                        onRemove={teamId !== CURRENT_USER_TEAM_ID ? () => removeTeamFromTrade(teamId) : undefined}
+                     >
+                       {teamAssets.map(asset => (
+                         <DraggableAsset 
+                            key={asset.id} 
+                            asset={asset} 
+                            onRemove={() => {
+                              setAssets(prev => prev.map(a => 
+                                a.id === asset.id ? { ...a, currentZone: 'roster' } : a
+                              ));
+                            }}
+                         />
+                       ))}
+                       {teamAssets.length === 0 && (
+                         <div className="text-center text-slate-400 text-sm py-8 font-medium">
+                           Drag assets here
+                         </div>
+                       )}
+                     </TradeDropzone>
+                   </div>
                  );
                })}
              </div>
           </div>
         </div>
 
-        {/* Floating Action Bar */}
         <div className="absolute bottom-4 right-4 bg-white p-3 rounded-xl shadow-lg border border-slate-200">
           <button 
             onClick={() => setIsReviewing(true)}

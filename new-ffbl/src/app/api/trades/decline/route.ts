@@ -35,11 +35,11 @@ export async function POST(request: Request) {
         throw new Error("User is not authorized to interact with this trade.");
       }
 
-      // 3. If a receiver is rejecting it, log their specific ticket as REJECTED
+      // 3. If a receiver is rejecting it, log their specific ticket as DECLINED
       if (userApproval && !isProposer) {
          await tx.tradeApproval.update({
            where: { id: userApproval.id },
-           data: { status: 'REJECTED' }
+           data: { status: 'CANCELLED' }
          });
       }
 
@@ -53,7 +53,20 @@ export async function POST(request: Request) {
       const playerIds = trade.assets.filter(a => a.playerId).map(a => a.playerId as string);
       const pickIds = trade.assets.filter(a => a.draftPickId).map(a => a.draftPickId as string);
 
-      if (playerIds.length > 0) {
+      // Gather all escrow players from every approval ticket
+      const escrowPlayerIds: string[] = [];
+      trade.approvals.forEach(approval => {
+        if (approval.correspondingMoves) {
+          const moves = approval.correspondingMoves as any;
+          if (moves.drops) escrowPlayerIds.push(...moves.drops);
+          if (moves.levelChanges) escrowPlayerIds.push(...moves.levelChanges.map((c: any) => c.playerId));
+          if (moves.statusChanges) escrowPlayerIds.push(...moves.statusChanges.map((c: any) => c.playerId));
+        }
+      });
+
+      const allPlayersToUnlock = [...new Set([...playerIds, ...escrowPlayerIds])];
+
+      if (allPlayersToUnlock.length > 0) {
         await tx.player.updateMany({
           where: { id: { in: playerIds } },
           data: { isTradeLocked: false }

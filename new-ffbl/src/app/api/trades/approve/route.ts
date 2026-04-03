@@ -51,7 +51,17 @@ export async function POST(request: Request) {
         .filter(a => a.fromTeamId === approvingUser.teamId && a.draftPickId)
         .map(a => a.draftPickId as string);
 
-      if (teamPlayerIds.length > 0) {
+      // Extract players from this manager's corresponding moves
+      const escrowPlayerIds: string[] = [];
+      if (correspondingMoves) {
+        if (correspondingMoves.drops) escrowPlayerIds.push(...correspondingMoves.drops);
+        if (correspondingMoves.levelChanges) escrowPlayerIds.push(...correspondingMoves.levelChanges.map((c: any) => c.playerId));
+        if (correspondingMoves.statusChanges) escrowPlayerIds.push(...correspondingMoves.statusChanges.map((c: any) => c.playerId));
+      }
+
+      const allPlayersToLock = [...new Set([...teamPlayerIds, ...escrowPlayerIds])];
+
+      if (allPlayersToLock.length > 0) {
         await tx.player.updateMany({
           where: { id: { in: teamPlayerIds } },
           data: { isTradeLocked: true }
@@ -71,7 +81,7 @@ export async function POST(request: Request) {
 
       if (!allApproved) {
         // Stop here! We have saved their vote and locked their assets. We wait for the others.
-        return { status: "Vote recorded. Waiting on other managers.", executed: false };
+        return { status: "Response recorded. Waiting on other managers.", executed: false };
       }
 
       // ==========================================
@@ -119,7 +129,7 @@ export async function POST(request: Request) {
 
             await tx.player.update({
               where: { id: change.playerId },
-              data: { level: change.newLevel }
+              data: { level: change.newLevel, isTradeLocked: false }
             });
             
             await tx.transaction.create({
@@ -150,7 +160,7 @@ export async function POST(request: Request) {
 
             await tx.player.update({
               where: { id: change.playerId },
-              data: { status: change.newStatus }
+              data: { status: change.newStatus, isTradeLocked: false }
             });
             
             await tx.transaction.create({

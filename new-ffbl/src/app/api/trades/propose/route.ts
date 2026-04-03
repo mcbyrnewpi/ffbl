@@ -5,7 +5,8 @@ import { prisma } from '@/lib/prisma';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { initiatingTeamId, expiresInDays, assets } = body;
+    // ⬅️ NEW: Destructure correspondingMoves
+    const { initiatingTeamId, expiresInDays, assets, correspondingMoves, counteringTradeId } = body;
 
     // 1. Basic Payload Validation
     if (!initiatingTeamId || !assets || assets.length === 0) {
@@ -37,6 +38,16 @@ export async function POST(request: Request) {
     // 4. The Mega-Transaction
     const newTrade = await prisma.$transaction(async (tx) => {
       
+      // --- 💥 NEW: Handle Counter Trades ---
+      if (counteringTradeId) {
+        // Mark the old trade as CANCELLED
+        await tx.trade.update({
+          where: { id: counteringTradeId },
+          data: { status: 'CANCELLED' }
+        });
+      } // ⬅️ FIX 1: ADDED MISSING BRACKET
+
+
       // --- 🏗️ SNAPSHOT GATHERING ---
       
       // Fetch Teams
@@ -101,9 +112,20 @@ export async function POST(request: Request) {
         .filter((a) => a.draftPickId && a.fromTeamId === initiatingTeamId)
         .map((a) => a.draftPickId as string);
 
-      if (tradePlayerIds.length > 0) {
+      // Extract players from the initiator's corresponding moves
+      const escrowPlayerIds: string[] = [];
+      if (correspondingMoves) {
+        if (correspondingMoves.drops) escrowPlayerIds.push(...correspondingMoves.drops);
+        if (correspondingMoves.levelChanges) escrowPlayerIds.push(...correspondingMoves.levelChanges.map((c: any) => c.playerId));
+        if (correspondingMoves.statusChanges) escrowPlayerIds.push(...correspondingMoves.statusChanges.map((c: any) => c.playerId));
+      }
+
+      // Combine traded players and escrow players into one unique array
+      const allPlayersToLock = [...new Set([...tradePlayerIds, ...escrowPlayerIds])];
+
+      if (allPlayersToLock.length > 0) {
         await tx.player.updateMany({
-          where: { id: { in: tradePlayerIds } },
+          where: { id: { in: allPlayersToLock } },
           data: { isTradeLocked: true },
         });
       }
@@ -137,7 +159,9 @@ export async function POST(request: Request) {
         return {
           tradeId: trade.id,
           userId: manager.id, 
-          status: manager.teamId === initiatingTeamId ? 'APPROVED' : 'PENDING' 
+          status: manager.teamId === initiatingTeamId ? 'APPROVED' : 'PENDING',
+          // ⬅️ NEW: Attach the escrow moves to the initiator's auto-approved ticket!
+          correspondingMoves: manager.teamId === initiatingTeamId ? correspondingMoves : null
         };
       });
 
