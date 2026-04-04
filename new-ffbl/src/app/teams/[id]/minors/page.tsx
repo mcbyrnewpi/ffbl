@@ -1,13 +1,18 @@
 // src/app/teams/[id]/minors/page.tsx
 import { prisma } from '@/lib/prisma';
 import FarmSystem from '@/components/teams/FarmSystem';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
 export default async function MinorsPage(props: { params: Promise<{ id: string }> }) {
   const { id } = await props.params;
 
+  // 1. ⬅️ NEW: Get session to determine if it's the user's team
+  const session = await getServerSession(authOptions);
+  const myTeamId = (session?.user as any)?.teamId || null;
+
   const team = await prisma.team.findUnique({
     where: { id },
-    // 🛡️ Make sure we include the affiliate names and logos!
     select: {
       id: true,
       aaaAffiliateName: true,
@@ -29,5 +34,5 @@ export default async function MinorsPage(props: { params: Promise<{ id: string }
 
   if (!team) return null;
 
-  return <FarmSystem team={team} />; // Pass the whole team object now
+  return <FarmSystem team={team} isMyTeam={myTeamId === id} />; 
 }

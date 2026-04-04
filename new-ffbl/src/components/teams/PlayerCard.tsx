@@ -1,13 +1,14 @@
 // src/components/teams/PlayerCard.tsx
 import PlayerHeadshot from './PlayerHeadshot';
 import { AlertTriangle } from 'lucide-react';
+import PlayerActionMenu from './PlayerActionMenu';
 
 interface PlayerCardProps {
   player: any;
   onLinkClick?: () => void;
 }
 
-export default function PlayerCard({ player, onLinkClick }: PlayerCardProps) {
+export default function PlayerCard({ player, onLinkClick, isMyTeam }: PlayerCardProps) {
   // 1. Dig into the JSON field we just defined
   const rawData = player.mlbRawData as any;
   
@@ -16,7 +17,7 @@ export default function PlayerCard({ player, onLinkClick }: PlayerCardProps) {
     `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:brooks:no_headshot.png/w_213,q_auto:best/v1/people/${player.mlbId}/headshot/67/current`;
   
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden group relative">
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 group relative">
       
       {/* THE TRIGGER: Floating in the top right over the image */}
       {!player.mlbId && onLinkClick && (
@@ -68,6 +69,8 @@ export default function PlayerCard({ player, onLinkClick }: PlayerCardProps) {
            <span className="w-1 h-1 bg-slate-200 rounded-full"></span>
            <span>Age: {player.age || '??'}</span>
         </div>
+        {/* The Action Menu */}
+        <PlayerActionMenu player={player} isMyTeam={isMyTeam} />
       </div>
     </div>
   );

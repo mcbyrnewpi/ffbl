@@ -8,11 +8,9 @@ export async function PATCH(
   { params }: { params: Promise<{ playerId: string }> }
 ) {
   try {
-    // 1. Next.js 15 Requirement: Await the params
     const { playerId } = await params;
     const body = await request.json();
 
-    // 2. Fetch the player's CURRENT state (The "Before" picture)
     const currentPlayer = await prisma.player.findUnique({
       where: { id: playerId },
     });
@@ -21,21 +19,45 @@ export async function PATCH(
       return NextResponse.json({ error: "Player not found" }, { status: 404 });
     }
 
-    // 3. Setup the target variables
     const newTeamId = body.teamId !== undefined ? body.teamId : currentPlayer.teamId;
     const newLevel = body.level !== undefined ? body.level : currentPlayer.level;
     const newStatus = body.status !== undefined ? body.status : currentPlayer.status;
-    
-    // NEW: Grab MLB Link data if provided in the request
     const newMlbId = body.mlbId !== undefined ? body.mlbId : currentPlayer.mlbId;
     const newMlbRawData = body.mlbRawData !== undefined ? body.mlbRawData : currentPlayer.mlbRawData;
+    
+    // Extract retroactive date
+    const retroactiveDate = body.retroactiveDate; 
+
+    // 🛡️ 60-Day IL Lock Enforcement
+    if (currentPlayer.status === 'IL_60' && currentPlayer.il60UnlockDate) {
+      const isLocked = new Date() < new Date(currentPlayer.il60UnlockDate);
+      const isDropping = newTeamId === null; // The only legal move is dropping them
+      
+      if (isLocked && !isDropping) {
+        return NextResponse.json(
+          { error: "Player Locked", message: `This player is locked on the 60-Day IL until ${new Date(currentPlayer.il60UnlockDate).toLocaleDateString()}.` }, 
+          { status: 400 }
+        );
+      }
+    }
+
+    // 🗓️ Calculate Unlock Date if moving TO IL_60
+    let newIl60UnlockDate = currentPlayer.il60UnlockDate;
+    if (newStatus === 'IL_60' && currentPlayer.status !== 'IL_60') {
+      // 1. Force the retroactive date to noon to avoid UTC midnight timezone shifting
+      const startDate = retroactiveDate ? new Date(`${retroactiveDate}T12:00:00`) : new Date();
+      
+      // 2. Add exactly 60 days in milliseconds (Bulletproof math)
+      newIl60UnlockDate = new Date(startDate.getTime() + (60 * 24 * 60 * 60 * 1000));
+    } else if (newTeamId === null || newStatus !== 'IL_60') {
+      // Clear the lock if they are dropped or legally activated
+      newIl60UnlockDate = null;
+    }
 
     // 4. The "Detective" Logic: Figure out what type of transaction this is
     let transType: TransType | null = null;
     let details = "";
 
-    // Note: We don't trigger a 'TransType' log just for linking an MLB profile, 
-    // so this logic stays focused on actual roster moves.
     if (currentPlayer.teamId === null && newTeamId !== null) {
       transType = 'ADD';
       details = "Added from Free Agency";
@@ -53,6 +75,23 @@ export async function PATCH(
         transType = 'DEMOTE';
       }
       details = `Moved from ${currentPlayer.level || 'Unassigned'} to ${newLevel}`;
+    } else if (currentPlayer.status !== newStatus) {
+      // Map Status changes to specific TransTypes for history logs
+      if (newStatus === 'IL') {
+        transType = 'PLACE_ON_IL';
+        details = "Placed on Injured List";
+      } else if (newStatus === 'IL_60') {
+        transType = 'PLACE_ON_IL_60';
+        details = `Placed on 60-Day IL${retroactiveDate ? ` (Retroactive to ${new Date(retroactiveDate).toLocaleDateString()})` : ''}`;
+      } else if (newStatus === 'NA') {
+        transType = 'PLACE_ON_NA';
+        details = "Placed on Not Active List";
+      } else if (newStatus === 'ACTIVE') {
+        transType = currentPlayer.status === 'IL' ? 'ACTIVATE_FROM_IL' :
+                    currentPlayer.status === 'IL_60' ? 'ACTIVATE_FROM_IL_60' :
+                    currentPlayer.status === 'NA' ? 'ACTIVATE_FROM_NA' : null;
+        details = "Activated to Roster";
+      }
     }
 
     // 🛡️ DUAL-CHECK ROSTER VALIDATION (Level & Status Limits)
@@ -64,7 +103,6 @@ export async function PATCH(
 
       if (settings?.enforceRosterLimits) {
         
-        // --- CHECK 1: ACTIVE LEVEL LIMITS ---
         if (newStatus === 'ACTIVE' && newLevel) {
           const currentLevelCount = await prisma.player.count({
             where: { teamId: newTeamId, level: newLevel, status: 'ACTIVE' },
@@ -81,7 +119,6 @@ export async function PATCH(
           }
         }
 
-        // --- CHECK 2: STATUS STASH LIMITS (IL, NA, IL_60) ---
         if (newStatus !== 'ACTIVE' && ['IL', 'IL_60', 'NA'].includes(newStatus)) {
           const currentStatusCount = await prisma.player.count({
             where: { teamId: newTeamId, status: newStatus },
@@ -104,20 +141,19 @@ export async function PATCH(
 
     // 5. Execute BOTH the update and the log simultaneously
     const result = await prisma.$transaction(async (tx) => {
-      // A. Update the Player (Now includes MLB fields!)
       const updatedPlayer = await tx.player.update({
         where: { id: playerId },
         data: {
           teamId: newTeamId,
           level: newLevel,
           status: newStatus,
-          mlbId: newMlbId,           // <-- NEW
-          mlbRawData: newMlbRawData, // <-- NEW
+          mlbId: newMlbId,           
+          mlbRawData: newMlbRawData, 
+          il60UnlockDate: newIl60UnlockDate !== undefined ? newIl60UnlockDate : null
         },
         include: { team: true }, 
       });
 
-      // B. Create the Transaction Log (if a valid move was detected)
       if (transType) {
         await tx.transaction.create({
           data: {
@@ -136,15 +172,12 @@ export async function PATCH(
 
   } catch (error: any) {
     console.error("PATCH Player Error:", error);
-    
-    // NEW: Safely catch duplicate MLB ID links
     if (error.code === 'P2002') {
       return NextResponse.json(
         { error: "MLB ID Collision", message: "This MLB ID is already linked to another player in the database." }, 
         { status: 409 }
       );
     }
-
     return NextResponse.json({ error: "Failed to update player" }, { status: 500 });
   }
 }

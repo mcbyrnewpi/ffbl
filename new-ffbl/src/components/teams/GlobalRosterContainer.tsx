@@ -7,11 +7,13 @@ import RosterView from './RosterView'; // We will simplify this component next
 export default function GlobalRosterContainer({ 
   mlbActive, 
   naList, 
-  injuredList 
+  injuredList,
+  isMyTeam
 }: { 
   mlbActive: any[], 
   naList: any[], 
-  injuredList: any[] 
+  injuredList: any[] ,
+  isMyTeam: boolean
 }) {
   const [view, setView] = useState<'grid' | 'list'>('list');
 
@@ -37,14 +39,14 @@ export default function GlobalRosterContainer({
       </div>
 
       {/* RENDER THE SECTIONS */}
-      <RosterView title="MLB Active Roster" players={mlbActive} headerColor="bg-blue-900" view={view} />
+      <RosterView title="MLB Active Roster" players={mlbActive} headerColor="bg-blue-900" view={view} isMyTeam={isMyTeam} />
       
       {naList.length > 0 && (
-        <RosterView title="Not Active (NA)" players={naList} headerColor="bg-slate-500" view={view} />
+        <RosterView title="Not Active (NA)" players={naList} headerColor="bg-slate-500" view={view} isMyTeam={isMyTeam} />
       )}
       
       {injuredList.length > 0 && (
-        <RosterView title="Injured List (IL)" players={injuredList} headerColor="bg-red-900" view={view} />
+        <RosterView title="Injured List (IL)" players={injuredList} headerColor="bg-red-900" view={view} isMyTeam={isMyTeam} />
       )}
     </div>
   );

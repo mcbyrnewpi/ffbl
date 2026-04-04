@@ -6,7 +6,7 @@ import RosterTable from './RosterTable';
 import PlayerCard from './PlayerCard';
 import MlbLinkModal from './MLBLinkModal';
 
-export default function RosterView({ title, players, headerColor, view, defaultOpen = true }: any) {
+export default function RosterView({ title, players, headerColor, view, defaultOpen = true, isMyTeam }: any) {
   // State to track which player's warning icon was clicked
   const [playerToLink, setPlayerToLink] = useState<any | null>(null);
   
@@ -38,20 +38,20 @@ export default function RosterView({ title, players, headerColor, view, defaultO
         <div className="animate-in fade-in slide-in-from-top-2 duration-200">
           {/* ⚡ This switches based on the GLOBAL prop */}
           {view === 'list' ? (
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                <RosterTable 
                  title={title}
                  headerColor={headerColor}
                  players={players}
+                 isMyTeam={isMyTeam}
                  onLinkClick={(player: any) => setPlayerToLink(player)} 
                />
-            </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 mt-4">
               {players.map((p: any) => (
                 <PlayerCard 
                   key={p.id} 
-                  player={p} 
+                  player={p}
+                  isMyTeam={isMyTeam}
                   onLinkClick={() => setPlayerToLink(p)} 
                 />
               ))}

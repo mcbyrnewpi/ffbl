@@ -2,8 +2,10 @@
 "use client";
 
 import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { MILB_PARENT_MAP } from '@/lib/milb-map'; // ⚾ Import our new lookup map!
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
+import { MILB_PARENT_MAP } from '@/lib/milb-map'; 
+import AddPlayerMenu from '@/components/players/AddPlayerMenu'; // ⬅️ NEW IMPORT
 
 // --- THE HEADSHOT COMPONENT ---
 const PlayerHeadshot = ({ player }: { player: any }) => {
@@ -30,6 +32,10 @@ const PlayerHeadshot = ({ player }: { player: any }) => {
 // --- THE MAIN SEARCH CONTENT ---
 function PlayerSearchContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const { data: session } = useSession();
+  const myTeamId = (session?.user as any)?.teamId;
+
   const initialQuery = searchParams.get('name') || '';
   const initialSearchMlb = searchParams.get('searchMlb') === 'true';
 
@@ -37,7 +43,9 @@ function PlayerSearchContent() {
   const [players, setPlayers] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearchedMlb, setHasSearchedMlb] = useState(initialSearchMlb);
+  
   const [importingId, setImportingId] = useState<string | null>(null);
+  const [addingId, setAddingId] = useState<string | null>(null);
 
   const searchPlayers = async (searchMlb = false, searchQuery = query) => {
     if (searchQuery.length < 3) return;
@@ -89,7 +97,6 @@ function PlayerSearchContent() {
           mlbId: externalPlayer.mlbId,
           firstName: externalPlayer.firstName,
           lastName: externalPlayer.lastName,
-          // We don't need to pass mlbRawData anymore since our POST route hydrates it!
         }),
       });
 
@@ -107,7 +114,35 @@ function PlayerSearchContent() {
     }
   };
 
-  // Helper to format dates safely
+  const handleAddToRoster = async (player: any, targetLevel: string) => {
+    if (!myTeamId) return alert("You must be assigned to a team to add players.");
+    
+    setAddingId(player.id);
+    try {
+      const res = await fetch(`/api/players/${player.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          teamId: myTeamId, 
+          status: 'ACTIVE', 
+          level: targetLevel 
+        }),
+      });
+
+      if (res.ok) {
+        searchPlayers(hasSearchedMlb, query);
+        alert(`${player.firstName} ${player.lastName} added to your ${targetLevel} Roster!`);
+      } else {
+        const error = await res.json();
+        alert(error.message || "Failed to add player.");
+      }
+    } catch (err) {
+      alert("An unexpected error occurred.");
+    } finally {
+      setAddingId(null);
+    }
+  };
+
   const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return 'Unknown';
     return new Date(dateString).toLocaleDateString();
@@ -141,77 +176,99 @@ function PlayerSearchContent() {
         {players.map((player) => (
           <div 
             key={player.id} 
-            className={`flex items-start p-5 rounded-xl border ${player.isExternal ? 'bg-blue-50/50 border-blue-200 shadow-sm' : 'bg-white border-slate-200 shadow-sm hover:shadow-md'} transition-all`}
+            className={`flex flex-col p-5 rounded-xl border ${player.isExternal ? 'bg-blue-50/50 border-blue-200 shadow-sm' : 'bg-white border-slate-200 shadow-sm hover:shadow-md'} transition-all relative hover:z-50 focus-within:z-50`}
           >
-            <PlayerHeadshot player={player} />
+            <div className="flex items-start">
+              <PlayerHeadshot player={player} />
 
-            <div className="flex-grow min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-lg font-bold text-slate-900 truncate">
-                  {player.firstName} {player.lastName}
-                </h3>
-                {player.isExternal && (
-                  <span className="inline-flex items-center justify-center bg-blue-100 text-blue-600 rounded-full w-5 h-5 flex-shrink-0" title="External MLB Player">
-                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                    </svg>
-                  </span>
-                )}
-              </div>
-
-              {/* FFBL Status Row */}
-              <div className="flex items-center gap-2 text-sm text-slate-500 mb-1">
-                <span className="font-bold text-slate-700">
-                  {player.isExternal 
-                    ? player.mlbRawData?.primaryPosition?.abbreviation 
-                    : player.positions?.[0]?.abbrev || '??'}
-                </span>
-                <span>•</span>
-                <span className={player.team?.name ? "text-blue-600 font-semibold" : "text-emerald-600 font-medium"}>
-                  {player.isExternal ? 'Not in FFBL' : (player.team?.name || 'Free Agent')}
-                </span>
-              </div>
-
-              {/* Real-Life Affiliate Row */}
-              {player.mlbRawData?.currentTeam?.name && (
-                <div className="text-sm text-slate-600 mb-1.5 truncate">
-                  <span className="font-medium">
-                    {player.mlbRawData.currentTeam.name}
-                  </span>
-                  {/* MiLB Parent Branding */}
-                  {player.mlbRawData?.currentTeam?.id && MILB_PARENT_MAP[player.mlbRawData.currentTeam.id] && (
-                    <span className="font-bold text-slate-400 ml-1">
-                      ({MILB_PARENT_MAP[player.mlbRawData.currentTeam.id].parentAbbrev})
+              <div className="flex-grow min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="text-lg font-bold text-slate-900 truncate">
+                    {player.firstName} {player.lastName}
+                  </h3>
+                  {player.isExternal && (
+                    <span className="inline-flex items-center justify-center bg-blue-100 text-blue-600 rounded-full w-5 h-5 flex-shrink-0" title="External MLB Player">
+                      <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                      </svg>
                     </span>
                   )}
                 </div>
-              )}
 
-              <div className="text-xs text-slate-400 uppercase font-medium tracking-wide">
-                Born: {formatDate(player.isExternal ? player.mlbRawData?.birthDate : (player.birthdate || player.dob))}
-              </div>
+                <div className="flex items-center gap-2 text-sm text-slate-500 mb-1">
+                  <span className="font-bold text-slate-700">
+                    {player.isExternal 
+                      ? player.mlbRawData?.primaryPosition?.abbreviation 
+                      : player.positions?.[0]?.abbrev || '??'}
+                  </span>
+                  <span>•</span>
+                  <span className={player.team?.name ? "text-blue-600 font-semibold" : "text-emerald-600 font-medium"}>
+                    {player.isExternal ? 'Not in FFBL' : (player.team?.name || 'Free Agent')}
+                  </span>
+                </div>
 
-              {/* Action Buttons */}
-              <div className="mt-4">
-                {player.isExternal ? (
-                  <button 
-                    onClick={() => handleImportPlayer(player)}
-                    disabled={importingId === player.id}
-                    className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-bold py-2.5 px-4 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2"
-                  >
-                    {importingId === player.id ? (
-                      <><span className="animate-spin text-lg leading-none">⚾</span> Importing...</>
-                    ) : (
-                      'Import to FFBL'
+                {player.mlbRawData?.currentTeam?.name && (
+                  <div className="text-sm text-slate-600 mb-1.5 truncate">
+                    <span className="font-medium">
+                      {player.mlbRawData.currentTeam.name}
+                    </span>
+                    {player.mlbRawData?.currentTeam?.id && MILB_PARENT_MAP[player.mlbRawData.currentTeam.id] && (
+                      <span className="font-bold text-slate-400 ml-1">
+                        ({MILB_PARENT_MAP[player.mlbRawData.currentTeam.id].parentAbbrev})
+                      </span>
                     )}
-                  </button>
-                ) : (
-                  <button className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold py-2.5 px-4 rounded-lg border border-slate-200 transition-colors">
-                    View Profile
-                  </button>
+                  </div>
                 )}
+
+                <div className="text-xs text-slate-400 uppercase font-medium tracking-wide">
+                  Born: {formatDate(player.isExternal ? player.mlbRawData?.birthDate : (player.birthdate || player.dob))}
+                </div>
               </div>
             </div>
+
+            {/* Action Buttons Container */}
+            <div className="mt-4 pt-4 border-t border-slate-100">
+              {player.isExternal ? (
+                <button 
+                  onClick={() => handleImportPlayer(player)}
+                  disabled={importingId === player.id}
+                  className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-bold py-2.5 px-4 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2"
+                >
+                  {importingId === player.id ? (
+                    <><span className="animate-spin text-lg leading-none">⚾</span> Importing...</>
+                  ) : (
+                    'Import to FFBL'
+                  )}
+                </button>
+              ) : (
+                <div className="flex gap-2 w-full">
+                  
+                  {/* The cleanly imported AddPlayerMenu component */}
+                  {!player.teamId && myTeamId && (
+                    <AddPlayerMenu 
+                      isAdding={addingId === player.id}
+                      onAdd={(level) => handleAddToRoster(player, level)}
+                    />
+                  )}
+
+                  {/* Deep-Link Trade Button */}
+                  {player.teamId && player.teamId !== myTeamId && myTeamId && !player.isTradeLocked && (
+                    <button 
+                      onClick={() => router.push(`/trades/build?addPlayer=${player.id}`)}
+                      className="flex-1 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-600 hover:text-white text-sm font-bold py-2.5 px-4 rounded-lg shadow-sm transition-colors"
+                    >
+                      Propose Trade
+                    </button>
+                  )}
+
+                  {/* View Profile Button */}
+                  <button className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold py-2.5 px-4 rounded-lg border border-slate-200 transition-colors">
+                    View Profile
+                  </button>
+                </div>
+              )}
+            </div>
+            
           </div>
         ))}
       </div>

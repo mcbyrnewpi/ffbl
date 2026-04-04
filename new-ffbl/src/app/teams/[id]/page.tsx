@@ -1,15 +1,20 @@
 import { prisma } from '@/lib/prisma';
 import GlobalRosterContainer from '@/components/teams/GlobalRosterContainer';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
 export default async function TeamPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  
+  // 1. Get the current user's session
+  const session = await getServerSession(authOptions);
+  const myTeamId = (session?.user as any)?.teamId || null;
+
   const team = await prisma.team.findUnique({
     where: { id },
     include: {
       players: { 
-        include: { 
-          positions: true,
-        }, 
+        include: { positions: true }, 
         orderBy: [{ level: 'desc' }, { lastName: 'asc' }] 
       }
     }
@@ -32,6 +37,7 @@ export default async function TeamPage({ params }: { params: Promise<{ id: strin
         mlbActive={mlbActive} 
         naList={naList} 
         injuredList={injuredList} 
+        isMyTeam={myTeamId === id} // ⬅️ NEW: Pass boolean down
       />
     </div>
   );

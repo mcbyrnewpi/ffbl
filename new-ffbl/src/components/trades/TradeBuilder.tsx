@@ -25,10 +25,11 @@ interface Props {
   initialTeams: any[];
   initialPlayers: any[];
   initialPicks: any[];
-  initialCounterTrade?: any | null; // ⬅️ NEW PROP
+  initialCounterTrade?: any | null; 
+  addPlayerId?: string; // ⬅️ NEW PROP
 }
 
-export default function TradeBuilder({ initialTeams, initialPlayers, initialPicks, initialCounterTrade }: Props) {
+export default function TradeBuilder({ initialTeams, initialPlayers, initialPicks, initialCounterTrade, addPlayerId }: Props) {
   const router = useRouter();
   const { data: session } = useSession();
   const [isMounted, setIsMounted] = useState(false);
@@ -50,17 +51,27 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
       .catch(err => console.error("Failed to fetch settings", err));
   }, []);
 
+  // ⬅️ MOVED UP: We need this ID *before* we initialize the assets state!
+  const CURRENT_USER_TEAM_ID = (session?.user as any)?.teamId || '';
+
   const [assets, setAssets] = useState<UIAsset[]>(() => {
-    // ⬅️ NEW: Helper to find if an asset was in the counter trade
+    // ⬅️ UPDATED: Helper handles both counter trades AND single-player deep links
     const getZone = (type: string, dbId: string) => {
-      if (!initialCounterTrade) return 'roster';
+      // 1. Counter Trade Logic
+      if (initialCounterTrade) {
+        const foundAsset = initialCounterTrade.assets.find((a: any) => 
+          (type === 'PLAYER' && a.playerId === dbId) || 
+          (type === 'PICK' && a.draftPickId === dbId)
+        );
+        if (foundAsset) return `trade-block-${foundAsset.toTeamId}`;
+      }
       
-      const foundAsset = initialCounterTrade.assets.find((a: any) => 
-        (type === 'PLAYER' && a.playerId === dbId) || 
-        (type === 'PICK' && a.draftPickId === dbId)
-      );
-      
-      return foundAsset ? `trade-block-${foundAsset.toTeamId}` : 'roster';
+      // 2. Direct Player Add Logic
+      if (addPlayerId && type === 'PLAYER' && dbId === addPlayerId) {
+         return `trade-block-${CURRENT_USER_TEAM_ID}`;
+      }
+
+      return 'roster';
     };
 
     const playerAssets: UIAsset[] = initialPlayers.map(p => ({
@@ -69,7 +80,7 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
       dbId: p.id,
       name: `${p.firstName} ${p.lastName}`,
       sourceTeamId: p.teamId,
-      currentZone: getZone('PLAYER', p.id), // ⬅️ UPDATED
+      currentZone: getZone('PLAYER', p.id),
       meta: p,
     }));
 
@@ -79,7 +90,7 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
       dbId: dp.id,
       name: `${dp.year} Round ${dp.round}`,
       sourceTeamId: dp.currentOwnerId,
-      currentZone: getZone('PICK', dp.id), // ⬅️ UPDATED
+      currentZone: getZone('PICK', dp.id),
       meta: {
         ...dp,
         originalTeamName: initialTeams.find(t => t.id === dp.originalOwnerId)?.name || 'Unknown Team'
@@ -88,10 +99,8 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
 
     return [...playerAssets, ...pickAssets];
   });
-
-  const CURRENT_USER_TEAM_ID = (session?.user as any)?.teamId || '';
   
-  // ⬅️ UPDATED: Pre-populate involved teams if countering
+  // ⬅️ UPDATED: Pre-populate involved teams if countering or targeting a player
   const [involvedTeamIds, setInvolvedTeamIds] = useState<string[]>(() => {
     if (initialCounterTrade) {
       const allTeams = initialCounterTrade.assets.flatMap((a: any) => [a.fromTeamId, a.toTeamId]);
@@ -99,6 +108,15 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
       if (!uniqueTeams.includes(CURRENT_USER_TEAM_ID)) uniqueTeams.push(CURRENT_USER_TEAM_ID);
       return uniqueTeams;
     }
+
+    // ⬅️ NEW: If we are trading for a specific player, automatically add their current team!
+    if (addPlayerId) {
+      const targetPlayer = initialPlayers.find(p => p.id === addPlayerId);
+      if (targetPlayer && targetPlayer.teamId !== CURRENT_USER_TEAM_ID) {
+        return [CURRENT_USER_TEAM_ID, targetPlayer.teamId];
+      }
+    }
+
     return [CURRENT_USER_TEAM_ID];
   });
 
@@ -211,7 +229,7 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
           expiresInDays: expiresInDays, 
           assets: formattedAssetsForModal,
           correspondingMoves,
-          counteringTradeId: initialCounterTrade?.id // ⬅️ NEW: Pass counter ID to API
+          counteringTradeId: initialCounterTrade?.id 
         }),
       });
 

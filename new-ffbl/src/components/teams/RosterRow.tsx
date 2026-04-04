@@ -1,12 +1,13 @@
 // src/components/teams/RosterRow.tsx
 import { AlertTriangle, Lock, Unlock } from 'lucide-react';
+import PlayerActionMenu from './PlayerActionMenu';
 
 interface RosterRowProps {
   player: any;
   onLinkClick?: () => void;
 }
 
-export default function RosterRow({ player, onLinkClick }: RosterRowProps) {
+export default function RosterRow({ player, onLinkClick, isMyTeam }: RosterRowProps) {
   // Quick debug: If you open your browser console, you'll see exactly why the button is hiding
   if (player.lastName === 'Ohtani') {
     console.log(`Ohtani Check:`, { mlbId: player.mlbId, hasClickProp: !!onLinkClick });
@@ -53,9 +54,7 @@ export default function RosterRow({ player, onLinkClick }: RosterRowProps) {
               <Lock size={10} /> Locked
             </span>
           ) : (
-            <span className="text-green-600 bg-green-50 px-2 py-1 rounded text-[10px] font-bold border border-green-100 uppercase flex items-center gap-1">
-              <Unlock size={10} /> Open
-            </span>
+            <PlayerActionMenu player={player} isMyTeam={isMyTeam} />
           )}
         </div>
       </td>
