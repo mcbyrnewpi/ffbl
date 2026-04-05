@@ -2,11 +2,12 @@
 "use client";
 
 import { useState } from 'react';
-import { LayoutGrid, List, AlertTriangle } from 'lucide-react';
+import { LayoutGrid, List, AlertTriangle, Trophy, Calendar } from 'lucide-react';
 import RosterRow from "./RosterRow";
 import { MILB_PARENT_MAP } from '@/lib/milb-map';
 import MLBLinkModal from './MLBLinkModal'; 
 import PlayerActionMenu from './PlayerActionMenu'; 
+import PlayerCardModal from '../players/PlayerCardModal'; // ⬅️ NEW IMPORT
 
 const formatDate = (dateString: string | null | undefined) => {
   if (!dateString) return 'Unknown';
@@ -16,6 +17,7 @@ const formatDate = (dateString: string | null | undefined) => {
 export default function FarmSystem({ team, isMyTeam }: { team: any, isMyTeam: boolean }) {
   const [view, setView] = useState<'list' | 'grid'>('list');
   const [linkingPlayer, setLinkingPlayer] = useState<any | null>(null);
+  const [selectedCardPlayer, setSelectedCardPlayer] = useState<any | null>(null); // ⬅️ NEW STATE
 
   const levels = [
     { 
@@ -66,7 +68,6 @@ export default function FarmSystem({ team, isMyTeam }: { team: any, isMyTeam: bo
         {levels.map((lvl) => {
           const levelPlayers = team.players.filter((p: any) => p.level === lvl.id);
 
-          // Removed overflow-hidden so dropdowns can escape!
           return (
             <div key={lvl.id} className={`bg-white rounded-xl shadow-sm border-t-4 ${lvl.color} flex flex-col`}>
               
@@ -105,6 +106,7 @@ export default function FarmSystem({ team, isMyTeam }: { team: any, isMyTeam: bo
                             key={player.id} 
                             player={player} 
                             onLinkClick={() => setLinkingPlayer(player)}
+                            onNameClick={() => setSelectedCardPlayer(player)} // ⬅️ NEW PROP
                             isMyTeam={isMyTeam} 
                           />
                         ))}
@@ -121,24 +123,42 @@ export default function FarmSystem({ team, isMyTeam }: { team: any, isMyTeam: bo
                         className="flex flex-col p-3 bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-all group relative hover:z-50 focus-within:z-50"
                       >
                         <div className="flex items-start">
-                          {/* Headshot */}
-                          <div className="w-12 h-12 bg-slate-100 rounded-full overflow-hidden flex-shrink-0 border border-slate-200 mr-3 shadow-sm">
-                            <img 
-                              src={player.mlbId ? `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120/v1/people/${player.mlbId}/headshot/silo/current.png` : '/images/placeholders/no-player.svg'}
-                              alt={player.lastName}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                              onError={(e) => {
-                                e.currentTarget.src = '/images/placeholders/no-player.svg';
-                              }}
-                            />
+                          
+                          <div className="flex flex-col items-center mr-3 flex-shrink-0">
+                            <div className="w-12 h-12 bg-slate-100 rounded-full overflow-hidden border border-slate-200 shadow-sm">
+                              <img 
+                                src={player.mlbId ? `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120/v1/people/${player.mlbId}/headshot/silo/current.png` : '/images/placeholders/no-player.svg'}
+                                alt={player.lastName}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                onError={(e) => {
+                                  e.currentTarget.src = '/images/placeholders/no-player.svg';
+                                }}
+                              />
+                            </div>
+                            {/* 🌟 MLB Pipeline Top 100 Badge */}
+                            {player.isTop100 && player.prospectRank && (
+                              <div className="relative -mt-2.5 z-10 pointer-events-none animate-in zoom-in duration-300">
+                                <div className="bg-gradient-to-br from-emerald-400 to-emerald-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md shadow-md border border-emerald-300 flex items-center gap-1">
+                                  <Trophy size={10} className="text-emerald-100" />
+                                  #{player.prospectRank}
+                                </div>
+                              </div>
+                            )}
                           </div>
 
                           {/* Player Details */}
                           <div className="flex-grow min-w-0">
                             <div className="flex items-center gap-2 mb-0.5">
-                              <div className="font-bold text-slate-900 truncate text-sm">
+                              {/* ⬅️ UPDATED: Clickable Name Button */}
+                              <button 
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  setSelectedCardPlayer(player);
+                                }}
+                                className="font-bold text-slate-900 truncate text-sm hover:text-blue-600 transition-colors text-left"
+                              >
                                 {player.firstName} {player.lastName}
-                              </div>
+                              </button>
                               
                               {!player.mlbId && (
                                 <button
@@ -173,6 +193,15 @@ export default function FarmSystem({ team, isMyTeam }: { team: any, isMyTeam: bo
                                 )}
                               </div>
                             )}
+
+                            {/* 📅 Prospect ETA */}
+                            {player.prospectEta && (
+                              <div className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-medium text-slate-500 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
+                                <Calendar size={10} className="text-slate-400" />
+                                <span>ETA: <span className="font-bold text-slate-700">{player.prospectEta}</span></span>
+                              </div>
+                            )}
+
                           </div>
                         </div>
 
@@ -210,6 +239,13 @@ export default function FarmSystem({ team, isMyTeam }: { team: any, isMyTeam: bo
           }}
         />
       )}
+
+      {/* 🃏 THE 3D BASEBALL CARD MODAL */}
+      <PlayerCardModal 
+        isOpen={!!selectedCardPlayer}
+        onClose={() => setSelectedCardPlayer(null)}
+        player={selectedCardPlayer}
+      />
     </div>
   );
 }

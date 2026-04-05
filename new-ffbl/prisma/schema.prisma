@@ -701,6 +701,7 @@ model ProspectRanking {
   year      Int
   rank      Int
   eta       String?
+  scouting  Json?
 
   player    Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
 

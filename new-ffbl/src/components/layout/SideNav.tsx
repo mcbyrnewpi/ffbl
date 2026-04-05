@@ -3,14 +3,18 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Users, LayoutDashboard, ArrowRightLeft, Shield, Search, Menu, X, LogOut, LogIn } from 'lucide-react';
+import { Users, LayoutDashboard, ArrowRightLeft, Shield, Search, Menu, X, LogOut, LogIn, ShieldAlert } from 'lucide-react';
 import GlobalSearch from './GlobalSearch';
-import { useSession, signIn, signOut } from 'next-auth/react'; // ⬅️ NEW IMPORTS
+import { useSession, signIn, signOut } from 'next-auth/react';
 
 export default function SideNav() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
-  const { data: session, status } = useSession(); // ⬅️ GET SESSION
+  const { data: session, status } = useSession(); 
+
+  // ⬅️ NEW: Check the user's role
+  const userRole = (session?.user as any)?.role;
+  const isCommishOrAdmin = userRole === 'COMMISH' || userRole === 'ADMIN';
 
   const navLinks = [
     { href: '/', icon: <LayoutDashboard size={18} />, label: 'Dashboard' },
@@ -52,6 +56,22 @@ export default function SideNav() {
                 {link.icon} {link.label}
               </Link>
             ))}
+
+            {/* 🛡️ MOBILE COMMISH LINK */}
+            {isCommishOrAdmin && (
+              <>
+                <div className="h-px bg-slate-800 my-2 mx-2" />
+                <Link
+                  href="/admin/commish"
+                  onClick={() => setIsOpen(false)}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium ${
+                    pathname === '/admin/commish' ? 'bg-amber-600 text-white' : 'text-amber-400 hover:bg-slate-800 hover:text-amber-300'
+                  }`}
+                >
+                  <ShieldAlert size={18} /> Commish Center
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       )}
@@ -80,6 +100,21 @@ export default function SideNav() {
               {link.icon} {link.label}
             </Link>
           ))}
+
+          {/* 🛡️ DESKTOP COMMISH LINK */}
+          {isCommishOrAdmin && (
+            <>
+              <div className="h-px bg-slate-800 my-2 mx-2" />
+              <Link
+                href="/admin/commish"
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors font-medium text-sm ${
+                  pathname === '/admin/commish' ? 'bg-amber-600 text-white' : 'text-amber-400 hover:bg-slate-800 hover:text-amber-300'
+                }`}
+              >
+                <ShieldAlert size={18} /> Commish Center
+              </Link>
+            </>
+          )}
         </nav>
 
         {/* 🔐 USER PROFILE BOTTOM BAR */}
