@@ -15,7 +15,6 @@ export async function POST(request: Request) {
 
     console.log(`⚾ Scraping MLB Pipeline HTML from: ${sourceUrl}`);
     
-    // 1. Fetch the raw HTML from the public MLB Webpage you provide
     const res = await fetch(sourceUrl, {
       headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
     });
@@ -26,14 +25,12 @@ export async function POST(request: Request) {
     
     const html = await res.text();
 
-    // 2. Extract the hidden data-init-state JSON blob using Regex
     const stateMatch = html.match(/data-init-state="(\{[\s\S]*?\})"/);
     
     if (!stateMatch || !stateMatch[1]) {
       return NextResponse.json({ error: "Could not locate data-init-state payload in MLB HTML." }, { status: 400 });
     }
 
-    // 3. Decode the HTML entities (like &quot;) back into a valid JSON string
     const rawJsonStr = stateMatch[1]
       .replace(/&quot;/g, '"')
       .replace(/&amp;/g, '&')
@@ -47,12 +44,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Failed to parse the decoded JSON state." }, { status: 400 });
     }
 
-    // 4. Traverse the JSON to find the Rankings Array
     let prospects: any[] = [];
     const rootQuery = nextData?.payload?.ROOT_QUERY;
     
     if (rootQuery) {
-      // Find the dynamic key that contains the rankings
       for (const key of Object.keys(rootQuery)) {
         if (key.includes('getPlayerRankingsFromSelection') && Array.isArray(rootQuery[key])) {
           prospects = rootQuery[key];
@@ -67,7 +62,6 @@ export async function POST(request: Request) {
 
     let matchedCount = 0;
 
-    // 5. Clear the slate for live player cards if syncing the current year
     if (targetYear === currentYear) {
       await prisma.player.updateMany({
         where: { isTop100: true },
@@ -83,39 +77,59 @@ export async function POST(request: Request) {
       if (!rank || !playerEntity) continue;
 
       const eta = playerEntity.eta;
-      const refString = playerEntity.player?.__ref; // e.g., "Person:804606"
+      const refString = playerEntity.player?.__ref; 
       
       if (!refString) continue;
       
-      // Extract the integer MLB ID from the string
       const mlbId = parseInt(refString.replace('Person:', ''), 10);
 
       if (!mlbId || rank > 100) continue;
 
-      // Compile the 20-80 Scouting Grades & Report
-      // We check for both hitter (hit/power) and pitcher (fastball/slider) fields
-      const rawReport = playerEntity.scoutingReport || '';
-      const cleanReport = rawReport.replace(/(<([^>]+)>)/gi, "").trim(); // Strips HTML tags like <p>
+      // ==========================================
+      // 🌟 THE NEW PROSPECT BIO PARSER 🌟
+      // ==========================================
+      let scoutingBlob: any = {};
+      const bios = playerEntity.prospectBio || [];
+      
+      // Grab the bio for the specific target year, or fallback to the most recent one available
+      const targetBio = bios.find((b: any) => b.contentTitle === targetYear.toString()) || bios[bios.length - 1];
 
-      const scoutingBlob = {
-        hit: playerEntity.hit,
-        power: playerEntity.power,
-        run: playerEntity.run,
-        arm: playerEntity.arm,
-        field: playerEntity.field,
-        fastball: playerEntity.fastball,
-        curveball: playerEntity.curveball,
-        slider: playerEntity.slider,
-        changeup: playerEntity.changeup,
-        control: playerEntity.control,
-        overall: playerEntity.overall,
-        report: cleanReport !== '' ? cleanReport : null,
-      };
+      if (targetBio && targetBio.contentText) {
+        const htmlText = targetBio.contentText;
 
-      // Filter out undefined/null fields so Hitters don't save empty Pitcher grades and vice versa
-      const cleanScoutingBlob = Object.fromEntries(
-        Object.entries(scoutingBlob).filter(([_, v]) => v != null)
-      );
+        // 1. Extract the Grades (e.g., "Hit: 50 | Power: 60 | Run: 65")
+        // Regex looks for "Scouting grades:" and grabs everything up to the next closing </p>
+        const gradesMatch = htmlText.match(/Scouting grades[^:]*:\s*(.*?)(?:<\/p>)/i);
+        if (gradesMatch && gradesMatch[1]) {
+          const gradesStr = gradesMatch[1].replace(/<[^>]+>/g, ''); // strip rogue tags
+          const gradePairs = gradesStr.split('|').map((s: string) => s.trim());
+          
+          gradePairs.forEach((pair: string) => {
+            const [key, val] = pair.split(':').map((s: string) => s.trim());
+            if (key && val) {
+              scoutingBlob[key.toLowerCase()] = parseInt(val, 10) || val;
+            }
+          });
+        }
+
+        // 2. Extract the Written Report
+        // Remove the Video link and the Scouting Grades line entirely from the text
+        let reportHtml = htmlText.replace(/<p><a[^>]*>Video scouting report.*?<\/a><\/p>/gi, '');
+        reportHtml = reportHtml.replace(/<p><strong>Scouting grades.*?<\/p>/gi, '');
+        
+        // Strip the remaining HTML tags and convert ugly text entities
+        const cleanReport = reportHtml
+          .replace(/(<([^>]+)>)/gi, "")
+          .replace(/&nbsp;/g, ' ')
+          .replace(/&#x27;/g, "'")
+          .replace(/&amp;/g, '&')
+          .replace(/&quot;/g, '"')
+          .trim();
+          
+        if (cleanReport) {
+          scoutingBlob.report = cleanReport;
+        }
+      }
 
       // Find the player in our local FFBL database
       const player = await prisma.player.findFirst({
@@ -123,7 +137,7 @@ export async function POST(request: Request) {
       });
 
       if (player) {
-        // Log the history with the new SCOUTING JSON
+        // Log the history!
         await prisma.prospectRanking.upsert({
           where: {
             playerId_year: { playerId: player.id, year: targetYear }
@@ -131,14 +145,14 @@ export async function POST(request: Request) {
           update: { 
             rank: rank, 
             eta: eta ? eta.toString() : null,
-            scouting: cleanScoutingBlob 
+            scouting: Object.keys(scoutingBlob).length > 0 ? scoutingBlob : null
           },
           create: { 
             playerId: player.id, 
             year: targetYear, 
             rank: rank, 
             eta: eta ? eta.toString() : null,
-            scouting: cleanScoutingBlob
+            scouting: Object.keys(scoutingBlob).length > 0 ? scoutingBlob : null
           }
         });
 
@@ -155,7 +169,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ 
       success: true, 
-      message: `Successfully scraped MLB HTML and matched ${matchedCount}/100 prospects for ${targetYear}. Saved 20-80 Scouting Grades!`,
+      message: `Successfully scraped MLB HTML and matched ${matchedCount}/100 prospects for ${targetYear}.`,
       matchedCount, 
       year: targetYear 
     });

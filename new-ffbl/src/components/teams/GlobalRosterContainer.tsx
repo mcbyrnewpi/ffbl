@@ -1,40 +1,50 @@
+// src/components/teams/GlobalRosterContainer.tsx
 "use client";
 
 import { useState } from 'react';
 import { LayoutGrid, List } from 'lucide-react';
-import RosterView from './RosterView'; // We will simplify this component next
+import RosterView from './RosterView';
+import SyncStatsButton from './SyncStatsButton';
 
 export default function GlobalRosterContainer({ 
   mlbActive, 
   naList, 
   injuredList,
-  isMyTeam
+  isMyTeam,
+  teamId,    
+  lastStatSync  
 }: { 
   mlbActive: any[], 
   naList: any[], 
   injuredList: any[] ,
-  isMyTeam: boolean
+  isMyTeam: boolean,
+  teamId: string,
+  lastStatSync: Date | null   
 }) {
   const [view, setView] = useState<'grid' | 'list'>('list');
 
   return (
     <div className="space-y-12">
-      {/* 🌎 GLOBAL TOGGLE BAR */}
-      <div className="flex justify-end items-center bg-white border border-slate-200 p-2 rounded-xl shadow-sm mb-6">
-        <span className="text-[10px] font-black uppercase text-slate-400 mr-3 tracking-widest">View Mode</span>
-        <div className="flex bg-slate-100 p-1 rounded-lg">
-          <button 
-            onClick={() => setView('list')}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold transition-all ${view === 'list' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            <List size={14} /> List
-          </button>
-          <button 
-            onClick={() => setView('grid')}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold transition-all ${view === 'grid' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            <LayoutGrid size={14} /> Cards
-          </button>
+      {/* 🌎 GLOBAL TOGGLE BAR & SYNC BUTTON */}
+      <div className="flex justify-between items-center bg-white border border-slate-200 p-2 rounded-xl shadow-sm mb-6">
+
+        {/* Right Side: View Toggles */}
+        <div className="flex items-center">
+          <span className="text-[10px] font-black uppercase text-slate-400 mr-3 tracking-widest hidden sm:inline-block">View Mode</span>
+          <div className="flex bg-slate-100 p-1 rounded-lg">
+            <button 
+              onClick={() => setView('list')}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold transition-all ${view === 'list' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              <List size={14} /> List
+            </button>
+            <button 
+              onClick={() => setView('grid')}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold transition-all ${view === 'grid' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              <LayoutGrid size={14} /> Cards
+            </button>
+          </div>
         </div>
       </div>
 

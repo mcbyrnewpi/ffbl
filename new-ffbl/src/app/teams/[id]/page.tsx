@@ -14,7 +14,7 @@ export default async function TeamPage({ params }: { params: Promise<{ id: strin
     where: { id },
     include: {
       players: { 
-        include: { positions: true }, 
+        include: { positions: true, prospectRankings: true }, 
         orderBy: [{ level: 'desc' }, { lastName: 'asc' }] 
       }
     }
@@ -37,7 +37,9 @@ export default async function TeamPage({ params }: { params: Promise<{ id: strin
         mlbActive={mlbActive} 
         naList={naList} 
         injuredList={injuredList} 
-        isMyTeam={myTeamId === id} // ⬅️ NEW: Pass boolean down
+        isMyTeam={myTeamId === id}
+        teamId={team.id}            
+        lastStatSync={team.lastStatSync}
       />
     </div>
   );

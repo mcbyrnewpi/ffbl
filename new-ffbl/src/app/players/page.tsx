@@ -5,7 +5,8 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { MILB_PARENT_MAP } from '@/lib/milb-map'; 
-import AddPlayerMenu from '@/components/players/AddPlayerMenu'; // ⬅️ NEW IMPORT
+import AddPlayerMenu from '@/components/players/AddPlayerMenu';
+import PlayerCardModal from '@/components/players/PlayerCardModal'; // 🌟 NEW IMPORT
 
 // --- THE HEADSHOT COMPONENT ---
 const PlayerHeadshot = ({ player }: { player: any }) => {
@@ -46,6 +47,9 @@ function PlayerSearchContent() {
   
   const [importingId, setImportingId] = useState<string | null>(null);
   const [addingId, setAddingId] = useState<string | null>(null);
+  
+  // 🌟 NEW: State to control the Baseball Card Modal
+  const [selectedPlayer, setSelectedPlayer] = useState<any | null>(null);
 
   const searchPlayers = async (searchMlb = false, searchQuery = query) => {
     if (searchQuery.length < 3) return;
@@ -178,12 +182,18 @@ function PlayerSearchContent() {
             key={player.id} 
             className={`flex flex-col p-5 rounded-xl border ${player.isExternal ? 'bg-blue-50/50 border-blue-200 shadow-sm' : 'bg-white border-slate-200 shadow-sm hover:shadow-md'} transition-all relative hover:z-50 focus-within:z-50`}
           >
-            <div className="flex items-start">
-              <PlayerHeadshot player={player} />
+            {/* 🌟 NEW: Made the entire top section clickable to view the card */}
+            <div 
+              className="flex items-start cursor-pointer group/header"
+              onClick={() => setSelectedPlayer(player)}
+            >
+              <div className="group-hover/header:scale-105 transition-transform duration-300">
+                <PlayerHeadshot player={player} />
+              </div>
 
               <div className="flex-grow min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-lg font-bold text-slate-900 truncate">
+                  <h3 className="text-lg font-bold text-slate-900 truncate group-hover/header:text-blue-600 transition-colors">
                     {player.firstName} {player.lastName}
                   </h3>
                   {player.isExternal && (
@@ -243,7 +253,6 @@ function PlayerSearchContent() {
               ) : (
                 <div className="flex gap-2 w-full">
                   
-                  {/* The cleanly imported AddPlayerMenu component */}
                   {!player.teamId && myTeamId && (
                     <AddPlayerMenu 
                       isAdding={addingId === player.id}
@@ -251,7 +260,6 @@ function PlayerSearchContent() {
                     />
                   )}
 
-                  {/* Deep-Link Trade Button */}
                   {player.teamId && player.teamId !== myTeamId && myTeamId && !player.isTradeLocked && (
                     <button 
                       onClick={() => router.push(`/trades/build?addPlayer=${player.id}`)}
@@ -261,8 +269,11 @@ function PlayerSearchContent() {
                     </button>
                   )}
 
-                  {/* View Profile Button */}
-                  <button className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold py-2.5 px-4 rounded-lg border border-slate-200 transition-colors">
+                  {/* 🌟 NEW: View Profile Button mapped to Modal */}
+                  <button 
+                    onClick={() => setSelectedPlayer(player)}
+                    className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold py-2.5 px-4 rounded-lg border border-slate-200 transition-colors"
+                  >
                     View Profile
                   </button>
                 </div>
@@ -299,6 +310,13 @@ function PlayerSearchContent() {
           <p className="text-sm mt-2 text-slate-400">Check your spelling or try searching by last name only.</p>
         </div>
       )}
+
+      {/* 🌟 NEW: The Baseball Card Modal Integration */}
+      <PlayerCardModal 
+        isOpen={!!selectedPlayer} 
+        onClose={() => setSelectedPlayer(null)} 
+        player={selectedPlayer} 
+      />
     </div>
   );
 }

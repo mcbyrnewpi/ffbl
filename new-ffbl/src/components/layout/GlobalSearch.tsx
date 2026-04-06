@@ -6,6 +6,7 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { createPortal } from 'react-dom';
 import { MILB_PARENT_MAP } from '@/lib/milb-map';
+import PlayerCardModal from '@/components/players/PlayerCardModal'; // 🌟 NEW IMPORT
 
 interface Props {
   variant?: 'full' | 'icon';
@@ -25,6 +26,9 @@ export default function GlobalSearch({ variant = 'full' }: Props) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   
+  // 🌟 NEW: State to control the Baseball Card Modal
+  const [selectedPlayer, setSelectedPlayer] = useState<any | null>(null);
+
   // OS Detection & Client-Side Mounting
   const [modifierKey, setModifierKey] = useState('⌘');
   const [isMounted, setIsMounted] = useState(false);
@@ -61,6 +65,7 @@ export default function GlobalSearch({ variant = 'full' }: Props) {
       return;
     }
     const timer = setTimeout(async () => {
+      // Because we updated this endpoint earlier, it already includes prospectRankings and team!
       const res = await fetch(`/api/players?name=${encodeURIComponent(query)}`);
       if (res.ok) setResults(await res.json());
     }, 300);
@@ -108,6 +113,8 @@ export default function GlobalSearch({ variant = 'full' }: Props) {
     return createPortal(
       <div className="fixed inset-0 z-[99999] flex items-start justify-center pt-24 bg-slate-900/80 backdrop-blur-md px-4" onClick={() => setIsOpen(false)}>
         <div className="w-full max-w-xl bg-white rounded-xl shadow-2xl overflow-hidden ring-1 ring-slate-200" onClick={e => e.stopPropagation()}>
+          
+          {/* SEARCH INPUT HEADER */}
           <div className="p-4 border-b border-slate-100 flex items-center gap-3">
             <svg className="w-6 h-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -124,6 +131,7 @@ export default function GlobalSearch({ variant = 'full' }: Props) {
             </button>
           </div>
           
+          {/* RESULTS LIST */}
           <div className="max-h-[450px] overflow-y-auto p-2 bg-slate-50/50 flex flex-col">
             {results.length > 0 ? (
               <>
@@ -132,9 +140,10 @@ export default function GlobalSearch({ variant = 'full' }: Props) {
                     key={player.id}
                     className="flex items-center gap-3 p-3 rounded-xl hover:bg-white hover:shadow-sm cursor-pointer border border-transparent hover:border-slate-200 transition-all group"
                     onClick={() => {
+                      // 🌟 CHANGED: Close search and instantly pop the Baseball Card
                       setIsOpen(false);
                       setQuery("");
-                      router.push(`/players/${player.id}`);
+                      setSelectedPlayer(player);
                     }}
                   >
                     {/* Headshot */}
@@ -154,7 +163,7 @@ export default function GlobalSearch({ variant = 'full' }: Props) {
                     {/* Rich Player Info */}
                     <div className="flex-grow min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className="font-bold text-slate-900 truncate text-lg">
+                        <span className="font-bold text-slate-900 truncate text-lg group-hover:text-blue-600 transition-colors">
                           {player.firstName} {player.lastName}
                         </span>
                         {player.isExternal && (
@@ -259,6 +268,15 @@ export default function GlobalSearch({ variant = 'full' }: Props) {
     <>
       {renderTrigger()}
       {renderModal()}
+      
+      {/* 🌟 NEW: The Baseball Card Modal Integration */}
+      {isMounted && (
+        <PlayerCardModal 
+          isOpen={!!selectedPlayer} 
+          onClose={() => setSelectedPlayer(null)} 
+          player={selectedPlayer} 
+        />
+      )}
     </>
   );
 }

@@ -38,7 +38,7 @@ To maintain a DRY codebase, the application utilizes a centralized search logic 
 
 ### The "Self-Healing" Hybrid Check
 If a local player record is found but lacks an `mlbId`:
-* The system triggers a background search against `statsapi.mlb.com/api/v1/people/search`.
+* The system triggers a background search against `statsapi.mlb.com/api/v1/people/search` (including minor league `sportIds` 11, 12, 13, 14, 16, 5442).
 * User confirms the match, and the `mlbId` is permanently saved.
 
 ### Contextual Action Routing
@@ -58,12 +58,13 @@ Once a player is selected, UI dynamically renders actions based on `Status` and 
 * **Position Seeding & Legacy Migration:** 3555 active players and 160 valid future draft picks migrated. Team lore and rebrands handled via `TEAM_ALIAS_MAP`.
 * **MLB ID Matchmaker (`sync-mlb-ids.ts`):** Automated script matching player names to official `mlbId` integers, enabling live `img.mlbstatic.com` headshots.
 * **MLB Raw Data Deep-Sync (`sync-mlb-raw-data.ts`):** Fetches full JSON profiles for matched players, saving to `mlbRawData`. Dynamically flags players with a `RETIRED` status to clean up the free-agent pool.
+* **Team-Scoped Stat Syncs:** Global header button allows Owners (and Admins) to pull fresh MLB stats for their specific roster via `POST /api/teams/[teamId]/sync-stats`. Uses `lastStatSync` to enforce a 24-hour cooldown.
 
 ### Phase 2: API, Roster Engine, & Frontend Foundations
 * **Identity, Settings, & Rosters:** `GET /api/users/me`, `GET /api/settings`, and `GET /api/rosters/[teamId]` endpoints built.
-* **Dynamic Roster Validation (The Bouncer):** `PATCH /api/players/[playerId]` enforces limits and calculates complex locks. Automatically generates beautiful `Transaction` logs based on status/level changes.
+* **The Bouncer (Minor League Eligibility):** Programmatic rule enforcement via `src/lib/roster-rules.ts`. Checks MLB career limits (650 AB, 250 IP, 85 App), age caps (AAA:25, AA:24, A:22), Rehab blocks, and MiLB active exemptions. 
+* **The Poison Pill:** `validateTeamFarmSystem` scans a franchise's entire farm system. If *any* player violates a rule, the entire API blocks new minor league additions until the manager drops or promotes the offending player. Bouncer simulates pending moves to avoid database deadlocks during promotions.
 * **The 60-Day IL Lock:** API accepts a retroactive date and uses bulletproof millisecond-math to calculate an `il60UnlockDate`. Frontend UI traps the player, showing the "Eligible" date and blocking all moves except "Drop Player" until 60 days have passed.
-* **Live Assets:** Roster components utilize synced `mlbId` for rendering official high-res MLB player headshots via Next/Image `unoptimized`.
 * **Omni-Search & Global Hub:** The `PlayersPage` handles local DB search + live MLB API imports. Integrated an intuitive `AddPlayerMenu` that lets managers scoop up Free Agents directly to a targeted level (MLB, AAA, AA, A).
 
 ### Phase 3: The Multi-Team Trade Engine
@@ -76,16 +77,17 @@ Once a player is selected, UI dynamically renders actions based on `Status` and 
 * **Deep-Linked Trade Initiation:** Reads `?addPlayer=id` or `?counter=id` from the URL to instantly bypass Prisma limits, pre-load opponent rosters, and drop targeted assets straight into the user's "Receives" block. 
 * **The Escrow System (`CorrespondingMovesModal`):** "The Bouncer" integrated directly into the trade flow to enforce corresponding drops/demotions prior to API execution.
 * **The Flow Engine (`TradeFlowDiagram.tsx`):** Custom `@xyflow/react` implementation rendering a Left-to-Right bipartite graph, routing perfectly curved lines through standalone Asset Nodes with dynamic stat ribbons.
-* **Modern Manager Dashboards:** `PlayerActionMenu` deployed across all grids/lists. Farm system upgraded to a vertical-stack layout allowing responsive grids to "breathe" with slick z-index overlapping dropdowns.
+* **Modern Manager Dashboards:** `PlayerActionMenu` deployed across all grids/lists. Farm system upgraded to a vertical-stack layout allowing responsive grids to "breathe" with slick z-index overlapping and dynamic `dropUp` dropdowns for bottom-screen elements.
+
+### Phase 5: The Baseball Card & UI Polish
+* **The 3D Baseball Card (`BaseballCard.tsx`):** A flippable, interactive master player profile. Features high-res headshots, dynamic positional badges, FFBL status on the front, and nested stats/scouting reports on the back.
+* **Advanced Sabermetrics:** The back of the card includes a `STD | ADV` toggle, dynamically calculating and mapping K%, BB%, BABIP, AB/HR, K/9, BB/9, and WHIP directly from the MLB JSON payloads. Gracefully handles `TWP` (Two-Way Players) like Ohtani.
+* **Live MLB Pipeline Integration:** Prospect cards natively display "Top 100" gold badges and ETA dates directly on minor league roster cards and lists.
+* **Poison Pill UI:** Farm System grids and lists explicitly highlight ineligible players with glowing red borders, tinted backgrounds, and explicit warning flags detailing the exact rule violation.
 
 ---
 
-## 🛠️ 5. Development Roadmap (The Work Ahead)
-
-### Phase 5: The Baseball Card & UI Polish
-* **The Baseball Card Profile (NEW):** Build a flippable, interactive 3D baseball card component to serve as the master player profile page. Features high-res headshots and FFBL status on the front, with year-over-year MLB stats on the back.
-* **Live MLB Pipeline Integration:** Sync with the undocumented MLB Pipeline endpoint to pull "Top 100" badges and ETA dates directly onto the minor league roster cards.
-* **Trade Comments (`POST /api/trades/comments`):** Build the threaded negotiation backend so managers can chat inside the War Room.
+## 🛠️ 6. Development Roadmap (The Work Ahead)
 
 ### Phase 6: Historical API (The Quarantine Bridge)
 * `GET /api/history/books` & `GET /api/history/posts`: Fetch legacy archives.
@@ -99,10 +101,13 @@ Once a player is selected, UI dynamically renders actions based on `Status` and 
 ### Phase 8: Frictionless Auth & Comms Layer
 * *Magic Links:* NextAuth + Resend for non-Gmail users.
 * *Transactional Emails:* Automated pings for trade offers/expirations.
+* *Trade Comments (`POST /api/trades/comments`):* Build the threaded negotiation backend so managers can chat inside the War Room.
 
 ---
 
-## ⚠️ 6. Critical Architecture & Session Notes
+## ⚠️ 7. Critical Architecture & Session Notes
+* **MLB Minor League Search:** The standard MLB API `people/search` endpoint defaults to `sportId=1` (Majors only). To find prospects, you MUST explicitly pass `sportIds=1,11,12,13,14,16,5442` in the fetch URL.
+* **The "Locked Keys" Deadlock:** When running the `validateTeamFarmSystem` (Poison Pill) check during a roster move, you *must* pass the `pendingMove` object to the bouncer. Otherwise, a player currently violating a rule will trigger the system to block the very transaction attempting to fix them.
 * **Asset-Driven Trades:** Trades do not have a single `receivingTeamId`. The web of a trade is defined entirely by `fromTeamId` and `toTeamId` on individual `TradeAsset` records.
 * **Escrow Locks:** When a manager agrees to drop/demote a player as a condition of a trade, that player receives an `isTradeLocked = true` padlock just like the players actually changing teams.
 * **Lazy Evaluation for Expirations:** No chron jobs needed. When the Trade UI loads, instantly flip any `PENDING` trades to `CANCELLED` (and unlock their assets) if `expiresAt < now()`.

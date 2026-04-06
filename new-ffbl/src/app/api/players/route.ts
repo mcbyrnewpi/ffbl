@@ -28,7 +28,8 @@ export async function GET(request: Request) {
       },
       include: {
         positions: true,
-        team: { select: { name: true } }
+        team: { select: { name: true } },
+        prospectRankings: true
       },
       take: 50, 
       orderBy: { lastName: 'asc' }
@@ -40,7 +41,7 @@ export async function GET(request: Request) {
     if (searchMlb && query && query.length >= 3) { 
       try {
         const mlbRes = await fetch(
-          `https://statsapi.mlb.com/api/v1/people/search?names=${encodeURIComponent(query)}`
+          `https://statsapi.mlb.com/api/v1/people/search?names=${encodeURIComponent(query)}&sportIds=1,11,12,13,14,16,5442&hydrate=currentTeam,primaryPosition`
         );
         
         if (mlbRes.ok) {

@@ -1,5 +1,15 @@
 @import "tailwindcss";
 
+/* Tailwind v4 Custom Animations */
+@theme {
+  --animate-shine: shine 3s infinite linear;
+  
+  @keyframes shine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(200%); }
+  }
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

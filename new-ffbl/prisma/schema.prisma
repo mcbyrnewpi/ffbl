@@ -391,6 +391,7 @@ model Team {
   name    String  @unique
   logoUrl String?
   motto   String?
+  lastStatSync     DateTime?
 
   aaaAffiliateName String?
   aaAffiliateName  String?

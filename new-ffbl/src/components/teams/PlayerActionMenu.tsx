@@ -1,3 +1,4 @@
+// src/components/teams/PlayerActionMenu.tsx
 "use client";
 
 import { useState } from 'react';
@@ -7,14 +8,15 @@ import { ArrowRightLeft, UserMinus, ArrowUpCircle, ArrowDownCircle, Stethoscope,
 interface Props {
   player: any;
   isMyTeam: boolean;
+  dropUp?: boolean; // 🌟 Included in interface
 }
 
-export default function PlayerActionMenu({ player, isMyTeam }: Props) {
+// 🌟 Added dropUp = false to the destructuring here
+export default function PlayerActionMenu({ player, isMyTeam, dropUp = false }: Props) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   
-  // ⬅️ NEW: States for our inline Retroactive Date picker
   const [showIl60Form, setShowIl60Form] = useState(false);
   const [retroDate, setRetroDate] = useState("");
 
@@ -56,7 +58,6 @@ export default function PlayerActionMenu({ player, isMyTeam }: Props) {
     }
   };
 
-  // ⬅️ NEW: Check if the player is currently trapped on the IL_60
   const isIL60Locked = player.status === 'IL_60' && player.il60UnlockDate && new Date(player.il60UnlockDate) > new Date();
 
   return (
@@ -76,9 +77,12 @@ export default function PlayerActionMenu({ player, isMyTeam }: Props) {
       {isOpen && (
         <>
           <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setIsOpen(false); }} />
-          <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden py-1">
+          
+          {/* 🌟 DYNAMIC POSITIONING: Swaps top for bottom based on prop */}
+          <div className={`absolute right-0 w-56 bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden py-1 ${
+            dropUp ? 'bottom-full mb-2' : 'top-full mt-2'
+          }`}>
             
-            {/* 🛡️ IF LOCKED: Show the warning and the Drop button ONLY */}
             {isIL60Locked ? (
               <>
                 <div className="px-3 py-3 bg-red-50 border-b border-red-100 text-center">
@@ -88,7 +92,6 @@ export default function PlayerActionMenu({ player, isMyTeam }: Props) {
                   <div className="flex flex-col gap-1 bg-white/60 rounded p-1.5 border border-red-100">
                     <p className="text-[10px] text-red-700 flex justify-between">
                       <span className="font-bold">Placed:</span> 
-                      {/* Subtract 60 days to dynamically prove the exact placement date! */}
                       <span>{new Date(new Date(player.il60UnlockDate).getTime() - (60 * 24 * 60 * 60 * 1000)).toLocaleDateString()}</span>
                     </p>
                     <p className="text-[10px] text-red-700 flex justify-between">
@@ -104,7 +107,6 @@ export default function PlayerActionMenu({ player, isMyTeam }: Props) {
                 </div>
               </>
             ) : (
-              /* 🟢 IF NOT LOCKED: Show the normal menus */
               <>
                 <div className="px-3 py-1.5 text-[10px] font-black uppercase text-slate-400 tracking-wider">Level Assignment</div>
                 
@@ -147,14 +149,12 @@ export default function PlayerActionMenu({ player, isMyTeam }: Props) {
                   </button>
                 )}
                 
-                {/* 60-Day IL triggers the inline date form instead of firing immediately */}
                 {player.status !== 'IL_60' && !showIl60Form && (
                   <button onClick={(e) => { e.stopPropagation(); setShowIl60Form(true); }} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 text-left">
                     <Stethoscope size={14} className="text-red-700" /> Move to 60-Day IL
                   </button>
                 )}
 
-                {/* The inline Retroactive Date Form */}
                 {showIl60Form && (
                   <div className="px-3 py-2 bg-red-50 border-t border-b border-red-100 mt-1">
                     <label className="text-[10px] font-bold uppercase text-red-800 mb-1 block">Retroactive Date (Optional)</label>

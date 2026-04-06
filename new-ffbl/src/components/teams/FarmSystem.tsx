@@ -7,7 +7,7 @@ import RosterRow from "./RosterRow";
 import { MILB_PARENT_MAP } from '@/lib/milb-map';
 import MLBLinkModal from './MLBLinkModal'; 
 import PlayerActionMenu from './PlayerActionMenu'; 
-import PlayerCardModal from '../players/PlayerCardModal'; // ⬅️ NEW IMPORT
+import PlayerCardModal from '../players/PlayerCardModal';
 
 const formatDate = (dateString: string | null | undefined) => {
   if (!dateString) return 'Unknown';
@@ -17,7 +17,7 @@ const formatDate = (dateString: string | null | undefined) => {
 export default function FarmSystem({ team, isMyTeam }: { team: any, isMyTeam: boolean }) {
   const [view, setView] = useState<'list' | 'grid'>('list');
   const [linkingPlayer, setLinkingPlayer] = useState<any | null>(null);
-  const [selectedCardPlayer, setSelectedCardPlayer] = useState<any | null>(null); // ⬅️ NEW STATE
+  const [selectedCardPlayer, setSelectedCardPlayer] = useState<any | null>(null);
 
   const levels = [
     { 
@@ -106,7 +106,7 @@ export default function FarmSystem({ team, isMyTeam }: { team: any, isMyTeam: bo
                             key={player.id} 
                             player={player} 
                             onLinkClick={() => setLinkingPlayer(player)}
-                            onNameClick={() => setSelectedCardPlayer(player)} // ⬅️ NEW PROP
+                            onNameClick={() => setSelectedCardPlayer(player)}
                             isMyTeam={isMyTeam} 
                           />
                         ))}
@@ -120,12 +120,26 @@ export default function FarmSystem({ team, isMyTeam }: { team: any, isMyTeam: bo
                     {levelPlayers.map((player: any) => (
                       <div 
                         key={player.id} 
-                        className="flex flex-col p-3 bg-white rounded-lg border border-slate-200 shadow-sm hover:shadow-md transition-all group relative hover:z-50 focus-within:z-50"
+                        className={`flex flex-col p-3 rounded-lg border shadow-sm transition-all group relative hover:z-50 focus-within:z-50 ${
+                          player.violation 
+                            ? 'bg-red-50 border-red-300 ring-1 ring-red-300 shadow-[0_0_15px_rgba(239,68,68,0.15)]' // 🚨 ILLEGAL HIGHLIGHT
+                            : 'bg-white border-slate-200 hover:shadow-md'
+                        }`}
                       >
+                        
+                        {/* 🚨 THE WARNING BADGE 🚨 */}
+                        {player.violation && (
+                          <div className="absolute -top-3 -right-2 z-10 flex flex-col items-end animate-bounce">
+                            <div className="bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded shadow-md flex items-center gap-1 border border-white">
+                              <AlertTriangle size={10} /> Ineligible
+                            </div>
+                          </div>
+                        )}
+
                         <div className="flex items-start">
                           
                           <div className="flex flex-col items-center mr-3 flex-shrink-0">
-                            <div className="w-12 h-12 bg-slate-100 rounded-full overflow-hidden border border-slate-200 shadow-sm">
+                            <div className={`w-12 h-12 rounded-full overflow-hidden border shadow-sm ${player.violation ? 'bg-red-100 border-red-300' : 'bg-slate-100 border-slate-200'}`}>
                               <img 
                                 src={player.mlbId ? `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120/v1/people/${player.mlbId}/headshot/silo/current.png` : '/images/placeholders/no-player.svg'}
                                 alt={player.lastName}
@@ -149,13 +163,12 @@ export default function FarmSystem({ team, isMyTeam }: { team: any, isMyTeam: bo
                           {/* Player Details */}
                           <div className="flex-grow min-w-0">
                             <div className="flex items-center gap-2 mb-0.5">
-                              {/* ⬅️ UPDATED: Clickable Name Button */}
                               <button 
                                 onClick={(e) => {
                                   e.preventDefault();
                                   setSelectedCardPlayer(player);
                                 }}
-                                className="font-bold text-slate-900 truncate text-sm hover:text-blue-600 transition-colors text-left"
+                                className={`font-bold truncate text-sm transition-colors text-left ${player.violation ? 'text-red-900 hover:text-red-600' : 'text-slate-900 hover:text-blue-600'}`}
                               >
                                 {player.firstName} {player.lastName}
                               </button>
@@ -175,19 +188,19 @@ export default function FarmSystem({ team, isMyTeam }: { team: any, isMyTeam: bo
                               )}
                             </div>
                             
-                            <div className="flex items-center gap-1.5 text-[11px] text-slate-500">
-                              <span className="font-bold text-slate-700">
+                            <div className={`flex items-center gap-1.5 text-[11px] ${player.violation ? 'text-red-700' : 'text-slate-500'}`}>
+                              <span className="font-bold">
                                 {player.positions?.[0]?.abbrev || player.mlbRawData?.primaryPosition?.abbreviation || '??'}
                               </span>
                             </div>
                             
                             {player.mlbRawData?.currentTeam?.name && (
-                              <div className="text-[10px] text-slate-600 mt-1 truncate">
+                              <div className={`text-[10px] mt-1 truncate ${player.violation ? 'text-red-800' : 'text-slate-600'}`}>
                                 <span className="font-medium">
                                   {player.mlbRawData.currentTeam.name}
                                 </span>
                                 {player.mlbRawData?.currentTeam?.id && MILB_PARENT_MAP[player.mlbRawData.currentTeam.id] && (
-                                  <span className="font-bold text-slate-400 ml-1">
+                                  <span className={`font-bold ml-1 ${player.violation ? 'text-red-500' : 'text-slate-400'}`}>
                                     ({MILB_PARENT_MAP[player.mlbRawData.currentTeam.id].parentAbbrev})
                                   </span>
                                 )}
@@ -196,18 +209,25 @@ export default function FarmSystem({ team, isMyTeam }: { team: any, isMyTeam: bo
 
                             {/* 📅 Prospect ETA */}
                             {player.prospectEta && (
-                              <div className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-medium text-slate-500 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
-                                <Calendar size={10} className="text-slate-400" />
-                                <span>ETA: <span className="font-bold text-slate-700">{player.prospectEta}</span></span>
+                              <div className={`mt-1.5 inline-flex items-center gap-1 text-[10px] font-medium px-1.5 py-0.5 rounded border ${player.violation ? 'bg-red-100/50 text-red-700 border-red-200' : 'bg-slate-50 text-slate-500 border-slate-100'}`}>
+                                <Calendar size={10} className={player.violation ? 'text-red-500' : 'text-slate-400'} />
+                                <span>ETA: <span className="font-bold">{player.prospectEta}</span></span>
                               </div>
                             )}
 
                           </div>
                         </div>
 
+                        {/* 🚨 EXPLANATORY TEXT 🚨 */}
+                        {player.violation && (
+                          <div className="mt-3 text-[9px] font-bold text-red-700 bg-red-100/80 p-2 rounded border border-red-200 leading-tight">
+                            {player.violation}
+                          </div>
+                        )}
+
                         {/* Bottom Action Bar */}
-                        <div className="mt-3 pt-2 border-t border-slate-100 flex justify-between items-center">
-                          <div className="text-[9px] text-slate-400 uppercase font-medium tracking-wide">
+                        <div className={`mt-3 pt-2 flex justify-between items-center border-t ${player.violation ? 'border-red-200' : 'border-slate-100'}`}>
+                          <div className={`text-[9px] uppercase font-medium tracking-wide ${player.violation ? 'text-red-500' : 'text-slate-400'}`}>
                             Born: {formatDate(player.birthdate || player.mlbRawData?.birthDate)}
                           </div>
                           

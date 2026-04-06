@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { TransType } from '@prisma/client'; 
+import { checkMinorLeagueEligibility, validateTeamFarmSystem } from '@/lib/roster-rules'; // 🌟 NEW IMPORTS
 
 export async function PATCH(
   request: Request,
@@ -91,6 +92,42 @@ export async function PATCH(
                     currentPlayer.status === 'IL_60' ? 'ACTIVATE_FROM_IL_60' :
                     currentPlayer.status === 'NA' ? 'ACTIVATE_FROM_NA' : null;
         details = "Activated to Roster";
+      }
+    }
+
+    // 🛡️ THE BOUNCER: MINOR LEAGUE ELIGIBILITY ENFORCEMENT 🌟
+    if (newTeamId && newLevel && ['AAA', 'AA', 'A'].includes(newLevel)) {
+      const isMovingToOrWithinMinors = newTeamId !== currentPlayer.teamId || newLevel !== currentPlayer.level;
+      
+      if (isMovingToOrWithinMinors) {
+        const playerToCheck = { ...currentPlayer, mlbRawData: newMlbRawData };
+        
+        // 1. Is this specific player eligible for this level?
+        const playerCheck = checkMinorLeagueEligibility(playerToCheck, newLevel);
+        
+        if (!playerCheck.isEligible) {
+          return NextResponse.json(
+            { error: "Ineligible for Level", message: `Move Blocked: ${playerCheck.reason}` }, 
+            { status: 403 }
+          );
+        }
+
+        // 2. The Poison Pill: Is the team's entire farm system compliant?
+        // We pass the pending move so the Bouncer knows we are trying to fix the illegal player!
+        const systemCheck = await validateTeamFarmSystem(newTeamId, { 
+          playerId: playerId, 
+          newLevel: newLevel 
+        });
+        
+        if (!systemCheck.isValid) {
+          return NextResponse.json(
+            { 
+              error: "Farm System Non-Compliant", 
+              message: `Move Blocked: Your farm system contains ineligible players. You must promote or drop them before making Minor League roster moves.\n\nViolations:\n- ${systemCheck.violations.join('\n- ')}` 
+            }, 
+            { status: 403 }
+          );
+        }
       }
     }
 
