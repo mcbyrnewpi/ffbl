@@ -44,7 +44,7 @@ export default function FarmSystem({ team, isMyTeam }: { team: any, isMyTeam: bo
     <div className="space-y-6">
       {/* 🌎 FARM SYSTEM TOGGLE BAR */}
       <div className="flex justify-between items-center bg-white border border-slate-200 p-2 rounded-xl shadow-sm">
-        <h2 className="text-sm font-bold text-slate-800 ml-2">Farm System Overview</h2>
+        <h2 className="text-sm font-bold text-slate-800 ml-2">Minor League Rosters</h2>
         <div className="flex items-center">
           <span className="text-[10px] font-black uppercase text-slate-400 mr-3 tracking-widest hidden sm:inline-block">View Mode</span>
           <div className="flex bg-slate-100 p-1 rounded-lg">

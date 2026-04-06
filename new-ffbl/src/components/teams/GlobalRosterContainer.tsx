@@ -27,10 +27,14 @@ export default function GlobalRosterContainer({
     <div className="space-y-12">
       {/* 🌎 GLOBAL TOGGLE BAR & SYNC BUTTON */}
       <div className="flex justify-between items-center bg-white border border-slate-200 p-2 rounded-xl shadow-sm mb-6">
+        {/* Left Side: Title */}
+        <h2 className="text-sm font-bold text-slate-800 ml-2">Major League Roster</h2>
 
-        {/* Right Side: View Toggles */}
+        {/* Right Side: Toggles */}
         <div className="flex items-center">
-          <span className="text-[10px] font-black uppercase text-slate-400 mr-3 tracking-widest hidden sm:inline-block">View Mode</span>
+          <span className="text-[10px] font-black uppercase text-slate-400 mr-3 tracking-widest hidden sm:inline-block">
+            View Mode
+          </span>
           <div className="flex bg-slate-100 p-1 rounded-lg">
             <button 
               onClick={() => setView('list')}
