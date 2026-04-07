@@ -4,6 +4,8 @@ import GoogleProvider from "next-auth/providers/google";
 import EmailProvider from "next-auth/providers/email";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
+import { resend } from "@/lib/resend";
+import MagicLinkEmail from "@/emails/MagicLinkEmail";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -19,8 +21,22 @@ export const authOptions: NextAuthOptions = {
       allowDangerousEmailAccountLinking: true,
     }),
     EmailProvider({
-      server: process.env.EMAIL_SERVER,
+      server: '', // We don't need this because we are overriding the send function!
       from: process.env.EMAIL_FROM,
+      sendVerificationRequest: async ({ identifier: email, url, provider }) => {
+        try {
+          const host = new URL(url).host;
+          await resend.emails.send({
+            from: provider.from as string,
+            to: email,
+            subject: `Log in to the FFBL (${host})`,
+            react: MagicLinkEmail({ url, host }),
+          });
+        } catch (error) {
+          console.error("Failed to send magic link:", error);
+          throw new Error("Failed to send verification email.");
+        }
+      },
     }),
   ],
   callbacks: {

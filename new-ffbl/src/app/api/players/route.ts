@@ -8,9 +8,9 @@ export async function GET(request: Request) {
     const query = searchParams.get('name');
     const level = searchParams.get('level'); 
     const unowned = searchParams.get('unowned') === 'true';
-    
-    // NEW: The manual trigger flag from the frontend
     const searchMlb = searchParams.get('searchMlb') === 'true';
+    const position = searchParams.get('position');
+    const playerStatus = searchParams.get('status'); 
 
     // 1. Search Local Database
     const localPlayers = await prisma.player.findMany({
@@ -24,46 +24,86 @@ export async function GET(request: Request) {
           } : {},
           level ? { level: level as any } : {},
           unowned ? { teamId: null } : {},
+          position ? { positions: { some: { abbrev: position } } } : {},
+          playerStatus === 'RETIRED' 
+            ? { status: 'RETIRED' } 
+            : playerStatus === 'ACTIVE' 
+              ? { status: { not: 'RETIRED' } } 
+              : {},
         ]
       },
       include: {
         positions: true,
         team: { select: { name: true } },
-        prospectRankings: true
+        prospectRankings: true,
+        hallOfFame: true
       },
       take: 50, 
       orderBy: { lastName: 'asc' }
     });
 
-    // 2. Search MLB API (ONLY if the user clicked the button & query is valid)
+    // 2. Search MLB API
     let externalPlayers: any[] = [];
 
     if (searchMlb && query && query.length >= 3) { 
       try {
         const mlbRes = await fetch(
-          `https://statsapi.mlb.com/api/v1/people/search?names=${encodeURIComponent(query)}&sportIds=1,11,12,13,14,16,5442&hydrate=currentTeam,primaryPosition`
+          `https://statsapi.mlb.com/api/v1/people/search?names=${encodeURIComponent(query)}&sportIds=1,11,12,13,14,16,5442&hydrate=currentTeam,primaryPosition,transactions`
         );
         
         if (mlbRes.ok) {
           const mlbData = await mlbRes.json();
-          
-          // Deduplicate: Don't show MLB results for players we already have locally
           const localMlbIds = new Set(localPlayers.map(p => p.mlbId).filter(Boolean));
+          const currentYear = new Date().getFullYear();
 
           externalPlayers = (mlbData.people || [])
             .filter((p: any) => !localMlbIds.has(p.id)) 
-            .map((p: any) => ({
-              id: `ext-${p.id}`, 
-              mlbId: p.id,
-              firstName: p.useName || p.firstName || "Unknown",
-              lastName: p.lastName || "Unknown",
-              isExternal: true, // Frontend will use this to render the "Import" button
-              teamId: null,
-              team: null,
-              positions: [], 
-              status: p.status?.description === 'Retired' ? 'RETIRED' : 'ACTIVE',
-              mlbRawData: p 
-            }));
+            .map((p: any) => {
+              
+              // 🌟 HEURISTIC 1: Explicit MLB Status
+              let isRetired = p.status?.description === 'Retired' || p.status?.code === 'RM';
+
+              // 🌟 HEURISTIC 2: Explicit "RET" Transaction Check (Catches Pujols)
+              if (!isRetired && p.transactions && p.transactions.length > 0) {
+                const sortedTransactions = [...p.transactions].sort((a: any, b: any) => {
+                  const dateA = new Date(a.effectiveDate || a.date).getTime();
+                  const dateB = new Date(b.effectiveDate || b.date).getTime();
+                  return dateB - dateA;
+                });
+                
+                const latestTx = sortedTransactions[0];
+                if (latestTx && (latestTx.typeCode === 'RET' || latestTx.typeDesc === 'Retired')) {
+                  isRetired = true;
+                }
+              }
+
+              // 🌟 HEURISTIC 3: The 2-Year Rule (Catches Lofton)
+              if (!isRetired && p.active === false && p.lastPlayedDate) {
+                 const lastPlayedYear = parseInt(p.lastPlayedDate.split('-')[0]);
+                 if (currentYear - lastPlayedYear >= 2) {
+                     isRetired = true;
+                 }
+              }
+
+              return {
+                id: `ext-${p.id}`, 
+                mlbId: p.id,
+                firstName: p.useName || p.firstName || "Unknown",
+                lastName: p.lastName || "Unknown",
+                isExternal: true, 
+                teamId: null,
+                team: null,
+                positions: [], 
+                status: isRetired ? 'RETIRED' : 'ACTIVE',
+                mlbRawData: p 
+              };
+            });
+
+          if (playerStatus === 'RETIRED') {
+            externalPlayers = externalPlayers.filter(p => p.status === 'RETIRED');
+          } else if (playerStatus === 'ACTIVE') {
+            externalPlayers = externalPlayers.filter(p => p.status !== 'RETIRED');
+          }
         }
       } catch (apiError) {
         console.error("MLB API Error during Omni-Search:", apiError);
@@ -84,27 +124,31 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { mlbId, firstName, lastName } = body; // Notice we stop caring about the client's mlbRawData
+    // We still accept frontend status as a fallback, but we will calculate it to be safe
+    const { mlbId, firstName, lastName, status: frontendStatus } = body; 
 
     if (!mlbId || !firstName || !lastName) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // 🚀 THE HYDRATION STEP: Fetch the rich, heavy JSON profile directly from MLB
-    // ?hydrate=currentTeam forces MLB to include the actual team name string!
-    const mlbRes = await fetch(`https://statsapi.mlb.com/api/v1/people?personIds=${mlbIds}&hydrate=currentTeam,stats(group=[hitting,pitching,fielding],type=[yearByYear,season,career,projected])`);
+    // Deep Hydration fetch (now including transactions)
+    const mlbRes = await fetch(`https://statsapi.mlb.com/api/v1/people?personIds=${mlbId}&hydrate=currentTeam,stats(group=[hitting,pitching,fielding],type=[yearByYear,season,career,projected]),transactions`);
     const mlbData = await mlbRes.json();
     
-    // Grab the first (and only) person from the response
     const richMlbRawData = mlbData.people?.[0] || {};
 
-    // 1. Extract and Format Birthdate (using the rich data)
     const rawBirthDate = richMlbRawData?.birthDate; 
     const birthdate = rawBirthDate ? new Date(rawBirthDate) : null;
 
-    // 2. Map Position using the MLB Index Code
     const mlbPosCode = richMlbRawData?.primaryPosition?.code;
-    const posAbbrev = richMlbRawData?.primaryPosition?.abbreviation;
+    let posAbbrev = richMlbRawData?.primaryPosition?.abbreviation;
+    let rawPosName = richMlbRawData?.primaryPosition?.name || posAbbrev;
+
+    // 🌟 THE OF INTERCEPTOR: Map specific outfield spots to the universal FFBL 'OF'
+    if (['LF', 'CF', 'RF'].includes(posAbbrev)) {
+      posAbbrev = 'OF';
+      rawPosName = 'Outfielder';
+    }
 
     const positionData = posAbbrev ? {
       positions: {
@@ -113,21 +157,54 @@ export async function POST(request: Request) {
           create: { 
             abbrev: posAbbrev, 
             mlbCode: mlbPosCode,
-            name: richMlbRawData?.primaryPosition?.name || posAbbrev 
+            name: rawPosName 
           }
         }
       }
     } : {};
 
-    // 3. Insert into the Database
+    // --- THE 3-STEP RETIREMENT HEURISTIC (Backend Source of Truth) ---
+    let isRetired = false;
+    const currentYear = new Date().getFullYear();
+
+    // Step 1: Explicit MLB Status
+    if (richMlbRawData.status?.description === 'Retired' || richMlbRawData.status?.code === 'RM') {
+      isRetired = true;
+    }
+
+    // Step 2: The Transaction Checker
+    if (!isRetired && richMlbRawData.transactions && richMlbRawData.transactions.length > 0) {
+      const sortedTransactions = [...richMlbRawData.transactions].sort((a: any, b: any) => {
+        const dateA = new Date(a.effectiveDate || a.date).getTime();
+        const dateB = new Date(b.effectiveDate || b.date).getTime();
+        return dateB - dateA; // Descending
+      });
+      
+      const latestTx = sortedTransactions[0];
+      if (latestTx && (latestTx.typeCode === 'RET' || latestTx.typeDesc === 'Retired')) {
+        isRetired = true;
+      }
+    }
+
+    // Step 3: The 2-Year Rule (Catches Kenny Lofton)
+    if (!isRetired && richMlbRawData.active === false && richMlbRawData.lastPlayedDate) {
+       const lastPlayedYear = parseInt(richMlbRawData.lastPlayedDate.split('-')[0]);
+       if (currentYear - lastPlayedYear >= 2) {
+           isRetired = true;
+       }
+    }
+
+    // Final check: If our backend caught the retirement, OR the frontend passed it, mark as retired.
+    const finalStatus = isRetired || frontendStatus === 'RETIRED' ? 'RETIRED' : 'ACTIVE';
+
     const newPlayer = await prisma.player.create({
       data: {
         mlbId: Number(mlbId),
         firstName,
         lastName,
         birthdate,
-        mlbRawData: richMlbRawData, // 💾 Save the highly-detailed JSON!
-        status: "ACTIVE",
+        mlbRawData: richMlbRawData, 
+        status: finalStatus,
         ...positionData
       }
     });
@@ -137,7 +214,6 @@ export async function POST(request: Request) {
   } catch (error: any) {
     console.error("Failed to import player:", error);
     
-    // Prisma unique constraint violation (P2002) means someone else just imported this mlbId
     if (error.code === 'P2002') {
       return NextResponse.json({ error: "Player with this MLB ID is already in the database." }, { status: 409 });
     }
