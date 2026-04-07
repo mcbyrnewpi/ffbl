@@ -2,7 +2,7 @@
 "use client";
 
 import { CldUploadWidget } from 'next-cloudinary';
-import { UploadCloud } from 'lucide-react';
+import { UploadCloud, Shield } from 'lucide-react';
 
 interface LogoUploadWidgetProps {
   currentLogoUrl?: string | null;

@@ -1,26 +1,27 @@
 // src/app/teams/[id]/layout.tsx
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
-import { Shield, User } from 'lucide-react';
+import { Shield, User, Settings } from 'lucide-react'; 
+import Link from 'next/link'; // 
 import TeamTabs from '@/components/teams/TeamTabs';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import SyncStatsButton from '@/components/teams/SyncStatsButton';
 
 export default async function TeamLayout({ children, params }: { children: React.ReactNode, params: Promise<{ id: string }> }) {
-  const { id } = await params;
+  const { teamId } = await params;
   
   // Get session to verify ownership OR admin status
   const session = await getServerSession(authOptions);
   const myTeamId = (session?.user as any)?.teamId;
   const userRole = (session?.user as any)?.role;
   
-  const isMyTeam = myTeamId === id;
+  const isMyTeam = myTeamId === teamId;
   const isAdmin = userRole === 'ADMIN';
-  const canSyncStats = isMyTeam || isAdmin; // Both owners and commishes get the button!
+  const canSyncStats = isMyTeam || isAdmin; 
 
   const team = await prisma.team.findUnique({
-    where: { id },
+    where: { id: teamId },
     include: { managers: true, players: true }
   });
 
@@ -28,11 +29,11 @@ export default async function TeamLayout({ children, params }: { children: React
 
   // ⚡ Fetch fast counts for the related tables
   const draftPickCount = await prisma.draftPick.count({
-    where: { currentOwnerId: id },
+    where: { currentOwnerId: teamId },
   });
   
   const hofCount = await prisma.teamHallOfFame.count({
-    where: { teamId: id },
+    where: { teamId: teamId },
   });
 
   // 🪣 Calculate Stats for the Header
@@ -51,7 +52,13 @@ export default async function TeamLayout({ children, params }: { children: React
         <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <div className="bg-blue-600 p-2 rounded-lg text-white"><Shield size={24} /></div>
+              <div className="w-10 h-10 bg-white rounded-lg border border-slate-200 shadow-sm flex items-center justify-center overflow-hidden shrink-0">
+                {team.logoUrl ? (
+                  <img src={team.logoUrl} alt={team.name} className="w-full h-full object-contain p-0.5" />
+                ) : (
+                  <Shield size={20} className="text-slate-400" />
+                )}
+              </div>
               <h1 className="text-3xl font-black text-slate-900">{team.name}</h1>
             </div>
             
@@ -60,9 +67,17 @@ export default async function TeamLayout({ children, params }: { children: React
                 <User size={16} /> Manager: {team.managers[0]?.name || 'Unmanaged'}
               </p>
               
-              {/* Uses the canSyncStats boolean */}
               {canSyncStats && (
-                <SyncStatsButton teamId={team.id} lastStatSync={team.lastStatSync} />
+                <div className="flex items-center gap-2">
+                  <SyncStatsButton teamId={team.id} lastStatSync={team.lastStatSync} />
+                  <Link 
+                    href={`/teams/${team.id}/edit`} 
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 text-xs font-bold rounded-md hover:bg-slate-50 transition-colors shadow-sm"
+                  >
+                    <Settings size={14} />
+                    Settings
+                  </Link>
+                </div>
               )}
             </div>
           </div>
@@ -78,7 +93,7 @@ export default async function TeamLayout({ children, params }: { children: React
           </div>
         </header>
 
-        <TeamTabs teamId={id} />
+        <TeamTabs teamId={teamId} />
         <main className="mt-8">{children}</main>
       </div>
     </div>
