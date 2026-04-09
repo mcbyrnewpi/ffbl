@@ -88,7 +88,7 @@ export default function PlayerCard({ player, onLinkClick, onNameClick, isMyTeam 
 
         {/* 4. PLAYER ACTIONS (Unconfined!) */}
         <div className="mt-3 pt-3 border-t border-slate-100 relative">
-           <PlayerActionMenu player={player} isMyTeam={isMyTeam} />
+           <PlayerActionMenu player={player} isMyTeam={!!isMyTeam} />
         </div>
       </div>
     </div>
