@@ -9,7 +9,7 @@ const MIGRATION_DB_URL = "<REPLACE_WITH_DB_URL>";
 const pool = new Pool({ connectionString: MIGRATION_DB_URL });
 
 // 3. Wrap it in the Prisma Adapter
-const adapter = new PrismaPg(pool);
+const adapter = new PrismaPg(pool as any);
 
 // 4. Hand the adapter to the Client!
 const prisma = new PrismaClient({ adapter });
