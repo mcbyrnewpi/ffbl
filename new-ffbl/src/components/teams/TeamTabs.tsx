@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 export default function TeamTabs({ teamId }: { teamId: string }) {
   const pathname = usePathname();
   
-  const tabs = [
+  const tabs: any[] = [
     { name: "Active Roster", href: `/teams/${teamId}` },
     { name: "Farm System", href: `/teams/${teamId}/minors` },
     { name: "Draft Picks", href: `/teams/${teamId}/draft-picks` },
