@@ -8,7 +8,7 @@ import { ArrowRightLeft, UserMinus, ArrowUpCircle, ArrowDownCircle, Stethoscope,
 interface Props {
   player: any;
   isMyTeam: boolean;
-  dropUp?: boolean; // 🌟 Included in interface
+  dropUp?: boolean;
 }
 
 // 🌟 Added dropUp = false to the destructuring here

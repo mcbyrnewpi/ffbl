@@ -119,7 +119,7 @@ export default function RosterRow({ player, onLinkClick, onNameClick, isMyTeam }
             </span>
           ) : (
             <div className="shrink-0">
-              <PlayerActionMenu player={player} isMyTeam={isMyTeam} />
+              <PlayerActionMenu player={player} isMyTeam={!!isMyTeam} />
             </div>
           )}
         </div>
