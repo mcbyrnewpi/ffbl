@@ -1,7 +1,7 @@
 // src/app/api/trades/decline.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { ApprovalStatus } from '@prisma/client';
+import { ApprovalStatus, TradeStatus } from '@prisma/client';
 
 export async function POST(request: Request) {
   try {
@@ -40,14 +40,14 @@ export async function POST(request: Request) {
       if (userApproval && !isProposer) {
          await tx.tradeApproval.update({
            where: { id: userApproval.id },
-           data: { status: ApprovalStatus.CANCELLED }
+           data: { status: ApprovalStatus.REJECTED }
          });
       }
 
       // 4. Kill the parent trade
       await tx.trade.update({
         where: { id: tradeId },
-        data: { status: ApprovalStatus.CANCELLED } 
+        data: { status: TradeStatus.CANCELLED } 
       });
 
       // 5. The Master Key: Break ALL padlocks associated with this trade
