@@ -1,6 +1,7 @@
 // src/app/api/trades/decline.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { ApprovalStatus } from '@prisma/client';
 
 export async function POST(request: Request) {
   try {
@@ -35,18 +36,18 @@ export async function POST(request: Request) {
         throw new Error("User is not authorized to interact with this trade.");
       }
 
-      // 3. If a receiver is rejecting it, log their specific ticket as DECLINED
+      // 3. If a receiver is rejecting it, log their specific ticket as cancelled
       if (userApproval && !isProposer) {
          await tx.tradeApproval.update({
            where: { id: userApproval.id },
-           data: { status: 'CANCELLED' }
+           data: { status: ApprovalStatus.CANCELLED }
          });
       }
 
       // 4. Kill the parent trade
       await tx.trade.update({
         where: { id: tradeId },
-        data: { status: 'CANCELLED' } 
+        data: { status: ApprovalStatus.CANCELLED } 
       });
 
       // 5. The Master Key: Break ALL padlocks associated with this trade
