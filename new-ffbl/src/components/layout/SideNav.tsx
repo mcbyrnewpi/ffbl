@@ -123,8 +123,8 @@ export default function SideNav() {
              <div className="text-xs text-slate-500 animate-pulse">Loading session...</div>
           ) : session ? (
             <div className="flex flex-col gap-1">
-              <div className="text-xs font-bold text-white truncate" title={session.user.name || session.user.email}>
-                {session.user.name || session.user.email}
+              <div className="text-xs font-bold text-white truncate" title={session.user.name || session.user.email || ""}>
+                {session.user.name || session.user.email || ""}
               </div>
               <div className="text-[10px] text-slate-400 font-medium uppercase tracking-widest mb-2">
                 {(session.user as any).role || 'OWNER'}
