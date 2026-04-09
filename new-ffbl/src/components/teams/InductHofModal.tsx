@@ -83,7 +83,7 @@ export default function InductHofModal({ teamId, isOpen, onClose }: { teamId: st
                 <Search size={16} className="absolute left-3 top-3 text-slate-400" />
                 <input 
                   autoFocus
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-4 py-2.5 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-9 pr-4 py-2.5 outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all text-slate-900 font-medium placeholder-slate-400"
                   placeholder="Type a name (e.g., Joey Votto)..."
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
@@ -120,7 +120,7 @@ export default function InductHofModal({ teamId, isOpen, onClose }: { teamId: st
                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Induction Year</label>
                 <input 
                   type="number"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 outline-none focus:border-amber-500"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 outline-none focus:border-amber-500 text-slate-900 font-bold"
                   value={inductionYear}
                   onChange={(e) => setInductionYear(parseInt(e.target.value))}
                 />
@@ -130,7 +130,7 @@ export default function InductHofModal({ teamId, isOpen, onClose }: { teamId: st
                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Manager's Tribute (Plaque Text)</label>
                 <textarea 
                   rows={4}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 outline-none focus:border-amber-500 text-sm"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 outline-none focus:border-amber-500 text-sm text-slate-900 font-medium placeholder-slate-400"
                   placeholder="Share your memories of this player's impact on your franchise..."
                   value={blurb}
                   onChange={(e) => setBlurb(e.target.value)}

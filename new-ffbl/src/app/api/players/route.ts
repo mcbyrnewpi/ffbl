@@ -34,9 +34,9 @@ export async function GET(request: Request) {
       },
       include: {
         positions: true,
-        team: { select: { name: true } },
+        team: { select: { name: true, logoUrl: true } },
         prospectRankings: true,
-        hallOfFame: { include: { team: { select: { name: true } } } }
+        hallOfFame: { include: { team: { select: { name: true, logoUrl: true } } } }
       },
       take: 50, 
       orderBy: { lastName: 'asc' }

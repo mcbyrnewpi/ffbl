@@ -293,8 +293,8 @@ function PlayerSearchContent() {
         </div>
         <input
           type="text"
-          className="block w-full pl-12 pr-4 py-4 border border-slate-300 rounded-xl leading-5 bg-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-lg transition-shadow"
-          placeholder="Search for a specific player (e.g., 'Pujols', 'Votto')..."
+          className="block w-full pl-12 pr-4 py-4 border border-slate-300 rounded-xl leading-5 bg-white text-slate-900 font-medium placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-lg transition-shadow"
+          placeholder="Search for a specific player (e.g., 'Qualls', 'Votto')..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
@@ -505,7 +505,7 @@ function PlayerSearchContent() {
         </div>
       )}
 
-      {/* 🌟 NEW: INLINE INDUCTION MODAL */}
+      {/* INLINE INDUCTION MODAL */}
       {inductingPlayer && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" onClick={() => setInductingPlayer(null)}>
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden" onClick={e => e.stopPropagation()}>
@@ -526,8 +526,7 @@ function PlayerSearchContent() {
                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Induction Year</label>
                 <input 
                   type="number"
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 outline-none focus:border-amber-500"
-                  value={hofYear}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 outline-none focus:border-amber-500 text-slate-900 font-bold"                  value={hofYear}
                   onChange={(e) => setHofYear(parseInt(e.target.value))}
                 />
               </div>
@@ -536,7 +535,7 @@ function PlayerSearchContent() {
                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Manager's Tribute</label>
                 <textarea 
                   rows={4}
-                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 outline-none focus:border-amber-500 text-sm"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 outline-none focus:border-amber-500 text-sm text-slate-900 font-medium placeholder-slate-400"
                   placeholder="Share your memories of this player's impact on your franchise..."
                   value={hofBlurb}
                   onChange={(e) => setHofBlurb(e.target.value)}

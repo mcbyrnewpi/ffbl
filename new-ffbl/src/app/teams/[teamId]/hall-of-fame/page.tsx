@@ -49,6 +49,7 @@ export default async function HallOfFamePage({ params }: { params: Promise<{ tea
   const inductees = await prisma.teamHallOfFame.findMany({
     where: { teamId },
     include: {
+      team: true,
       player: {
         include: { positions: true }
       }

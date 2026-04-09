@@ -2,34 +2,36 @@
 import { Trophy, Activity } from 'lucide-react';
 import { getTeamAbbrev, getKBB, getRatePct } from './utils';
 
-// Reusable mini-stat component
-export const CareerStat = ({ label, value }: { label: string, value: string | number | undefined }) => (
-  <div className="flex flex-col items-center">
-     <span className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-0.5">{label}</span>
-     <span className="text-2xl font-black text-slate-800 leading-none">{value ?? '--'}</span>
+// Textured "Letterpress" Stat Plaque
+export const CareerStat = ({ label, value, isLegend }: { label: string, value: string | number | undefined, isLegend?: boolean }) => (
+  <div className={`flex flex-col items-center justify-center py-2.5 rounded border-b-2 ${isLegend ? 'bg-[#fdfaf4] bg-[url("https://www.transparenttextures.com/patterns/paper-fibers.png")] border-b-amber-400 border-x border-t border-amber-900/10 shadow-[0_2px_4px_rgba(251,191,36,0.15)]' : 'bg-[#fcfcfc] bg-[url("https://www.transparenttextures.com/patterns/paper-fibers.png")] border-b-slate-300 border-x border-t border-slate-200 shadow-sm'}`}>
+     <span className="text-[9px] font-black uppercase tracking-widest mb-0.5 text-slate-600 drop-shadow-[0_1px_0_rgba(255,255,255,0.8)]">{label}</span>
+     <span className="text-2xl font-black leading-none text-slate-900 tracking-tight drop-shadow-[0_1px_0_rgba(255,255,255,0.8)]">{value ?? '--'}</span>
   </div>
 );
 
-// --- 1. RETIRED / LEGEND BOARD ---
+// --- 1. RETIRED / LEGEND BOARD (Aged Cardboard Edition) ---
 export const CareerLegacyBoard = ({ isLegend, statView, setStatView, isAdvanced, setIsAdvanced, availableViews, careerSplit }: any) => (
-  <div className={`p-3 border-2 rounded-sm flex flex-col flex-grow ${isLegend ? 'bg-yellow-500/10 border-yellow-500/50' : 'bg-[#4a3c31]/5 border-[#4a3c31]/20'}`}>
-     <div className="flex items-center justify-between mb-3 border-b border-black/10 pb-2">
+  <div className={`p-3 border rounded-xl flex flex-col flex-grow shadow-sm ${isLegend ? 'bg-[#f4ebd8] bg-[url("https://www.transparenttextures.com/patterns/paper-fibers.png")] shadow-[inset_0_0_20px_rgba(133,77,14,0.05)] border-amber-300' : 'bg-[#f4f5f7] bg-[url("https://www.transparenttextures.com/patterns/paper-fibers.png")] shadow-[inset_0_0_20px_rgba(0,0,0,0.03)] border-slate-300'}`}>
+     <div className={`flex items-center justify-between mb-3 border-b pb-2 ${isLegend ? 'border-amber-300' : 'border-slate-300'}`}>
         <div className="flex items-center gap-1.5">
-           <Trophy size={14} className={isLegend ? 'text-yellow-600' : 'text-[#4a3c31]'} />
-           <h4 className={`text-[10px] font-black uppercase tracking-widest ${isLegend ? 'text-yellow-800' : 'text-[#4a3c31]'}`}>Career Legacy</h4>
+           <Trophy size={14} className={isLegend ? 'text-amber-600 drop-shadow-[0_1px_0_rgba(255,255,255,0.8)]' : 'text-slate-500'} />
+           <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-800 drop-shadow-[0_1px_0_rgba(255,255,255,0.8)]">Career Legacy</h4>
         </div>
+        
+        {/* Toggles */}
         <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
           {statView !== 'fielding' && (
             <div className="flex gap-1">
-              <button onClick={() => setIsAdvanced(false)} className={`text-[6.5px] px-1.5 py-0.5 rounded font-black transition-colors ${!isAdvanced ? (isLegend ? 'bg-yellow-500 text-white' : 'bg-[#4a3c31] text-white') : 'bg-white text-slate-500 hover:bg-slate-100'}`}>STD</button>
-              <button onClick={() => setIsAdvanced(true)} className={`text-[6.5px] px-1.5 py-0.5 rounded font-black transition-colors ${isAdvanced ? (isLegend ? 'bg-yellow-500 text-white' : 'bg-[#4a3c31] text-white') : 'bg-white text-slate-500 hover:bg-slate-100'}`}>ADV</button>
+              <button onClick={() => setIsAdvanced(false)} className={`text-[6.5px] px-1.5 py-0.5 rounded-sm font-black transition-colors ${!isAdvanced ? (isLegend ? 'bg-amber-400 text-slate-900 shadow-sm' : 'bg-slate-300 text-slate-900') : 'bg-transparent text-slate-600 hover:text-slate-900 drop-shadow-[0_1px_0_rgba(255,255,255,0.8)]'}`}>STD</button>
+              <button onClick={() => setIsAdvanced(true)} className={`text-[6.5px] px-1.5 py-0.5 rounded-sm font-black transition-colors ${isAdvanced ? (isLegend ? 'bg-amber-400 text-slate-900 shadow-sm' : 'bg-slate-300 text-slate-900') : 'bg-transparent text-slate-600 hover:text-slate-900 drop-shadow-[0_1px_0_rgba(255,255,255,0.8)]'}`}>ADV</button>
             </div>
           )}
           {availableViews.length > 1 && (
-            <div className="flex gap-1 border-l border-black/20 pl-1.5">
-              {availableViews.includes('hitting') && <button onClick={() => setStatView('hitting')} className={`text-[6.5px] px-1.5 py-0.5 rounded font-black transition-colors ${statView === 'hitting' ? (isLegend ? 'bg-yellow-500 text-white' : 'bg-[#4a3c31] text-white') : 'bg-white text-slate-500 hover:bg-slate-100'}`}>HIT</button>}
-              {availableViews.includes('pitching') && <button onClick={() => setStatView('pitching')} className={`text-[6.5px] px-1.5 py-0.5 rounded font-black transition-colors ${statView === 'pitching' ? (isLegend ? 'bg-yellow-500 text-white' : 'bg-[#4a3c31] text-white') : 'bg-white text-slate-500 hover:bg-slate-100'}`}>PIT</button>}
-              {availableViews.includes('fielding') && <button onClick={() => setStatView('fielding')} className={`text-[6.5px] px-1.5 py-0.5 rounded font-black transition-colors ${statView === 'fielding' ? (isLegend ? 'bg-yellow-500 text-white' : 'bg-[#4a3c31] text-white') : 'bg-white text-slate-500 hover:bg-slate-100'}`}>FLD</button>}
+            <div className={`flex gap-1 border-l pl-1.5 ${isLegend ? 'border-amber-300' : 'border-slate-300'}`}>
+              {availableViews.includes('hitting') && <button onClick={() => setStatView('hitting')} className={`text-[6.5px] px-1.5 py-0.5 rounded-sm font-black transition-colors ${statView === 'hitting' ? (isLegend ? 'bg-amber-400 text-slate-900 shadow-sm' : 'bg-slate-300 text-slate-900') : 'bg-transparent text-slate-600 hover:text-slate-900 drop-shadow-[0_1px_0_rgba(255,255,255,0.8)]'}`}>HIT</button>}
+              {availableViews.includes('pitching') && <button onClick={() => setStatView('pitching')} className={`text-[6.5px] px-1.5 py-0.5 rounded-sm font-black transition-colors ${statView === 'pitching' ? (isLegend ? 'bg-amber-400 text-slate-900 shadow-sm' : 'bg-slate-300 text-slate-900') : 'bg-transparent text-slate-600 hover:text-slate-900 drop-shadow-[0_1px_0_rgba(255,255,255,0.8)]'}`}>PIT</button>}
+              {availableViews.includes('fielding') && <button onClick={() => setStatView('fielding')} className={`text-[6.5px] px-1.5 py-0.5 rounded-sm font-black transition-colors ${statView === 'fielding' ? (isLegend ? 'bg-amber-400 text-slate-900 shadow-sm' : 'bg-slate-300 text-slate-900') : 'bg-transparent text-slate-600 hover:text-slate-900 drop-shadow-[0_1px_0_rgba(255,255,255,0.8)]'}`}>FLD</button>}
             </div>
           )}
         </div>
@@ -37,25 +39,25 @@ export const CareerLegacyBoard = ({ isLegend, statView, setStatView, isAdvanced,
 
      {careerSplit ? (
         <div className="flex-grow flex flex-col justify-center">
-           <div className="grid grid-cols-3 gap-y-6 gap-x-2 text-center">
+           <div className="grid grid-cols-3 gap-2 text-center">
               {statView === 'hitting' ? (
                  isAdvanced ? (
-                    <><CareerStat label="PA" value={careerSplit.stat?.plateAppearances} /><CareerStat label="K%" value={getRatePct(careerSplit.stat?.strikeOuts, careerSplit.stat?.plateAppearances)} /><CareerStat label="BB%" value={getRatePct(careerSplit.stat?.baseOnBalls, careerSplit.stat?.plateAppearances)} /><CareerStat label="BABIP" value={careerSplit.stat?.babip} /><CareerStat label="GO/AO" value={careerSplit.stat?.groundOutsToAirouts} /><CareerStat label="AB/HR" value={careerSplit.stat?.atBatsPerHomeRun} /></>
+                    <><CareerStat isLegend={isLegend} label="PA" value={careerSplit.stat?.plateAppearances} /><CareerStat isLegend={isLegend} label="K%" value={getRatePct(careerSplit.stat?.strikeOuts, careerSplit.stat?.plateAppearances)} /><CareerStat isLegend={isLegend} label="BB%" value={getRatePct(careerSplit.stat?.baseOnBalls, careerSplit.stat?.plateAppearances)} /><CareerStat isLegend={isLegend} label="BABIP" value={careerSplit.stat?.babip} /><CareerStat isLegend={isLegend} label="GO/AO" value={careerSplit.stat?.groundOutsToAirouts} /><CareerStat isLegend={isLegend} label="AB/HR" value={careerSplit.stat?.atBatsPerHomeRun} /></>
                  ) : (
-                    <><CareerStat label="G" value={careerSplit.stat?.gamesPlayed} /><CareerStat label="HITS" value={careerSplit.stat?.hits} /><CareerStat label="HR" value={careerSplit.stat?.homeRuns} /><CareerStat label="RBI" value={careerSplit.stat?.rbi} /><CareerStat label="AVG" value={careerSplit.stat?.avg} /><CareerStat label="OPS" value={careerSplit.stat?.ops} /></>
+                    <><CareerStat isLegend={isLegend} label="G" value={careerSplit.stat?.gamesPlayed} /><CareerStat isLegend={isLegend} label="HITS" value={careerSplit.stat?.hits} /><CareerStat isLegend={isLegend} label="HR" value={careerSplit.stat?.homeRuns} /><CareerStat isLegend={isLegend} label="RBI" value={careerSplit.stat?.rbi} /><CareerStat isLegend={isLegend} label="AVG" value={careerSplit.stat?.avg} /><CareerStat isLegend={isLegend} label="OPS" value={careerSplit.stat?.ops} /></>
                  )
               ) : statView === 'pitching' ? (
                  isAdvanced ? (
-                    <><CareerStat label="BF" value={careerSplit.stat?.battersFaced} /><CareerStat label="K/9" value={careerSplit.stat?.strikeoutsPer9Inn} /><CareerStat label="BB/9" value={careerSplit.stat?.walksPer9Inn} /><CareerStat label="HR/9" value={careerSplit.stat?.homeRunsPer9} /><CareerStat label="K/BB" value={getKBB(careerSplit.stat)} /><CareerStat label="WHIP" value={careerSplit.stat?.whip} /></>
+                    <><CareerStat isLegend={isLegend} label="BF" value={careerSplit.stat?.battersFaced} /><CareerStat isLegend={isLegend} label="K/9" value={careerSplit.stat?.strikeoutsPer9Inn} /><CareerStat isLegend={isLegend} label="BB/9" value={careerSplit.stat?.walksPer9Inn} /><CareerStat isLegend={isLegend} label="HR/9" value={careerSplit.stat?.homeRunsPer9} /><CareerStat isLegend={isLegend} label="K/BB" value={getKBB(careerSplit.stat)} /><CareerStat isLegend={isLegend} label="WHIP" value={careerSplit.stat?.whip} /></>
                  ) : (
-                    <><CareerStat label="IP" value={careerSplit.stat?.inningsPitched ?? careerSplit.stat?.innings} /><CareerStat label="W" value={careerSplit.stat?.wins} /><CareerStat label="SV" value={careerSplit.stat?.saves} /><CareerStat label="K" value={careerSplit.stat?.strikeOuts} /><CareerStat label="ERA" value={careerSplit.stat?.era} /><CareerStat label="WHIP" value={careerSplit.stat?.whip} /></>
+                    <><CareerStat isLegend={isLegend} label="IP" value={careerSplit.stat?.inningsPitched ?? careerSplit.stat?.innings} /><CareerStat isLegend={isLegend} label="W" value={careerSplit.stat?.wins} /><CareerStat isLegend={isLegend} label="SV" value={careerSplit.stat?.saves} /><CareerStat isLegend={isLegend} label="K" value={careerSplit.stat?.strikeOuts} /><CareerStat isLegend={isLegend} label="ERA" value={careerSplit.stat?.era} /><CareerStat isLegend={isLegend} label="WHIP" value={careerSplit.stat?.whip} /></>
                  )
               ) : (
-                 <><CareerStat label="POS" value={careerSplit.position?.abbreviation} /><CareerStat label="INN" value={careerSplit.stat?.innings} /><CareerStat label="PO" value={careerSplit.stat?.putOuts} /><CareerStat label="A" value={careerSplit.stat?.assists} /><CareerStat label="E" value={careerSplit.stat?.errors} /><CareerStat label="FLD%" value={careerSplit.stat?.fielding} /></>
+                 <><CareerStat isLegend={isLegend} label="POS" value={careerSplit.position?.abbreviation} /><CareerStat isLegend={isLegend} label="INN" value={careerSplit.stat?.innings} /><CareerStat isLegend={isLegend} label="PO" value={careerSplit.stat?.putOuts} /><CareerStat isLegend={isLegend} label="A" value={careerSplit.stat?.assists} /><CareerStat isLegend={isLegend} label="E" value={careerSplit.stat?.errors} /><CareerStat isLegend={isLegend} label="FLD%" value={careerSplit.stat?.fielding} /></>
               )}
            </div>
         </div>
-     ) : <div className="flex-grow flex items-center justify-center text-[10px] font-bold italic opacity-50">Stats unavailable.</div>}
+     ) : <div className="flex-grow flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-500 drop-shadow-[0_1px_0_rgba(255,255,255,0.8)]">Stats unavailable.</div>}
   </div>
 );
 
@@ -106,11 +108,10 @@ export const ProspectScoutingBoard = ({ validRankings, isPitcherDef, statView, l
       <div className="text-center text-[10px] text-amber-700/60 font-bold italic py-2 shrink-0">Scouting unavailable.</div>
     )}
 
-    {/* 🌟 SCROLLING REPORT SECTION - Added min-h-0 and overflow-y-auto, removed line-clamp */}
+    {/* SCROLLING REPORT SECTION */}
     <div className="pt-3 border-t border-amber-200/50 relative flex flex-col flex-grow min-h-0 mt-auto">
       <div className="absolute -top-2 left-2 bg-[#fdfaf3] px-1 text-[8px] font-black text-amber-500 uppercase tracking-widest z-10">Report</div>
       
-      {/* The actual scrolling area */}
       <div className="overflow-y-auto h-full pr-1 pb-1" style={{ scrollbarWidth: 'thin' }}>
         <p className="text-[7.5px] leading-relaxed text-slate-700 italic font-medium whitespace-pre-wrap">
           "{latestScoutingReport}"

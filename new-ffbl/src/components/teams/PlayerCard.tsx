@@ -11,8 +11,36 @@ interface PlayerCardProps {
 }
 
 export default function PlayerCard({ player, onLinkClick, onNameClick, isMyTeam }: PlayerCardProps) {
-  return (
+  
+  // 🌟 Calculate Age
+  const age = player.mlbRawData?.currentAge || 
+    (player.birthdate ? Math.floor((new Date().getTime() - new Date(player.birthdate).getTime()) / 31557600000) : '??');
 
+  const isMinorLeaguer = player.level !== 'MLB' && player.status !== 'RETIRED';
+
+  const getQuickStats = () => {
+    if (!player.mlbRawData?.stats) return null;
+    
+    const pos = player.positions?.[0]?.abbrev || player.mlbRawData?.primaryPosition?.abbreviation;
+    const isPitcher = pos === 'P' || pos === 'SP' || pos === 'RP';
+
+    // Try to get current season stats first, fallback to career stats
+    const statGroup = isPitcher ? 'pitching' : 'hitting';
+    const statBlock = player.mlbRawData.stats.find((s: any) => s.type?.displayName === 'season' && s.group?.displayName === statGroup)?.splits?.[0]?.stat
+      || player.mlbRawData.stats.find((s: any) => s.type?.displayName === 'career' && s.group?.displayName === statGroup)?.splits?.[0]?.stat;
+
+    if (!statBlock) return null;
+
+    if (isPitcher) {
+      return `${statBlock.era || '-'} ERA • ${statBlock.strikeOuts || '-'} K`;
+    } else {
+      return `${statBlock.avg || '-'} AVG • ${statBlock.homeRuns || '-'} HR`;
+    }
+  };
+
+  const quickStats = getQuickStats();
+
+  return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 group relative flex flex-col hover:shadow-md transition-all hover:z-50 focus-within:z-50">
       
       {/* 1. TOP OVERLAYS */}
@@ -38,7 +66,7 @@ export default function PlayerCard({ player, onLinkClick, onNameClick, isMyTeam 
         )}
       </div>
 
-      {/* 2. CLICKABLE HEADSHOT AREA (Now handles its own overflow) */}
+      {/* 2. CLICKABLE HEADSHOT AREA */}
       <button 
         onClick={onNameClick}
         className="relative h-36 overflow-hidden bg-slate-100 flex flex-col items-center flex-shrink-0 w-full group/img focus:outline-none rounded-t-xl"
@@ -80,13 +108,32 @@ export default function PlayerCard({ player, onLinkClick, onNameClick, isMyTeam 
           </span>
         </div>
         
-        <div className="flex items-center gap-1.5 pt-2 border-t border-slate-50 text-[10px] text-slate-400 font-bold uppercase tracking-wide">
-           <span>ETA: {player.prospectEta || '---'}</span>
-           <span className="w-0.5 h-0.5 bg-slate-200 rounded-full"></span>
-           <span>Age: {player.age || '??'}</span>
+        {/* DYNAMIC SUBTEXT ROW */}
+        <div className="flex flex-col gap-1 pt-2 border-t border-slate-50 text-[10px] font-bold uppercase tracking-wide">
+           {/* Top Row: Age & ETA */}
+           <div className="flex items-center gap-1.5 text-slate-400">
+             <span>Age: {age}</span>
+             {isMinorLeaguer && player.prospectEta && (
+               <>
+                 <span className="w-0.5 h-0.5 bg-slate-300 rounded-full shrink-0"></span>
+                 <span className="text-blue-500">ETA: {player.prospectEta}</span>
+               </>
+             )}
+           </div>
+
+           {/* Bottom Row: Quick Stats */}
+           {quickStats ? (
+             <div className="text-slate-600 truncate tracking-normal">
+               {quickStats}
+             </div>
+           ) : (
+             <div className="text-slate-300 italic truncate">
+               No recent stats
+             </div>
+           )}
         </div>
 
-        {/* 4. PLAYER ACTIONS (Unconfined!) */}
+        {/* 4. PLAYER ACTIONS */}
         <div className="mt-3 pt-3 border-t border-slate-100 relative">
            <PlayerActionMenu player={player} isMyTeam={!!isMyTeam} />
         </div>

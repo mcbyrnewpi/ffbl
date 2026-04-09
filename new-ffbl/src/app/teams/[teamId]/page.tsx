@@ -1,3 +1,4 @@
+// src/app/teams/[teamId]/page.tsx
 import { prisma } from '@/lib/prisma';
 import GlobalRosterContainer from '@/components/teams/GlobalRosterContainer';
 import { getServerSession } from 'next-auth/next';
@@ -14,7 +15,11 @@ export default async function TeamPage({ params }: { params: Promise<{ teamId: s
     where: { id: teamId },
     include: {
       players: { 
-        include: { positions: true, prospectRankings: true }, 
+        include: { 
+          positions: true, 
+          prospectRankings: true, 
+          team: true // 🌟 We fetch the full team (with logos!) here
+        }, 
         orderBy: [{ level: 'desc' }, { lastName: 'asc' }] 
       }
     }
@@ -22,14 +27,10 @@ export default async function TeamPage({ params }: { params: Promise<{ teamId: s
 
   if (!team) return null;
 
-  const playersWithTeam = team.players.map(p => ({
-    ...p,
-    team: { name: team.name }
-  }));
-
-  const mlbActive = playersWithTeam.filter(p => p.level === 'MLB' && p.status === 'ACTIVE');
-  const naList = playersWithTeam.filter(p => p.status === 'NA');
-  const injuredList = playersWithTeam.filter(p => p.status !== 'ACTIVE' && p.status !== 'NA');
+  // 🌟 No more .map() overwrite! Just use the native team.players
+  const mlbActive = team.players.filter(p => p.level === 'MLB' && p.status === 'ACTIVE');
+  const naList = team.players.filter(p => p.status === 'NA');
+  const injuredList = team.players.filter(p => p.status !== 'ACTIVE' && p.status !== 'NA');
 
   return (
     <div className="animate-in fade-in duration-500">

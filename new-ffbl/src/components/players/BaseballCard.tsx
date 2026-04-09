@@ -22,8 +22,24 @@ export default function BaseballCard({ player }: { player: any }) {
     ? `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_400/v1/people/${player.mlbId}/headshot/silo/current.png` 
     : '/images/placeholders/no-player.svg';
 
-  const ffblTeamName = player.team?.name || 'Free Agent';
-  const ffblTeamLogo = player.team?.logoUrl;
+  // 1. Safely extract the HOF Team if they are a Legend
+  const hofTeam = isLegend ? player.hallOfFame?.[0]?.team : null;
+  const baseTeam = player.team || hofTeam;
+
+  let ffblTeamName = baseTeam?.name || 'Free Agent';
+  let ffblTeamLogo = baseTeam?.logoUrl;
+
+  // 2. Swap to Affiliate Names & Logos based on Level!
+  if (player.team) {
+    if (player.level === 'AAA' && player.team.aaaAffiliateName) ffblTeamName = player.team.aaaAffiliateName;
+    else if (player.level === 'AA' && player.team.aaAffiliateName) ffblTeamName = player.team.aaAffiliateName;
+    else if (player.level === 'A' && player.team.aAffiliateName) ffblTeamName = player.team.aAffiliateName;
+
+    if (player.level === 'AAA' && player.team.aaaLogoUrl) ffblTeamLogo = player.team.aaaLogoUrl;
+    else if (player.level === 'AA' && player.team.aaLogoUrl) ffblTeamLogo = player.team.aaLogoUrl;
+    else if (player.level === 'A' && player.team.aLogoUrl) ffblTeamLogo = player.team.aLogoUrl;
+  }
+
   const mlbTeamName = player.mlbRawData?.currentTeam?.name || 'Unassigned';
   const mlbDisplayTeam = isRetired ? getLegacyTeam(player) : mlbTeamName;
 
@@ -50,9 +66,9 @@ export default function BaseballCard({ player }: { player: any }) {
   const careerSplit = rawStats.find((s: any) => s.type?.displayName === 'career' && s.group?.displayName === statView)?.splits?.[0];
 
   // --- Dynamic Visual Theming ---
-  let cardBackground = "bg-[#f4f1ea] bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')]";
-  if (isLegend) cardBackground = "bg-gradient-to-br from-amber-50 to-yellow-100 bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')]";
-  else if (isRetired) cardBackground = "bg-[#e8dcc7] bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')]";
+  let cardBackground = "bg-[#f8f9fa] bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')]";
+  if (isLegend) cardBackground = "bg-white bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')]";
+  else if (isRetired) cardBackground = "bg-[#f8f9fa] bg-[url('https://www.transparenttextures.com/patterns/paper-fibers.png')]";
 
   let borderStyle = "border-[12px] border-white shadow-inner";
   if (isLegend) borderStyle = "border-[12px] border-yellow-400 shadow-[0_0_20px_rgba(250,204,21,0.6)]";
@@ -157,25 +173,32 @@ export default function BaseballCard({ player }: { player: any }) {
               )}
 
               {/* Physicals Grid */}
-              <div className="grid grid-cols-2 gap-x-6 border-y border-slate-200 py-1 flex-shrink-0">
-                <div className="flex justify-between text-[8px] font-bold uppercase"><span className="text-slate-400">B/T:</span><span className="text-slate-800">{player.mlbRawData?.batSide?.code || 'R'}/{player.mlbRawData?.pitchHand?.code || 'R'}</span></div>
-                <div className="flex justify-between text-[8px] font-bold uppercase"><span className="text-slate-400">Age:</span><span className="text-slate-800">{age}</span></div>
+              <div className={`grid grid-cols-2 gap-x-6 border-y py-1 flex-shrink-0 ${isLegend ? 'border-amber-300/50' : isRetired ? 'border-[#c4af98]/50' : 'border-slate-200'}`}>
+                <div className="flex justify-between text-[8px] font-bold uppercase">
+                  <span className="text-slate-600">B/T:</span>
+                  <span className="text-black font-black">{player.mlbRawData?.batSide?.code || 'R'}/{player.mlbRawData?.pitchHand?.code || 'R'}</span>
+                </div>
+                <div className="flex justify-between text-[8px] font-bold uppercase">
+                  <span className="text-slate-600">Age:</span>
+                  <span className="text-black font-black">{age}</span>
+                </div>
               </div>
 
               {/* Ownership Footer */}
               <div className="pt-1 flex items-center justify-between flex-shrink-0">
                 <div className="flex flex-col">
-                  <span className="text-[6.5px] font-black text-slate-400 uppercase leading-none">FFBL Archive</span>
-                  <span className="text-[9px] font-black text-slate-800 uppercase italic truncate">{isLegend ? 'Hall of Fame' : isRetired ? 'Retired Alumni' : ffblTeamName}</span>
+                  <span className="text-[6.5px] font-black uppercase leading-none text-slate-600">FFBL Archive</span>
+                  <span className="text-[9px] font-black uppercase italic truncate text-black">{isLegend ? 'Hall of Fame' : isRetired ? 'Retired Alumni' : ffblTeamName}</span>
                 </div>
-                <div className={`text-[8.5px] font-black italic flex items-center gap-1 ${isLegend ? 'text-yellow-600' : isRetired ? 'text-[#4a3c31]' : 'text-red-600'}`}>
-                  {isLegend ? <Star size={8} fill="currentColor" /> : <Activity size={8} />} {isLegend ? 'LEGEND' : isRetired ? 'RETIRED' : player.status === 'ACTIVE' ? 'ROSTERED' : 'FREE AGENT'}
+                <div className={`text-[8.5px] font-black italic flex items-center gap-1 ${isLegend ? 'text-amber-700' : isRetired ? 'text-slate-800' : 'text-red-600'}`}>
+                  {isLegend ? <Star size={8} fill="currentColor" /> : <Activity size={8} />} 
+                  <span className="text-black">{isLegend ? 'LEGEND' : isRetired ? 'RETIRED' : player.status === 'ACTIVE' ? 'ROSTERED' : 'FREE AGENT'}</span>
                 </div>
               </div>
             </div>
 
-            <div className="mt-2 pt-1 border-t border-slate-200 opacity-20 flex justify-center shrink-0">
-               <span className="text-[7px] font-black italic tracking-[0.3em] uppercase text-slate-900">FFBL HERITAGE COLLECTION</span>
+            <div className={`mt-2 pt-1 border-t flex justify-center shrink-0 ${isLegend ? 'border-amber-400/50' : isRetired ? 'border-[#c4af98]/40' : 'border-slate-200/40'}`}>
+               <span className="text-[7px] font-black italic tracking-[0.3em] uppercase text-slate-800/60">FFBL HERITAGE COLLECTION</span>
             </div>
           </div>
         </div>
