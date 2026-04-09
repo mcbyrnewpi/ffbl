@@ -23,13 +23,18 @@ export const authOptions: NextAuthOptions = {
     EmailProvider({
       server: '', // We don't need this because we are overriding the send function!
       from: process.env.EMAIL_FROM,
+      // Inside your EmailProvider:
       sendVerificationRequest: async ({ identifier: email, url, provider }) => {
         try {
           const host = new URL(url).host;
+          
+          // Create a quick formatted timestamp (e.g., "4:22 PM")
+          const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
           await resend.emails.send({
             from: provider.from as string,
             to: email,
-            subject: `Log in to the FFBL (${host})`,
+            subject: `Log in to FFBL - ${timeString}`, 
             react: MagicLinkEmail({ url, host }),
           });
         } catch (error) {

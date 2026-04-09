@@ -11,15 +11,22 @@ const pool = new pg.Pool({ connectionString });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
-// Helper to prevent rate-limiting from the MLB API
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function matchMlbIds() {
-  console.log("⚾ Starting MLB API Matchmaker...");
+// Helper to strip "Jr.", "Sr.", "II", and accents for better fuzzy matching
+function cleanName(name: string) {
+  return name
+    .normalize("NFD") // Deconstructs accents (ñ -> n + ~)
+    .replace(/[\u0300-\u036f]/g, "") // Removes the accent marks
+    .replace(/\s+(Jr\.|Sr\.|II|III|IV)$/i, "") // Removes suffixes
+    .trim();
+}
 
-  // 1. Get all players missing an MLB ID
+async function matchMlbIds() {
+  console.log("⚾ Starting MLB API Matchmaker (Omni-Search Enabled)...");
+
   const players = await prisma.player.findMany({
-    where: { mlbId: null }, // Adjust this if your field is named differently
+    where: { mlbId: null }, 
   });
 
   console.log(`Found ${players.length} players needing an MLB ID.`);
@@ -30,16 +37,28 @@ async function matchMlbIds() {
 
   for (const player of players) {
     const fullName = `${player.firstName} ${player.lastName}`.trim();
+    const cleanedName = cleanName(fullName);
+
     console.log(`Searching for: ${fullName}...`);
 
     try {
-      // 2. Ask the MLB API for this specific name
-      const response = await fetch(
-        `https://statsapi.mlb.com/api/v1/people/search?names=${encodeURIComponent(fullName)}`
+      // Add sportIds for Minors, Fall League, Winter Leagues, etc.
+      let response = await fetch(
+        `https://statsapi.mlb.com/api/v1/people/search?names=${encodeURIComponent(fullName)}&sportIds=1,11,12,13,14,16,5442`
       );
-      const data = await response.json();
+      let data = await response.json();
+      let people = data.people || [];
 
-      const people = data.people || [];
+      // 🔄 FALLBACK SEARCH: If no matches, try the "cleaned" name (e.g., stripped accents/suffixes)
+      if (people.length === 0 && fullName !== cleanedName) {
+        console.log(`  🔄 Retrying with cleaned name: ${cleanedName}...`);
+        await sleep(500); // Polite delay
+        response = await fetch(
+          `https://statsapi.mlb.com/api/v1/people/search?names=${encodeURIComponent(cleanedName)}&sportIds=1,11,12,13,14,16,5442`
+        );
+        data = await response.json();
+        people = data.people || [];
+      }
 
       if (people.length === 1) {
         // 🎯 EXACT MATCH
@@ -47,17 +66,17 @@ async function matchMlbIds() {
         
         await prisma.player.update({
           where: { id: player.id },
-          data: { mlbId: mlbId }, // Update this field!
+          data: { mlbId: mlbId }, 
         });
 
         console.log(`  ✅ Matched! ID: ${mlbId}`);
         matchCount++;
       } else if (people.length > 1) {
-        // ⚠️ MULTIPLE MATCHES (e.g., Luis Garcia, Will Smith)
+        // ⚠️ MULTIPLE MATCHES
         console.log(`  ⚠️ Found ${people.length} matches for ${fullName}. Skipping for manual review.`);
         duplicateCount++;
       } else {
-        // ❌ NO MATCH (Spelling differences, retired, or international)
+        // ❌ NO MATCH
         console.log(`  ❌ No match found for ${fullName}.`);
         missingCount++;
       }
@@ -70,10 +89,10 @@ async function matchMlbIds() {
     }
   }
 
-  console.log(`\n🎉 MLB ID Sync Complete!`);
+  console.log(`\n🎉 MLB ID Omni-Sync Complete!`);
   console.log(`🎯 Exact Matches: ${matchCount}`);
   console.log(`⚠️ Multiple Matches (Needs Manual Fix): ${duplicateCount}`);
-  console.log(`❌ Not Found (Check Spelling): ${missingCount}`);
+  console.log(`❌ Not Found (Check Spelling/Retired): ${missingCount}`);
 }
 
 matchMlbIds()

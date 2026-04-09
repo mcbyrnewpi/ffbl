@@ -1,15 +1,14 @@
-// src/app/teams/[id]/edit/page.tsx
+// src/app/teams/[teamId]/edit/page.tsx
 "use client";
 
 import { use, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Save, ArrowLeft, Loader2, Shield, Sprout } from 'lucide-react';
+import { Save, ArrowLeft, Loader2, Shield, Sprout, Quote } from 'lucide-react'; // 🌟 Added Quote icon
 import LogoUploadWidget from '@/components/ui/LogoUploadWidget';
 
-export default function EditTeamPage({ params }: { params: Promise<{ id: string }> }) {
+export default function EditTeamPage({ params }: { params: Promise<{ teamId: string }> }) {
   const router = useRouter();
   
-  // 🌟 Unwrap the params Promise using React.use()
   const resolvedParams = use(params);
   const teamId = resolvedParams.teamId;
 
@@ -20,6 +19,7 @@ export default function EditTeamPage({ params }: { params: Promise<{ id: string 
   // --- Form State ---
   const [name, setName] = useState('');
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [motto, setMotto] = useState(''); // 🌟 Added Motto State
   
   const [aaaName, setAaaName] = useState('');
   const [aaaLogo, setAaaLogo] = useState<string | null>(null);
@@ -30,19 +30,19 @@ export default function EditTeamPage({ params }: { params: Promise<{ id: string 
   const [aName, setAName] = useState('');
   const [aLogo, setALogo] = useState<string | null>(null);
 
-  // Fetch the current team data
   useEffect(() => {
     const fetchTeam = async () => {
       try {
         const res = await fetch(`/api/teams`);
         if (res.ok) {
           const data = await res.json();
-          const currentTeam = data.find((t: any) => t.id === teamId); // Use unwrapped ID
+          const currentTeam = data.find((t: any) => t.id === teamId);
           
           if (currentTeam) {
             setTeam(currentTeam);
             setName(currentTeam.name || '');
             setLogoUrl(currentTeam.logoUrl || null);
+            setMotto(currentTeam.motto || ''); // 🌟 Populate motto
             setAaaName(currentTeam.aaaAffiliateName || '');
             setAaaLogo(currentTeam.aaaLogoUrl || null);
             setAaName(currentTeam.aaAffiliateName || '');
@@ -58,18 +58,18 @@ export default function EditTeamPage({ params }: { params: Promise<{ id: string 
       }
     };
     fetchTeam();
-  }, [teamId]); // Use unwrapped ID in dependency array
+  }, [teamId]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
 
     try {
-      const res = await fetch(`/api/teams/${teamId}`, { // Use unwrapped ID
+      const res = await fetch(`/api/teams/${teamId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          name, logoUrl,
+          name, logoUrl, motto, // 🌟 Include motto in payload
           aaaAffiliateName: aaaName, aaaLogoUrl: aaaLogo,
           aaAffiliateName: aaName, aaLogoUrl: aaLogo,
           aAffiliateName: aName, aLogoUrl: aLogo
@@ -77,10 +77,11 @@ export default function EditTeamPage({ params }: { params: Promise<{ id: string 
       });
 
       if (res.ok) {
-        router.push(`/teams/${teamId}`); // Use unwrapped ID
+        router.push(`/teams/${teamId}`);
         router.refresh();
       } else {
-        alert("Failed to save changes.");
+        const errData = await res.json();
+        alert(`Failed to save: ${errData.error || "Unknown error"}`);
       }
     } catch (error) {
       console.error(error);
@@ -140,6 +141,21 @@ export default function EditTeamPage({ params }: { params: Promise<{ id: string 
                   className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-900"
                   placeholder="e.g., Norfolk Nighthawks"
                   required
+                />
+              </div>
+
+              {/* 🌟 Added Team Motto field */}
+              <div>
+                <label className="flex items-center gap-1 text-xs font-black uppercase tracking-wider text-slate-500 mb-2">
+                  <Quote size={12} /> Franchise Motto (Optional)
+                </label>
+                <input 
+                  type="text" 
+                  value={motto}
+                  onChange={(e) => setMotto(e.target.value)}
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 transition-all font-medium text-slate-900"
+                  placeholder="e.g., Blood, Sweat, and Tears"
+                  maxLength={100}
                 />
               </div>
             </div>

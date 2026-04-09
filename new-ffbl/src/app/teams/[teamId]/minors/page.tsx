@@ -6,14 +6,14 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { checkMinorLeagueEligibility } from '@/lib/roster-rules'; // 🌟 NEW IMPORT
 
 export default async function MinorsPage(props: { params: Promise<{ id: string }> }) {
-  const { id } = await props.params;
+  const { teamId } = await props.params;
 
   // 1. Get session to determine if it's the user's team
   const session = await getServerSession(authOptions);
   const myTeamId = (session?.user as any)?.teamId || null;
 
   const team = await prisma.team.findUnique({
-    where: { id },
+    where: { id: teamId },
     select: {
       id: true,
       aaaAffiliateName: true,
@@ -54,5 +54,5 @@ export default async function MinorsPage(props: { params: Promise<{ id: string }
     players: playersWithViolations 
   };
 
-  return <FarmSystem team={updatedTeam} isMyTeam={myTeamId === id} />; 
+  return <FarmSystem team={updatedTeam} isMyTeam={myTeamId === teamId} />; 
 }

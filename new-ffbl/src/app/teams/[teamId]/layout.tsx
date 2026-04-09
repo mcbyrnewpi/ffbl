@@ -1,24 +1,20 @@
-// src/app/teams/[id]/layout.tsx
+// src/app/teams/[teamId]/layout.tsx
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
-import { Shield, User, Settings } from 'lucide-react'; 
-import Link from 'next/link'; // 
+import { Shield, User, Settings, Quote } from 'lucide-react';
+import Link from 'next/link';
 import TeamTabs from '@/components/teams/TeamTabs';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import SyncStatsButton from '@/components/teams/SyncStatsButton';
 
-export default async function TeamLayout({ children, params }: { children: React.ReactNode, params: Promise<{ id: string }> }) {
+export default async function TeamLayout({ children, params }: { children: React.ReactNode, params: Promise<{ teamId: string }> }) {
   const { teamId } = await params;
   
-  // Get session to verify ownership OR admin status
   const session = await getServerSession(authOptions);
+  const userId = (session?.user as any)?.id; 
   const myTeamId = (session?.user as any)?.teamId;
   const userRole = (session?.user as any)?.role;
-  
-  const isMyTeam = myTeamId === teamId;
-  const isAdmin = userRole === 'ADMIN';
-  const canSyncStats = isMyTeam || isAdmin; 
 
   const team = await prisma.team.findUnique({
     where: { id: teamId },
@@ -27,7 +23,15 @@ export default async function TeamLayout({ children, params }: { children: React
 
   if (!team) notFound();
 
-  // ⚡ Fetch fast counts for the related tables
+  // Determine permissions
+  const isMyTeam = myTeamId === teamId;
+  const isAdmin = userRole === 'ADMIN';
+  const canSyncStats = isMyTeam || isAdmin; 
+
+  const myManagerRecord = team.managers.find(m => m.id === userId);
+  const isPrimaryManager = myManagerRecord?.isPrimaryManager === true;
+  const canEditTeam = isAdmin || (isMyTeam && isPrimaryManager);
+
   const draftPickCount = await prisma.draftPick.count({
     where: { currentOwnerId: teamId },
   });
@@ -36,7 +40,6 @@ export default async function TeamLayout({ children, params }: { children: React
     where: { teamId: teamId },
   });
 
-  // 🪣 Calculate Stats for the Header
   const stats = {
     mlb: team.players.filter(p => p.level === 'MLB' && p.status === 'ACTIVE').length,
     minors: team.players.filter(p => p.level !== 'MLB' && p.status === 'ACTIVE').length,
@@ -51,7 +54,7 @@ export default async function TeamLayout({ children, params }: { children: React
       <div className="max-w-5xl mx-auto">
         <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <div className="flex items-center gap-3 mb-2">
+            <div className="flex items-center gap-3 mb-1">
               <div className="w-10 h-10 bg-white rounded-lg border border-slate-200 shadow-sm flex items-center justify-center overflow-hidden shrink-0">
                 {team.logoUrl ? (
                   <img src={team.logoUrl} alt={team.name} className="w-full h-full object-contain p-0.5" />
@@ -62,14 +65,26 @@ export default async function TeamLayout({ children, params }: { children: React
               <h1 className="text-3xl font-black text-slate-900">{team.name}</h1>
             </div>
             
-            <div className="flex flex-wrap items-center gap-4">
+            {team.motto && (
+              <div className="ml-[52px] mb-3">
+                <span className="text-sm font-medium italic text-slate-500 flex items-center gap-1.5">
+                  <Quote size={12} className="text-slate-400" /> 
+                  {team.motto}
+                </span>
+              </div>
+            )}
+            
+            <div className="flex flex-wrap items-center gap-4 mt-2">
               <p className="text-slate-500 flex items-center gap-2 font-medium">
-                <User size={16} /> Manager: {team.managers[0]?.name || 'Unmanaged'}
+                <User size={16} /> Manager: {team.managers.find(m => m.isPrimaryManager)?.name || team.managers[0]?.name || 'Unmanaged'}
               </p>
               
-              {canSyncStats && (
-                <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
+                {canSyncStats && (
                   <SyncStatsButton teamId={team.id} lastStatSync={team.lastStatSync} />
+                )}
+                
+                {canEditTeam && (
                   <Link 
                     href={`/teams/${team.id}/edit`} 
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 text-xs font-bold rounded-md hover:bg-slate-50 transition-colors shadow-sm"
@@ -77,12 +92,11 @@ export default async function TeamLayout({ children, params }: { children: React
                     <Settings size={14} />
                     Settings
                   </Link>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
           
-          {/* 📊 The Front Office Badges */}
           <div className="flex flex-wrap gap-2 md:gap-3">
             <StatBadge label="MLB" value={stats.mlb} color="text-blue-700 bg-blue-50 border-blue-200" />
             <StatBadge label="Minors" value={stats.minors} color="text-emerald-700 bg-emerald-50 border-emerald-200" />
@@ -100,12 +114,7 @@ export default async function TeamLayout({ children, params }: { children: React
   );
 }
 
-interface StatBadgeProps {
-  label: string;
-  value: number;
-  color?: string;
-}
-
+interface StatBadgeProps { label: string; value: number; color?: string; }
 function StatBadge({ label, value, color = "text-slate-700 bg-slate-100 border-slate-200" }: StatBadgeProps) {
   return (
     <div className={`px-3 py-2 rounded-lg border flex flex-col items-center min-w-[64px] md:min-w-[72px] ${color}`}>
