@@ -1,6 +1,7 @@
 // src/app/api/trades/propose/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { ApprovalStatus, TradeStatus } from '@prisma/client';
 
 export async function POST(request: Request) {
   try {
@@ -43,7 +44,7 @@ export async function POST(request: Request) {
         // Mark the old trade as CANCELLED
         await tx.trade.update({
           where: { id: counteringTradeId },
-          data: { status: 'CANCELLED' }
+          data: { status: TradeStatus.CANCELLED }
         });
       } // ⬅️ FIX 1: ADDED MISSING BRACKET
 
@@ -82,7 +83,7 @@ export async function POST(request: Request) {
         data: {
           initiatingTeamId,
           expiresAt,
-          status: 'PENDING',
+          status: TradeStatus.PENDING,
           assets: {
             create: assets.map((asset: any) => ({
               fromTeamId: asset.fromTeamId,
@@ -159,7 +160,7 @@ export async function POST(request: Request) {
         return {
           tradeId: trade.id,
           userId: manager.id, 
-          status: manager.teamId === initiatingTeamId ? 'APPROVED' : 'PENDING',
+          status: manager.teamId === initiatingTeamId ? ApprovalStatus.APPROVED : ApprovalStatus.PENDING,
           // ⬅️ NEW: Attach the escrow moves to the initiator's auto-approved ticket!
           correspondingMoves: manager.teamId === initiatingTeamId ? correspondingMoves : null
         };
