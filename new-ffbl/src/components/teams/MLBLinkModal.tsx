@@ -10,6 +10,7 @@ interface MlbLinkModalProps {
   player: any; 
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
 export default function MlbLinkModal({ player, isOpen, onClose }: MlbLinkModalProps) {
