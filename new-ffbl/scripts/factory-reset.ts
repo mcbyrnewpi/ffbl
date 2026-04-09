@@ -26,13 +26,17 @@ if (!dbUrl) {
   process.exit(1);
 }
 
-// 1. Restore the true Heroku backup
-// --clean drops existing tables safely, --if-exists prevents errors on first run
-// --no-owner and --no-acl prevent permissions issues on local/cloud DBs
-runCommand(`pg_restore --clean --if-exists --no-owner --no-acl -d "${dbUrl}" latest.dump`, "Restoring Pristine Legacy DB from latest.dump");
+// Prisma needs '&schema=public', but pg_restore and psql hate it. 
+// We strip it out just for the native Postgres CLI commands.
+const pgCliUrl = dbUrl.replace(/([?&])schema=[^&]+/, '');
 
-// 2. Build the Modern Schema
-// Prisma will see the legacy tables exist, and seamlessly add the Modern tables!
+// 1. Restore the true Heroku backup using the cleaned URL
+runCommand(`pg_restore --clean --if-exists --no-owner --no-acl -d "${pgCliUrl}" latest.dump`, "Restoring Pristine Legacy DB from latest.dump");
+
+// Recreate the public schema in the cloud after pg_restore wipes it
+runCommand(`psql "${pgCliUrl}" -c "CREATE SCHEMA IF NOT EXISTS public;"`, "Repairing Schema after Restore");
+
+// 2. Build the Modern Schema (Prisma automatically uses the full DB URL from .env)
 runCommand("npx prisma db push --accept-data-loss", "Applying Modern Schema");
 
 // 3. Seed Modern Foundation Data
