@@ -103,7 +103,7 @@ export default function PlayerCardModal({ isOpen, onClose, player }: PlayerCardM
             <div className="mt-4 flex gap-2 w-full animate-in slide-in-from-bottom-4 duration-500 delay-150 fill-mode-both">
               
               {/* Scenario 1: Free Agent -> Claim Player */}
-              {!player.teamId && (
+              {!player.teamId && player.status !== 'RETIRED' && (
                 <div className="flex-1 flex flex-col justify-center bg-white rounded-xl shadow-xl p-1 border border-slate-200 [&>div]:w-full [&_button]:w-full [&_button]:py-2.5 [&_button]:flex [&_button]:justify-center [&_button]:font-bold">
                   <AddPlayerMenu isAdding={isAdding} onAdd={handleAdd} />
                 </div>

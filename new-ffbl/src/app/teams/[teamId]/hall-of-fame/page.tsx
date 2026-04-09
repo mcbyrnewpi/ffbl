@@ -1,31 +1,60 @@
+// src/app/teams/[teamId]/hall-of-fame/page.tsx
 import Image from 'next/image';
+import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import ClientHofWrapper from './ClientHofWrapper';
+import HofPlaque from '@/components/teams/HofPlaque'; // <-- Good, we have the import
 
-// We'll hardcode Votto for our UI prototype
-const MOCK_HOF_DATA = [
-  {
-    id: "hof-1",
-    inductionYear: 2026,
-    blurb: "The cornerstone of our franchise. Carried us to the 2018 and 2021 championships. A true OBP god. We will never forget you, Joey.",
-    player: {
-      firstName: "Joey",
-      lastName: "Votto",
-      mlbId: 458015,
-      positions: [{ abbreviation: "1B" }]
-    },
-    // We'll fetch this real data later, mocking it for the UI design
-    careerStats: {
-      avg: ".294",
-      obp: ".409",
-      hr: 356,
-      rbi: 1144,
-      hits: 2135
-    }
+// --- STAT EXTRACTOR HELPER ---
+function getCareerStats(player: any) {
+  const mlbData = player.mlbRawData;
+  if (!mlbData || !mlbData.stats) return null;
+
+  const isPitcher = player.positions?.[0]?.abbrev === 'P' || player.positions?.[0]?.abbrev === 'SP' || player.positions?.[0]?.abbrev === 'RP';
+
+  if (isPitcher) {
+    const pitchingStats = mlbData.stats.find((s: any) => s.type?.displayName === 'career' && s.group?.displayName === 'pitching')?.splits?.[0]?.stat;
+    if (!pitchingStats) return null;
+    return {
+      type: 'pitching',
+      s1Label: 'ERA', s1: pitchingStats.era || '-',
+      s2Label: 'WHIP', s2: pitchingStats.whip || '-',
+      s3Label: 'W', s3: pitchingStats.wins || '-',
+      s4Label: 'K', s4: pitchingStats.strikeOuts || '-',
+    };
+  } else {
+    const hittingStats = mlbData.stats.find((s: any) => s.type?.displayName === 'career' && s.group?.displayName === 'hitting')?.splits?.[0]?.stat;
+    if (!hittingStats) return null;
+    return {
+      type: 'hitting',
+      s1Label: 'AVG', s1: hittingStats.avg || '-',
+      s2Label: 'OBP', s2: hittingStats.obp || '-',
+      s3Label: 'HR', s3: hittingStats.homeRuns || '-',
+      s4Label: 'HITS', s4: hittingStats.hits || '-',
+    };
   }
-];
+}
 
 export default async function HallOfFamePage({ params }: { params: Promise<{ teamId: string }> }) {
-  // Await the params per Next 15 rules
   const { teamId } = await params;
+  
+  // 1. Auth Check
+  const session = await getServerSession(authOptions);
+  const userRole = (session?.user as any)?.role;
+  const userTeamId = (session?.user as any)?.teamId;
+  const canInduct = userTeamId === teamId || userRole === 'COMMISH' || userRole === 'ADMIN';
+
+  // 2. Fetch the Data
+  const inductees = await prisma.teamHallOfFame.findMany({
+    where: { teamId },
+    include: {
+      player: {
+        include: { positions: true }
+      }
+    },
+    orderBy: { inductionYear: 'desc' }
+  });
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -38,73 +67,23 @@ export default async function HallOfFamePage({ params }: { params: Promise<{ tea
             Immortalizing the legends who built this franchise.
           </p>
         </div>
-        {/* We'll wire this button up to NextAuth later! */}
-        <button className="bg-amber-100 text-amber-800 hover:bg-amber-200 px-4 py-2 rounded-lg font-bold text-sm transition-colors border border-amber-300 shadow-sm">
-          + Induct Player
-        </button>
+        {canInduct && (
+          <ClientHofWrapper teamId={teamId} />
+        )}
       </div>
 
-      {/* The Hall of Fame Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {MOCK_HOF_DATA.map((inductee) => (
-          <div key={inductee.id} className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col relative group">
-            
-            {/* The Gold "Plaque" Header */}
-            <div className="bg-gradient-to-br from-amber-400 to-amber-600 p-6 flex flex-col items-center justify-center text-center relative overflow-hidden">
-              {/* Subtle background texture/pattern could go here */}
-              <div className="w-24 h-24 bg-white rounded-full p-1 shadow-lg z-10 relative border-4 border-amber-200">
-                <Image
-                  src={`https://img.mlbstatic.com/mlb-photos/image/upload/d_people:brooks:no_headshot.png/w_213,q_auto:best/v1/people/${inductee.player.mlbId}/headshot/67/current`}
-                  alt={`${inductee.player.firstName} ${inductee.player.lastName}`}
-                  fill
-                  className="rounded-full object-cover"
-                />
-              </div>
-              
-              <div className="mt-4 z-10 text-white">
-                <h3 className="text-xl font-black tracking-tight drop-shadow-md">
-                  {inductee.player.firstName} {inductee.player.lastName}
-                </h3>
-                <p className="text-amber-100 font-medium text-sm drop-shadow-sm">
-                  Class of {inductee.inductionYear} • {inductee.player.positions[0].abbreviation}
-                </p>
-              </div>
-            </div>
-
-            {/* The Career Stats Banner */}
-            <div className="bg-slate-50 border-b border-slate-100 px-4 py-3 flex justify-between text-center">
-              <div>
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">AVG</div>
-                <div className="text-sm font-black text-slate-700">{inductee.careerStats.avg}</div>
-              </div>
-              <div>
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">OBP</div>
-                <div className="text-sm font-black text-slate-700">{inductee.careerStats.obp}</div>
-              </div>
-              <div>
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">HR</div>
-                <div className="text-sm font-black text-slate-700">{inductee.careerStats.hr}</div>
-              </div>
-              <div>
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">HITS</div>
-                <div className="text-sm font-black text-slate-700">{inductee.careerStats.hits}</div>
-              </div>
-            </div>
-
-            {/* The Manager's Memory */}
-            <div className="p-5 flex-grow">
-              <div className="relative">
-                <span className="text-4xl text-amber-200 absolute -top-3 -left-2 font-serif opacity-50">"</span>
-                <p className="text-sm text-slate-600 italic relative z-10 pl-3 leading-relaxed">
-                  {inductee.blurb}
-                </p>
-              </div>
-            </div>
-            
-          </div>
-        ))}
-      </div>
-      
+      {inductees.length === 0 ? (
+        <div className="text-center py-20 bg-slate-50 rounded-2xl border border-slate-200 border-dashed">
+          <p className="text-slate-400 font-medium">This franchise has not inducted any players yet.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {inductees.map((inductee) => {
+            const stats = getCareerStats(inductee.player);
+            return <HofPlaque key={inductee.id} inductee={inductee} stats={stats} />;
+          })}
+        </div>
+      )}
     </div>
   );
 }

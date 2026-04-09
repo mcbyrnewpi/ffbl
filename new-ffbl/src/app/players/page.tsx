@@ -7,7 +7,7 @@ import { useSession } from 'next-auth/react';
 import { MILB_PARENT_MAP } from '@/lib/milb-map'; 
 import AddPlayerMenu from '@/components/players/AddPlayerMenu';
 import PlayerCardModal from '@/components/players/PlayerCardModal';
-import { Trophy } from 'lucide-react'; 
+import { Trophy, X } from 'lucide-react'; // 🌟 Added X icon here
 
 // --- THE HEADSHOT COMPONENT ---
 const PlayerHeadshot = ({ player }: { player: any }) => {
@@ -78,6 +78,12 @@ function PlayerSearchContent() {
   const [importingId, setImportingId] = useState<string | null>(null);
   const [addingId, setAddingId] = useState<string | null>(null);
   const [selectedPlayer, setSelectedPlayer] = useState<any | null>(null);
+
+  // 🌟 NEW HOF INDUCTION STATES
+  const [inductingPlayer, setInductingPlayer] = useState<any | null>(null);
+  const [hofYear, setHofYear] = useState(new Date().getFullYear());
+  const [hofBlurb, setHofBlurb] = useState("");
+  const [isInducting, setIsInducting] = useState(false);
 
   const [ownershipFilter, setOwnershipFilter] = useState<'ALL' | 'FA'>('ALL');
   const [positionFilter, setPositionFilter] = useState<string>('ALL');
@@ -186,6 +192,36 @@ function PlayerSearchContent() {
     }
   };
 
+  // 🌟 NEW: Submission Logic for HOF
+  const submitInduction = async () => {
+    if (!myTeamId || !inductingPlayer) return;
+    setIsInducting(true);
+    try {
+      const res = await fetch(`/api/teams/${myTeamId}/hall-of-fame`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          playerId: inductingPlayer.id,
+          inductionYear: hofYear,
+          blurb: hofBlurb
+        })
+      });
+
+      if (res.ok) {
+        alert("Player successfully immortalized!");
+        setInductingPlayer(null);
+        setHofBlurb("");
+      } else {
+        const errorData = await res.json();
+        alert(errorData.error || "Failed to induct player.");
+      }
+    } catch (e) {
+      alert("Network error occurred.");
+    } finally {
+      setIsInducting(false);
+    }
+  };
+
   const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return 'Unknown';
     return new Date(dateString).toLocaleDateString();
@@ -198,7 +234,6 @@ function PlayerSearchContent() {
         <p className="text-slate-500">Browse the waiver wire, find prospects, or search the MLB for new rookies.</p>
       </div>
 
-      {/* 🌟 NEW CLEAN FILTERS UI */}
       <div className="flex flex-col gap-5 mb-8 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
         
         {/* Top Row: Primary Toggles */}
@@ -366,15 +401,43 @@ function PlayerSearchContent() {
               ) : player.status === 'RETIRED' ? (
                 
                 <div className="flex gap-2 w-full">
-                  {myTeamId && (
-                    <button 
-                      onClick={() => alert("HOF Induction Flow Coming Soon!")}
-                      className="flex-1 bg-amber-100 text-amber-800 border border-amber-300 hover:bg-amber-200 text-sm font-bold py-2.5 px-4 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2"
-                    >
-                      <Trophy size={16} />
-                      Induct to HOF
-                    </button>
-                  )}
+                  {myTeamId && (() => {
+                    const myHof = player.hallOfFame?.find((hof: any) => hof.teamId === myTeamId);
+                    const otherHof = player.hallOfFame?.find((hof: any) => hof.teamId !== myTeamId);
+
+                    if (myHof) {
+                      return (
+                        <button 
+                          onClick={() => router.push(`/teams/${myTeamId}/hall-of-fame`)}
+                          className="flex-1 bg-gradient-to-r from-amber-50 to-yellow-50 hover:from-amber-100 hover:to-yellow-100 text-amber-800 border border-amber-200 text-sm font-bold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors shadow-sm"
+                        >
+                          <Trophy size={16} className="text-amber-500" />
+                          View Your HOF
+                        </button>
+                      );
+                    }
+
+                    if (otherHof) {
+                      return (
+                        <button 
+                          onClick={() => router.push(`/teams/${otherHof.teamId}/hall-of-fame`)}
+                          className="flex-1 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-bold py-2.5 px-2 rounded-lg flex items-center justify-center gap-1.5 transition-colors truncate shadow-sm group" 
+                          title={`View ${otherHof.team?.name || 'Another'}'s HOF`}
+                        >
+                          <Trophy size={14} className="text-amber-500/70 group-hover:text-amber-500 transition-colors flex-shrink-0" />
+                          <span className="truncate">In {otherHof.team?.name || 'Another'}'s HOF</span>
+                        </button>
+                      );
+                    }
+
+                    return (
+                      <button onClick={() => setInductingPlayer(player)} className="flex-1 bg-amber-100 text-amber-800 border border-amber-300 hover:bg-amber-200 text-sm font-bold py-2.5 px-4 rounded-lg shadow-sm transition-colors flex items-center justify-center gap-2">
+                        <Trophy size={16} />
+                        Induct to HOF
+                      </button>
+                    );
+                  })()}
+
                   <button 
                     onClick={() => setSelectedPlayer(player)}
                     className="flex-1 bg-white hover:bg-slate-100 text-slate-700 text-sm font-bold py-2.5 px-4 rounded-lg border border-slate-300 transition-colors"
@@ -439,6 +502,56 @@ function PlayerSearchContent() {
           <div className="text-4xl mb-4">🤷‍♂️</div>
           <p className="text-lg">No players found matching your current filters.</p>
           <p className="text-sm mt-2 text-slate-400">Try adjusting your position, status, or ownership toggles.</p>
+        </div>
+      )}
+
+      {/* 🌟 NEW: INLINE INDUCTION MODAL */}
+      {inductingPlayer && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" onClick={() => setInductingPlayer(null)}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden" onClick={e => e.stopPropagation()}>
+            <div className="bg-gradient-to-r from-amber-500 to-amber-600 p-4 text-white flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <Trophy size={18} className="text-amber-200" />
+                <h2 className="font-black text-lg">Induct to Hall of Fame</h2>
+              </div>
+              <button onClick={() => setInductingPlayer(null)} className="text-amber-200 hover:text-white transition-colors"><X size={20} /></button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="text-center bg-amber-50 rounded-lg p-3 border border-amber-100">
+                <p className="text-sm text-amber-700 font-medium">Immortalizing</p>
+                <p className="text-xl font-black text-amber-900">{inductingPlayer.firstName} {inductingPlayer.lastName}</p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Induction Year</label>
+                <input 
+                  type="number"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 outline-none focus:border-amber-500"
+                  value={hofYear}
+                  onChange={(e) => setHofYear(parseInt(e.target.value))}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Manager's Tribute</label>
+                <textarea 
+                  rows={4}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 outline-none focus:border-amber-500 text-sm"
+                  placeholder="Share your memories of this player's impact on your franchise..."
+                  value={hofBlurb}
+                  onChange={(e) => setHofBlurb(e.target.value)}
+                />
+              </div>
+
+              <button 
+                onClick={submitInduction}
+                disabled={isInducting || !hofBlurb}
+                className="w-full bg-amber-500 hover:bg-amber-600 disabled:bg-amber-300 text-white font-black py-3 rounded-lg transition-colors"
+              >
+                {isInducting ? "Inducting..." : "Confirm Induction"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

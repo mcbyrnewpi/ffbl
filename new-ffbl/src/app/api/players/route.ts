@@ -36,7 +36,7 @@ export async function GET(request: Request) {
         positions: true,
         team: { select: { name: true } },
         prospectRankings: true,
-        hallOfFame: true
+        hallOfFame: { include: { team: { select: { name: true } } } }
       },
       take: 50, 
       orderBy: { lastName: 'asc' }
