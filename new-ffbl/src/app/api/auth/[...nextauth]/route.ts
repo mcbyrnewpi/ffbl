@@ -28,13 +28,16 @@ export const authOptions: NextAuthOptions = {
         try {
           const host = new URL(url).host;
           
-          // Create a quick formatted timestamp (e.g., "4:22 PM")
-          const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const timeString = new Date().toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit', 
+            timeZone: 'America/New_York' 
+          });
 
           await resend.emails.send({
             from: provider.from as string,
             to: email,
-            subject: `Log in to FFBL - ${timeString}`, 
+            subject: `Log in to FFBL - ${timeString} ET`, 
             react: MagicLinkEmail({ url, host }),
           });
         } catch (error) {
