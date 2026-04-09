@@ -34,7 +34,7 @@ async function migrateUsers() {
     }
 
     // 3. Map the Role (Data Dictionary Rule)
-    let modernRole = Role.OWNER;
+    let modernRole: Role = Role.OWNER;
     if (lu.admin) {
       modernRole = Role.ADMIN;
     } else if (lu.commish) {
