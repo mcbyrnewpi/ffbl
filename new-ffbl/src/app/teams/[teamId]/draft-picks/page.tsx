@@ -1,9 +1,9 @@
 import { prisma } from '@/lib/prisma';
 import DraftPicksTable from "@/components/teams/DraftPicksTable";
 
-export default async function DraftCapitalPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function DraftCapitalPage({ params }: { params: Promise<{ teamId: string }> }) {
   // Await the params per Next 15 rules
-  const { id } = await params;
+  const { teamId } = await params;
 
   // Fetch all draft picks currently owned by this team
   const picks = await prisma.draftPick.findMany({

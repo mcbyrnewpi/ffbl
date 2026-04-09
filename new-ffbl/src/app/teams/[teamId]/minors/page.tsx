@@ -3,9 +3,9 @@ import { prisma } from '@/lib/prisma';
 import FarmSystem from '@/components/teams/FarmSystem';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { checkMinorLeagueEligibility } from '@/lib/roster-rules'; // 🌟 NEW IMPORT
+import { checkMinorLeagueEligibility } from '@/lib/roster-rules';
 
-export default async function MinorsPage(props: { params: Promise<{ id: string }> }) {
+export default async function MinorsPage(props: { params: Promise<{ teamId: string }> }) {
   const { teamId } = await props.params;
 
   // 1. Get session to determine if it's the user's team

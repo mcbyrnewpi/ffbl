@@ -23,9 +23,9 @@ const MOCK_HOF_DATA = [
   }
 ];
 
-export default async function HallOfFamePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function HallOfFamePage({ params }: { params: Promise<{ teamId: string }> }) {
   // Await the params per Next 15 rules
-  const { id } = await params;
+  const { teamId } = await params;
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">

@@ -3,7 +3,7 @@ import GlobalRosterContainer from '@/components/teams/GlobalRosterContainer';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
-export default async function TeamPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function TeamPage({ params }: { params: Promise<{ teamId: string }> }) {
   const { teamId } = await params;
   
   // 1. Get the current user's session
