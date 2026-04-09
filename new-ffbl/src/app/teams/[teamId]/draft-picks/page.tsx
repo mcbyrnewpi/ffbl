@@ -33,7 +33,7 @@ export default async function DraftCapitalPage({ params }: { params: Promise<{ t
       </div>
 
       {/* Render your pre-built component! */}
-      <DraftPicksTable picks={picks} currentTeamId={id} />
+      <DraftPicksTable picks={picks} currentTeamId={teamId} />
       
     </div>
   );
