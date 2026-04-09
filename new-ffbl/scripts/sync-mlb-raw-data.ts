@@ -58,7 +58,7 @@ async function fetchMlbRawData() {
 
       // 4. Update the database concurrently for this batch
       await Promise.all(chunk.map(async (player) => {
-        const personData = personMap.get(player.mlbId);
+        const personData: any = personMap.get(player.mlbId);
 
         if (personData) {
           // Prepare the rich JSON payload
