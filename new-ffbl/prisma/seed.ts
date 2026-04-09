@@ -12,7 +12,7 @@ if (!connectionString) {
 }
 
 const pool = new pg.Pool({ connectionString });
-const adapter = new PrismaPg(pool);
+const adapter = new PrismaPg(pool as any);
 
 // 2. Pass the adapter to the PrismaClient constructor
 const prisma = new PrismaClient({ adapter });
