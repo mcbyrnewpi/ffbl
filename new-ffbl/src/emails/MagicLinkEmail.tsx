@@ -24,7 +24,7 @@ export const MagicLinkEmail = ({ url, host }: MagicLinkEmailProps) => {
             </Text>
             <Section style={btnContainer}>
               <Button href={url} style={button}>
-                Sign In to Clubhouse
+                Sign In to FFBL
               </Button>
             </Section>
             <Text style={footer}>
