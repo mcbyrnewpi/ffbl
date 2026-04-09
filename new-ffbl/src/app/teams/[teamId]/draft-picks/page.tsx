@@ -8,7 +8,7 @@ export default async function DraftCapitalPage({ params }: { params: Promise<{ t
   // Fetch all draft picks currently owned by this team
   const picks = await prisma.draftPick.findMany({
     where: {
-      currentOwnerId: id,
+      currentOwnerId: teamId,
     },
     include: {
       originalOwner: true, // We need this so the table can display the original franchise name
