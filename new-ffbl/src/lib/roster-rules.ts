@@ -138,7 +138,7 @@ export const validateTeamFarmSystem = async (
     }
 
     // Standard check for everyone else
-    const check = checkMinorLeagueEligibility(player, player.level);
+    const check = checkMinorLeagueEligibility(player, player.level ?? '');
     if (!check.isEligible) {
       violations.push(`${player.firstName} ${player.lastName} (${player.level}): ${check.reason}`);
     }
