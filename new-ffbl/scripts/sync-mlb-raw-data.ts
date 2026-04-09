@@ -65,7 +65,7 @@ async function fetchMlbRawData() {
           const updatePayload: any = { mlbRawData: personData };
 
           // Sync the birthdate to the root model just like our POST route does!
-          if (personData.birthDate) {
+          if (personData && 'birthDate' in personData && typeof personData.birthDate === 'string') {
             updatePayload.birthdate = new Date(personData.birthDate);
           }
 
