@@ -54,13 +54,14 @@ export default async function TradeDetailsPage({ params }: { params: Promise<{ t
 
   const initiatorName = teamDictionary[trade.initiatingTeamId] || 'Another Team';
 
-  const statusColors = {
+  const statusColors: Record<string, string> = {
     PENDING: "bg-yellow-100 text-yellow-700",
     CANCELLED: "bg-red-100 text-red-700",
     REJECTED: "bg-red-100 text-red-700",
+    VETOED: "bg-red-100 text-red-700",
     APPROVED: "bg-green-100 text-green-700",
     PROCESSED: "bg-blue-100 text-blue-700",
-  }[trade.status] || "bg-slate-100 text-slate-700";
+  };
 
   const customTitle = (
     <div className="flex items-center gap-4">
