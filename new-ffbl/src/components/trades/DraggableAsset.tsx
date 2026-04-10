@@ -4,11 +4,13 @@ import PlayerHeadshot from '../teams/PlayerHeadshot';
 export default function DraggableAsset({ 
   asset, 
   isOverlay = false,
-  onRemove // ⬅️ NEW PROP
+  onRemove,
+  onMobileAdd
 }: { 
   asset: any, 
   isOverlay?: boolean,
-  onRemove?: () => void // ⬅️ NEW TYPE
+  onRemove?: () => void,
+  onMobileAdd?: () => void
 }) {
   // If this is the overlay, we append a suffix so dnd-kit doesn't get confused by duplicate IDs
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
@@ -45,7 +47,7 @@ export default function DraggableAsset({
         </div>
 
         <div className="flex items-center flex-shrink-0 gap-1">
-            {/* ❌ NEW: Remove Button */}
+            {/* ❌ Remove Button */}
             {onRemove && !isOverlay && (
               <button 
                 onPointerDown={(e) => e.stopPropagation()} // Stops dnd-kit from initiating a drag
@@ -60,13 +62,17 @@ export default function DraggableAsset({
             <div className="text-slate-300 px-1 hidden md:block">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
             </div>
-            <button 
-              className="p-1 text-slate-400 hover:text-blue-600 rounded hover:bg-blue-50 transition-colors md:hidden" 
-              onPointerDown={(e) => e.stopPropagation()} 
-              onClick={() => alert("Move Menu coming soon!")}
-            >
-               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-            </button>
+            
+            {/* 📱 Mobile Add Button */}
+            {onMobileAdd && !isOverlay && (
+              <button 
+                className="p-1 text-slate-400 hover:text-blue-600 rounded hover:bg-blue-50 transition-colors md:hidden" 
+                onPointerDown={(e) => e.stopPropagation()} 
+                onClick={(e) => { e.stopPropagation(); onMobileAdd(); }}
+              >
+                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </button>
+            )}
         </div>
       </div>
     );
@@ -106,7 +112,7 @@ export default function DraggableAsset({
       </div>
       
       <div className="flex items-center flex-shrink-0 gap-1">
-          {/* ❌ NEW: Remove Button */}
+          {/* ❌ Remove Button */}
           {onRemove && !isOverlay && (
             <button 
               onPointerDown={(e) => e.stopPropagation()} // Stops dnd-kit from initiating a drag
@@ -121,13 +127,17 @@ export default function DraggableAsset({
           <div className="text-slate-300 px-1 hidden md:block">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
           </div>
-          <button 
-            className="p-1 text-slate-400 hover:text-blue-600 rounded hover:bg-blue-50 transition-colors md:hidden" 
-            onPointerDown={(e) => e.stopPropagation()} 
-            onClick={() => alert("Move Menu coming soon!")}
-          >
-             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-          </button>
+          
+          {/* 📱 Mobile Add Button */}
+          {onMobileAdd && !isOverlay && (
+            <button 
+              className="p-1 text-slate-400 hover:text-blue-600 rounded hover:bg-blue-50 transition-colors md:hidden" 
+              onPointerDown={(e) => e.stopPropagation()} 
+              onClick={(e) => { e.stopPropagation(); onMobileAdd(); }}
+            >
+               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          )}
       </div>
     </div>
   );

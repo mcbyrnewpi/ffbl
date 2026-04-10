@@ -65,17 +65,17 @@ export default async function TradesDashboard() {
 
   return (
     <div className="p-4 md:p-8 max-w-6xl mx-auto w-full">
-      <div className="flex justify-between items-end mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-5 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Trade Center</h1>
-          <p className="text-slate-500 mt-1">Review and respond to pending offers</p>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Trade Center</h1>
+          <p className="text-slate-500 mt-1 font-medium">Review and respond to pending offers</p>
         </div>
         
         <Link 
           href="/trades/build"
-          className="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+          className="w-full sm:w-auto px-6 py-4 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl sm:rounded-lg shadow-sm shadow-blue-500/25 transition-all text-center flex-shrink-0"
         >
-          + Propose Trade
+          Propose Trade
         </Link>
       </div>
 
@@ -83,7 +83,6 @@ export default async function TradesDashboard() {
         <div className="bg-white rounded-xl border border-slate-200 p-12 text-center shadow-sm">
           <div className="text-4xl mb-4">🤝</div>
           <h3 className="text-lg font-bold text-slate-700">No Pending Trades</h3>
-          <p className="text-slate-500 mt-2">Your negotiation table is currently empty.</p>
         </div>
       ) : (
         <div className="grid gap-6">
@@ -96,7 +95,7 @@ export default async function TradesDashboard() {
             const hasApproved = userApproval?.status === 'APPROVED';
             const pendingApprovalsCount = trade.approvals.filter((a: any) => a.status === 'PENDING').length;
 
-            // ⬅️ NEW: Group the assets by receiving team for a cleaner display
+            // Group the assets by receiving team for a cleaner display
             const groupedAssets = trade.assets.reduce((acc: any, asset: any) => {
               const teamId = asset.toTeamId;
               if (!acc[teamId]) {
@@ -110,16 +109,18 @@ export default async function TradesDashboard() {
             }, {});
 
             return (
-              <div key={trade.id} className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col">
-                <div className="flex justify-between items-center mb-4 border-b border-slate-100 pb-4">
+              <div key={trade.id} className="bg-white rounded-xl border border-slate-200 p-4 sm:p-6 shadow-sm flex flex-col">
+                
+                {/* THE HEADER (Stacks on mobile, removes rogue margins, aligns left) */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4 border-b border-slate-100 pb-4">
                   <div className="text-sm font-bold text-slate-500 uppercase tracking-wider">
-                    <span className="ml-2 px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-xs">
+                    <span className="px-2.5 py-1 bg-blue-50 text-blue-600 rounded-md text-[10px] sm:text-xs">
                       {isInitiator ? "Proposed by You" : `Offered by ${initiatorName}`}
                     </span>
                   </div>
-                  <div className="text-sm text-slate-400">
+                  <div className="text-xs sm:text-sm text-slate-400 font-medium">
                     Proposed {new Date(trade.createdAt).toLocaleDateString()}
-                    {trade.expiresAt && <span className="text-red-500 ml-2">(Expires {new Date(trade.expiresAt).toLocaleDateString()})</span>}
+                    {trade.expiresAt && <span className="text-red-500 ml-1 block sm:inline-block mt-1 sm:mt-0">(Expires {new Date(trade.expiresAt).toLocaleDateString()})</span>}
                   </div>
                 </div>
                 
@@ -147,26 +148,30 @@ export default async function TradesDashboard() {
                   ))}
                 </div>
 
-                {/* 🛡️ Dynamic Action Buttons */}
-                <div className="flex flex-wrap items-center gap-3 mt-auto pt-4 border-t border-slate-100">
-                  <TradeActionButtons 
-                    tradeId={trade.id} 
-                    userId={userId}
-                    teamId={myTeamId}
-                    tradeAssets={trade.assets}
-                    settings={settings}
-                    isInitiator={isInitiator} 
-                    status={trade.status}
-                    hasApproved={hasApproved}
-                    pendingApprovalsCount={pendingApprovalsCount}
-                  />
+                {/* THE FOOTER (Stacks buttons, makes "View Details" a full-width mobile button) */}
+                <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-4 mt-auto pt-4 border-t border-slate-100">
                   
                   <Link 
                     href={`/trades/${trade.id}`} 
-                    className="ml-auto text-sm text-blue-600 hover:underline font-bold"
+                    className="w-full sm:w-auto text-center sm:text-left text-sm text-blue-600 hover:text-blue-800 font-bold bg-blue-50 sm:bg-transparent py-3 sm:py-0 rounded-lg sm:rounded-none transition-colors"
                   >
                     View Details &rarr;
                   </Link>
+                  
+                  <div className="w-full sm:w-auto flex justify-center sm:justify-end">
+                    <TradeActionButtons 
+                      tradeId={trade.id} 
+                      userId={userId}
+                      teamId={myTeamId}
+                      tradeAssets={trade.assets}
+                      settings={settings}
+                      isInitiator={isInitiator} 
+                      status={trade.status}
+                      hasApproved={hasApproved}
+                      pendingApprovalsCount={pendingApprovalsCount}
+                    />
+                  </div>
+
                 </div>
               </div>
             );
