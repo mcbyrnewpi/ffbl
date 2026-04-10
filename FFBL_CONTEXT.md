@@ -27,7 +27,7 @@
 ### User, Team, & Draft Pick Mapping
 * **User Identity:** Legacy `email` maps to modern `User.email` (trimmed/lowercased) as the primary NextAuth key.
 * **Roles:** Legacy `commish` / `admin` booleans map to the `User.role` Enum (`COMMISH`, `ADMIN`, `OWNER`).
-* **Team Lore:** Custom minor league names (e.g., `aaa`) mapped to `aaaAffiliateName`, etc.
+* **Team Lore:** Custom minor league names (e.g., `aaa`) mapped to `aaaAffiliateName`, `aaaLogoUrl`, etc., for dynamic branding.
 * **Draft Picks (2027/2028):** Year & Round extracted via Regex from legacy `players.last_name`. Original/Current Owners mapped using `TEAM_ALIAS_MAP` for rebranded franchises.
 
 ---
@@ -81,6 +81,9 @@ Once a player is selected, UI dynamically renders actions based on `Status` and 
 
 ### Phase 5: The Baseball Card & UI Polish
 * **The 3D Baseball Card (`BaseballCard.tsx`):** A flippable, interactive master player profile. Features high-res headshots, dynamic positional badges, FFBL status on the front, and nested stats/scouting reports on the back.
+* **Dynamic Affiliate Branding:** The card intelligently parses `player.level` and dynamically swaps the visual franchise branding to the corresponding Minor League Affiliate's name and custom logo.
+* **Quick Stats Snapshot:** Front-facing cards parse the `mlbRawData` payload to extract and calculate Age, prospect ETA, and a context-aware stat line (e.g., `3.45 ERA • 120 K` for pitchers vs. `.285 AVG • 24 HR` for hitters).
+* **Accessibility & High-Contrast Design:** Re-engineered the back of the Baseball Card to eliminate colorblindness/accessibility issues. Replaced low-contrast amber/brown backgrounds with an "Aged Letterpress" textured parchment theme, utilizing deep slate text, drop-shadow indentations, and pure white stat plaques for maximum legibility while retaining the vintage physical feel.
 * **Advanced Sabermetrics:** The back of the card includes a `STD | ADV` toggle, dynamically calculating and mapping K%, BB%, BABIP, AB/HR, K/9, BB/9, and WHIP directly from the MLB JSON payloads. Gracefully handles `TWP` (Two-Way Players) like Ohtani.
 * **Live MLB Pipeline Integration:** Prospect cards natively display "Top 100" gold badges and ETA dates directly on minor league roster cards and lists.
 * **Poison Pill UI:** Farm System grids and lists explicitly highlight ineligible players with glowing red borders, tinted backgrounds, and explicit warning flags detailing the exact rule violation.
@@ -106,6 +109,8 @@ Once a player is selected, UI dynamically renders actions based on `Status` and 
 ---
 
 ## ⚠️ 7. Critical Architecture & Session Notes
+* **Prisma Relational Strictness:** Always verify `include` blocks. Nested relational data (like team logos on a player, or team objects inside a `hallOfFame` array) will return `undefined` unless explicitly called and selected in the Prisma query. Overwriting Prisma outputs with `.map()` can accidentally destroy this nested data.
+* **Tailwind Input Contrast:** UI `<input>` and `<textarea>` elements often inherit light text colors from parent wrappers. Always apply explicit text colors (e.g., `text-slate-900`) to ensure typed text remains readable against light backgrounds.
 * **MLB Minor League Search:** The standard MLB API `people/search` endpoint defaults to `sportId=1` (Majors only). To find prospects, you MUST explicitly pass `sportIds=1,11,12,13,14,16,5442` in the fetch URL.
 * **The "Locked Keys" Deadlock:** When running the `validateTeamFarmSystem` (Poison Pill) check during a roster move, you *must* pass the `pendingMove` object to the bouncer. Otherwise, a player currently violating a rule will trigger the system to block the very transaction attempting to fix them.
 * **Asset-Driven Trades:** Trades do not have a single `receivingTeamId`. The web of a trade is defined entirely by `fromTeamId` and `toTeamId` on individual `TradeAsset` records.
