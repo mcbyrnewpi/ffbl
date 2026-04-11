@@ -27,9 +27,9 @@ export default function SideNav() {
     <>
       {/* --- MOBILE TOP BAR --- */}
       <div className="md:hidden bg-white text-slate-900 p-4 flex justify-between items-center sticky top-0 z-50 border-b border-slate-200">
-        <span className="font-black tracking-tighter text-xl text-slate-900">
+        <Link href="/" className="font-black tracking-tighter text-xl text-slate-900 hover:opacity-80 transition-opacity">
           FF<span className="text-blue-600">BL</span>
-        </span>
+        </Link>
         
         <div className="flex items-center gap-2">
           <GlobalSearch variant="icon" />
@@ -77,9 +77,9 @@ export default function SideNav() {
       {/* --- DESKTOP SIDEBAR --- */}
       <aside className="hidden md:flex w-64 bg-white border-r border-slate-200 flex-col sticky top-0 h-screen shrink-0 shadow-sm">
         <div className="p-6">
-          <span className="font-black tracking-tighter text-2xl text-slate-900">
+          <Link href="/" className="font-black tracking-tighter text-2xl text-slate-900 hover:opacity-80 transition-opacity block w-fit">
             FF<span className="text-blue-600">BL</span>
-          </span>
+          </Link>
         </div>
 
         <div className="px-4 mb-6">
