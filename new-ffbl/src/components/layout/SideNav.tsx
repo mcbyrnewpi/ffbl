@@ -12,7 +12,6 @@ export default function SideNav() {
   const pathname = usePathname();
   const { data: session, status } = useSession(); 
 
-  // ⬅️ NEW: Check the user's role
   const userRole = (session?.user as any)?.role;
   const isCommishOrAdmin = userRole === 'COMMISH' || userRole === 'ADMIN';
 
@@ -27,14 +26,14 @@ export default function SideNav() {
   return (
     <>
       {/* --- MOBILE TOP BAR --- */}
-      <div className="md:hidden bg-slate-900 text-white p-4 flex justify-between items-center sticky top-0 z-50">
-        <span className="font-black tracking-tighter text-xl">
-          FF<span className="text-blue-400">BL</span>
+      <div className="md:hidden bg-white text-slate-900 p-4 flex justify-between items-center sticky top-0 z-50 border-b border-slate-200">
+        <span className="font-black tracking-tighter text-xl text-slate-900">
+          FF<span className="text-blue-600">BL</span>
         </span>
         
         <div className="flex items-center gap-2">
           <GlobalSearch variant="icon" />
-          <button onClick={() => setIsOpen(!isOpen)} className="p-1 hover:bg-slate-800 rounded text-slate-300 hover:text-white transition-colors">
+          <button onClick={() => setIsOpen(!isOpen)} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 hover:text-slate-900 transition-colors">
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
@@ -42,30 +41,29 @@ export default function SideNav() {
 
       {/* --- MOBILE OVERLAY MENU --- */}
       {isOpen && (
-        <div className="md:hidden fixed inset-0 top-[60px] bg-slate-900 z-40 flex flex-col p-4 border-t border-slate-800">
+        <div className="md:hidden fixed inset-0 top-[61px] bg-white z-40 flex flex-col p-4 border-b border-slate-200 shadow-xl">
           <nav className="flex flex-col gap-2 flex-grow">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setIsOpen(false)} 
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium ${
-                  pathname === link.href ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors font-bold ${
+                  pathname === link.href ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                 }`}
               >
                 {link.icon} {link.label}
               </Link>
             ))}
 
-            {/* 🛡️ MOBILE COMMISH LINK */}
             {isCommishOrAdmin && (
               <>
-                <div className="h-px bg-slate-800 my-2 mx-2" />
+                <div className="h-px bg-slate-100 my-2 mx-2" />
                 <Link
                   href="/admin/commish"
                   onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors font-medium ${
-                    pathname === '/admin/commish' ? 'bg-amber-600 text-white' : 'text-amber-400 hover:bg-slate-800 hover:text-amber-300'
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors font-bold ${
+                    pathname === '/admin/commish' ? 'bg-amber-50 text-amber-700' : 'text-amber-600 hover:bg-amber-50'
                   }`}
                 >
                   <ShieldAlert size={18} /> Commish Center
@@ -77,10 +75,10 @@ export default function SideNav() {
       )}
 
       {/* --- DESKTOP SIDEBAR --- */}
-      <aside className="hidden md:flex w-64 bg-slate-900 text-slate-300 flex-col sticky top-0 h-screen shrink-0">
+      <aside className="hidden md:flex w-64 bg-white border-r border-slate-200 flex-col sticky top-0 h-screen shrink-0 shadow-sm">
         <div className="p-6">
-          <span className="font-black tracking-tighter text-2xl text-white">
-            FF<span className="text-blue-400">BL</span>
+          <span className="font-black tracking-tighter text-2xl text-slate-900">
+            FF<span className="text-blue-600">BL</span>
           </span>
         </div>
 
@@ -93,22 +91,21 @@ export default function SideNav() {
             <Link
               key={link.href}
               href={link.href}
-              className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors font-medium text-sm ${
-                pathname === link.href ? 'bg-blue-600 text-white' : 'hover:bg-slate-800 hover:text-white'
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-bold text-sm ${
+                pathname === link.href ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
               }`}
             >
               {link.icon} {link.label}
             </Link>
           ))}
 
-          {/* 🛡️ DESKTOP COMMISH LINK */}
           {isCommishOrAdmin && (
             <>
-              <div className="h-px bg-slate-800 my-2 mx-2" />
+              <div className="h-px bg-slate-100 my-2 mx-2" />
               <Link
                 href="/admin/commish"
-                className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors font-medium text-sm ${
-                  pathname === '/admin/commish' ? 'bg-amber-600 text-white' : 'text-amber-400 hover:bg-slate-800 hover:text-amber-300'
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors font-bold text-sm ${
+                  pathname === '/admin/commish' ? 'bg-amber-50 text-amber-700' : 'text-amber-600 hover:bg-amber-50'
                 }`}
               >
                 <ShieldAlert size={18} /> Commish Center
@@ -118,20 +115,20 @@ export default function SideNav() {
         </nav>
 
         {/* 🔐 USER PROFILE BOTTOM BAR */}
-        <div className="p-4 border-t border-slate-800">
+        <div className="p-4 border-t border-slate-100 bg-slate-50/50">
           {status === 'loading' ? (
-             <div className="text-xs text-slate-500 animate-pulse">Loading session...</div>
+             <div className="text-xs text-slate-400 font-bold animate-pulse">Loading...</div>
           ) : session ? (
             <div className="flex flex-col gap-1">
-              <div className="text-xs font-bold text-white truncate" title={session?.user?.name || session?.user?.email || ""}>
+              <div className="text-sm font-black text-slate-900 truncate" title={session?.user?.name || session?.user?.email || ""}>
                 {session?.user?.name || session?.user?.email || ""}
               </div>
-              <div className="text-[10px] text-slate-400 font-medium uppercase tracking-widest mb-2">
+              <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-2">
                 {(session?.user as any)?.role || 'OWNER'}
               </div>
               <button 
                 onClick={() => signOut()} 
-                className="flex items-center gap-2 text-xs text-slate-400 hover:text-white transition-colors w-fit"
+                className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-red-600 transition-colors w-fit"
               >
                 <LogOut size={14} /> Sign Out
               </button>
@@ -139,7 +136,7 @@ export default function SideNav() {
           ) : (
             <button 
               onClick={() => signIn()} 
-              className="flex items-center gap-2 text-sm font-bold text-blue-400 hover:text-blue-300 transition-colors"
+              className="flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors"
             >
               <LogIn size={16} /> Sign In
             </button>

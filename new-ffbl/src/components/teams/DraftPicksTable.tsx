@@ -1,23 +1,24 @@
-// src/components/teams/DraftPicksTable.tsx
 export default function DraftPicksTable({ picks, currentTeamId }: { picks: any[], currentTeamId: string }) {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-      <div className="bg-emerald-900 px-4 md:px-6 py-3 border-b border-slate-800 flex justify-between items-center">
-        <h2 className="text-white font-bold tracking-wide text-sm md:text-base">Draft Picks</h2>
-        <span className="bg-white/20 text-white text-xs px-2.5 py-1 rounded-md font-bold">
+      
+      {/* 🌟 FIX: Premium Light Header */}
+      <div className="bg-slate-50 px-4 md:px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+        <h2 className="text-slate-900 font-black tracking-widest text-sm md:text-base uppercase">Draft Picks</h2>
+        <span className="bg-white border border-slate-200 text-slate-700 text-xs px-2.5 py-1 rounded-md font-black shadow-sm">
           {picks?.length || 0}
         </span>
       </div>
       
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
-          <thead className="bg-slate-50 border-b border-slate-200 text-xs uppercase text-slate-500 font-semibold">
+          <thead className="bg-white border-b border-slate-200 text-[10px] uppercase text-slate-400 font-bold tracking-widest">
             <tr>
               <th className="px-4 md:px-6 py-3 md:py-4">Pick</th>
               <th className="px-4 md:px-6 py-3 md:py-4 text-right">Franchise</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-slate-100 bg-white">
             {picks?.map((pick) => {
               const isOwnPick = String(pick.originalOwnerId) === String(currentTeamId);
               
@@ -25,7 +26,8 @@ export default function DraftPicksTable({ picks, currentTeamId }: { picks: any[]
                 <tr key={pick.id} className="hover:bg-slate-50 transition-colors">
                   <td className="px-4 md:px-6 py-3 md:py-4">
                     <div className="flex items-center gap-1.5">
-                      <div className="font-bold text-slate-800">
+                      {/* 🌟 FIX: font-black text-slate-900 */}
+                      <div className="font-black text-slate-900">
                         Round {pick.round} - {pick.year}
                       </div>
                       {pick.isTradeLocked && (

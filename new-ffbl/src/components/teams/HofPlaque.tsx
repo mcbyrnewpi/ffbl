@@ -45,19 +45,19 @@ export default function HofPlaque({ inductee, stats }: Props) {
           <div className="bg-slate-50 border-b border-slate-100 px-4 py-3 flex justify-between text-center">
             <div>
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{stats.s1Label}</div>
-              <div className="text-sm font-black text-slate-700">{stats.s1}</div>
+              <div className="text-base font-black text-slate-900">{stats.s1}</div>
             </div>
             <div>
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{stats.s2Label}</div>
-              <div className="text-sm font-black text-slate-700">{stats.s2}</div>
+              <div className="text-base font-black text-slate-900">{stats.s2}</div>
             </div>
             <div>
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{stats.s3Label}</div>
-              <div className="text-sm font-black text-slate-700">{stats.s3}</div>
+              <div className="text-base font-black text-slate-900">{stats.s3}</div>
             </div>
             <div>
               <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{stats.s4Label}</div>
-              <div className="text-sm font-black text-slate-700">{stats.s4}</div>
+              <div className="text-base font-black text-slate-900">{stats.s4}</div>
             </div>
           </div>
         ) : (

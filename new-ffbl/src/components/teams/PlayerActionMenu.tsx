@@ -3,7 +3,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRightLeft, UserMinus, ArrowUpCircle, ArrowDownCircle, Stethoscope, Ban, Settings, ChevronDown, Lock } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { ArrowRightLeft, UserMinus, UserPlus, ArrowUpCircle, ArrowDownCircle, Stethoscope, Ban, Settings, ChevronDown, Lock } from 'lucide-react';
 
 interface Props {
   player: any;
@@ -11,28 +12,16 @@ interface Props {
   dropUp?: boolean;
 }
 
-// 🌟 Added dropUp = false to the destructuring here
 export default function PlayerActionMenu({ player, isMyTeam, dropUp = false }: Props) {
   const router = useRouter();
+  const { data: session } = useSession();
+  const myTeamId = (session?.user as any)?.teamId;
+
   const [isOpen, setIsOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   
   const [showIl60Form, setShowIl60Form] = useState(false);
   const [retroDate, setRetroDate] = useState("");
-
-  if (!isMyTeam) {
-    return (
-      <button 
-        onClick={(e) => {
-          e.stopPropagation();
-          router.push(`/trades/build?addPlayer=${player.id}`);
-        }}
-        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white text-xs font-bold rounded-lg transition-colors border border-blue-100 shadow-sm"
-      >
-        <ArrowRightLeft size={14} /> Trade
-      </button>
-    );
-  }
 
   const handleAction = async (payload: any) => {
     setIsProcessing(true);
@@ -58,6 +47,95 @@ export default function PlayerActionMenu({ player, isMyTeam, dropUp = false }: P
     }
   };
 
+  // 🌟 STATE 1: FREE AGENT (Dropdown to select level)
+  if (!player.teamId) {
+    return (
+      <div className="relative">
+        <button 
+          onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); }}
+          disabled={isProcessing}
+          className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all border shadow-sm whitespace-nowrap ${
+            isOpen ? 'bg-emerald-800 text-white border-emerald-800' : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-600 hover:text-white'
+          }`}
+        >
+          <UserPlus size={14} /> {isProcessing ? 'Adding...' : 'Add Player'}
+          <ChevronDown size={14} className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        </button>
+
+        {isOpen && (
+          <>
+            <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setIsOpen(false); }} />
+            <div className={`absolute right-0 w-48 bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden py-1 ${
+              dropUp ? 'bottom-full mb-2' : 'top-full mt-2'
+            }`}>
+              <div className="px-3 py-1.5 text-[10px] font-black uppercase text-slate-400 tracking-wider">Assign to Level</div>
+              
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!myTeamId) return alert("You must be assigned to a franchise.");
+                  handleAction({ teamId: myTeamId, level: 'MLB', status: 'ACTIVE' });
+                }} 
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 text-left"
+              >
+                <ArrowUpCircle size={14} className="text-emerald-500" /> Add to MLB
+              </button>
+              
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!myTeamId) return alert("You must be assigned to a franchise.");
+                  handleAction({ teamId: myTeamId, level: 'AAA', status: 'ACTIVE' });
+                }} 
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 text-left"
+              >
+                <ArrowDownCircle size={14} className="text-orange-500" /> Add to AAA
+              </button>
+              
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!myTeamId) return alert("You must be assigned to a franchise.");
+                  handleAction({ teamId: myTeamId, level: 'AA', status: 'ACTIVE' });
+                }} 
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 text-left"
+              >
+                <ArrowDownCircle size={14} className="text-orange-500" /> Add to AA
+              </button>
+              
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!myTeamId) return alert("You must be assigned to a franchise.");
+                  handleAction({ teamId: myTeamId, level: 'A', status: 'ACTIVE' });
+                }} 
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 text-left"
+              >
+                <ArrowDownCircle size={14} className="text-orange-500" /> Add to A
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    );
+  }
+
+  // 🌟 STATE 2: SOMEONE ELSE'S TEAM
+  if (!isMyTeam) {
+    return (
+      <button 
+        onClick={(e) => {
+          e.stopPropagation();
+          router.push(`/trades/build?addPlayer=${player.id}`);
+        }}
+        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white text-xs font-bold rounded-lg transition-colors border border-blue-100 shadow-sm whitespace-nowrap"
+      >
+        <ArrowRightLeft size={14} /> Trade
+      </button>
+    );
+  }
+
+  // 🌟 STATE 3: MY TEAM (Show Management Dropdown)
   const isIL60Locked = player.status === 'IL_60' && player.il60UnlockDate && new Date(player.il60UnlockDate) > new Date();
 
   return (
@@ -65,7 +143,7 @@ export default function PlayerActionMenu({ player, isMyTeam, dropUp = false }: P
       <button 
         onClick={(e) => { e.stopPropagation(); setIsOpen(!isOpen); setShowIl60Form(false); }}
         disabled={isProcessing}
-        className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all border shadow-sm ${
+        className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all border shadow-sm whitespace-nowrap ${
           isOpen ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
         }`}
       >
@@ -78,7 +156,6 @@ export default function PlayerActionMenu({ player, isMyTeam, dropUp = false }: P
         <>
           <div className="fixed inset-0 z-40" onClick={(e) => { e.stopPropagation(); setIsOpen(false); }} />
           
-          {/* 🌟 DYNAMIC POSITIONING: Swaps top for bottom based on prop */}
           <div className={`absolute right-0 w-56 bg-white rounded-xl shadow-xl border border-slate-200 z-50 overflow-hidden py-1 ${
             dropUp ? 'bottom-full mb-2' : 'top-full mt-2'
           }`}>

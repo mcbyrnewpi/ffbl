@@ -6,6 +6,9 @@ import Image from 'next/image';
 import { createPortal } from 'react-dom';
 import { MILB_PARENT_MAP } from '@/lib/milb-map';
 import PlayerCardModal from '@/components/players/PlayerCardModal';
+// 🌟 NEW: Imports for session and actions
+import { useSession } from 'next-auth/react';
+import PlayerActionMenu from '@/components/teams/PlayerActionMenu';
 
 interface Props {
   variant?: 'full' | 'icon';
@@ -16,7 +19,7 @@ const formatDate = (dateString: string | null | undefined) => {
   return new Date(dateString).toLocaleDateString();
 };
 
-// --- 🏗️ WRAPPER COMPONENT (The Fix for Vercel) ---
+// --- 🏗️ WRAPPER COMPONENT ---
 export default function GlobalSearch(props: Props) {
   return (
     <Suspense fallback={
@@ -40,6 +43,10 @@ function GlobalSearchContent({ variant = 'full' }: Props) {
   const [modifierKey, setModifierKey] = useState('⌘');
   const [isMounted, setIsMounted] = useState(false);
 
+  // 🌟 NEW: Get session to determine if a searched player belongs to the user
+  const { data: session } = useSession();
+  const myTeamId = (session?.user as any)?.teamId;
+
   useEffect(() => {
     setIsMounted(true);
     const isMac = navigator.userAgent.includes('Macintosh') || navigator.userAgent.includes('Mac OS') || navigator.userAgent.includes('iPhone') || navigator.userAgent.includes('iPad');
@@ -57,6 +64,7 @@ function GlobalSearchContent({ variant = 'full' }: Props) {
     return () => document.removeEventListener("keydown", down);
   }, []);
 
+  // 🌟 BONUS FIX: Automatically closes search if they click a Trade link!
   useEffect(() => {
     setIsOpen(false);
     setQuery("");
@@ -79,11 +87,11 @@ function GlobalSearchContent({ variant = 'full' }: Props) {
       return (
         <button 
           onClick={() => setIsOpen(true)}
-          className="p-2 text-slate-300 hover:text-white hover:bg-slate-800 rounded-md transition-colors"
+          className="p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
           aria-label="Search players"
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </button>
       );
@@ -92,14 +100,14 @@ function GlobalSearchContent({ variant = 'full' }: Props) {
     return (
       <button 
         onClick={() => setIsOpen(true)}
-        className="flex items-center gap-2 px-3 py-2 text-sm text-slate-400 bg-slate-950/50 border border-slate-700 rounded-lg hover:bg-slate-800 hover:text-slate-200 transition-colors w-full"
+        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-500 bg-slate-50 border border-slate-200 rounded-lg hover:bg-slate-100 hover:border-slate-300 hover:text-slate-700 transition-all w-full shadow-sm"
       >
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
         </svg>
         <span>Search players...</span>
         {isMounted && (
-          <kbd className="ml-auto hidden lg:inline-flex h-5 items-center gap-1 rounded border border-slate-700 bg-slate-900 px-1.5 font-mono text-[10px] font-medium text-slate-400">
+          <kbd className="ml-auto hidden lg:inline-flex h-5 items-center gap-1 rounded bg-white border border-slate-200 px-1.5 font-mono text-[10px] font-bold text-slate-400 shadow-sm">
             <span className="text-xs">{modifierKey}</span>K
           </kbd>
         )}
@@ -129,7 +137,7 @@ function GlobalSearchContent({ variant = 'full' }: Props) {
             </button>
           </div>
           
-          <div className="max-h-[450px] overflow-y-auto p-2 bg-slate-50/50 flex flex-col">
+          <div className="max-h-[450px] overflow-y-auto p-2 pb-48 bg-slate-50/50 flex flex-col">
             {results.length > 0 ? (
               <>
                 {results.map(player => (
@@ -197,11 +205,26 @@ function GlobalSearchContent({ variant = 'full' }: Props) {
                       </div>
                     </div>
 
-                    {!player.isExternal && (
-                      <div className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded border border-slate-200 ml-auto flex-shrink-0 group-hover:bg-white transition-colors">
-                        {player.status}
-                      </div>
-                    )}
+                    {/* 🌟 NEW: Action Menu Container */}
+                    <div 
+                      className="ml-auto flex items-center gap-2 flex-shrink-0"
+                      // Stop propagation so clicking the menu doesn't open the 3D card
+                      onClick={(e) => e.stopPropagation()} 
+                    >
+                      {!player.isExternal && (
+                        <div className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-1 rounded border border-slate-200 group-hover:bg-white transition-colors">
+                          {player.status}
+                        </div>
+                      )}
+                      
+                      {!player.isExternal && (
+                        <PlayerActionMenu 
+                          player={player} 
+                          isMyTeam={String(player.teamId) === String(myTeamId)} 
+                        />
+                      )}
+                    </div>
+
                   </div>
                 ))}
                 

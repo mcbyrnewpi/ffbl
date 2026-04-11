@@ -1,4 +1,3 @@
-// src/components/teams/GlobalRosterContainer.tsx
 "use client";
 
 import { useState } from 'react';
@@ -21,16 +20,14 @@ export default function GlobalRosterContainer({
   teamId: string,
   lastStatSync: Date | null   
 }) {
-  const [view, setView] = useState<'grid' | 'list'>('list');
+  const [view, setView] = useState<'grid' | 'list'>('grid');
 
   return (
-    <div className="space-y-12">
-      {/* 🌎 GLOBAL TOGGLE BAR & SYNC BUTTON */}
+    <div className="space-y-8">
+      {/* 🌎 GLOBAL TOGGLE BAR */}
       <div className="flex justify-between items-center bg-white border border-slate-200 p-2 rounded-xl shadow-sm mb-6">
-        {/* Left Side: Title */}
-        <h2 className="text-sm font-bold text-slate-800 ml-2">Major League Roster</h2>
+        <h2 className="text-lg font-black tracking-tight text-slate-900 ml-2">Major League Roster</h2>
 
-        {/* Right Side: Toggles */}
         <div className="flex items-center">
           <span className="text-[10px] font-black uppercase text-slate-400 mr-3 tracking-widest hidden sm:inline-block">
             View Mode
@@ -52,15 +49,14 @@ export default function GlobalRosterContainer({
         </div>
       </div>
 
-      {/* RENDER THE SECTIONS */}
-      <RosterView title="MLB Active Roster" players={mlbActive} headerColor="bg-blue-900" view={view} isMyTeam={isMyTeam} />
+      <RosterView title="MLB Active Roster" players={mlbActive} headerColor="text-slate-900" view={view} isMyTeam={isMyTeam} />
       
       {naList.length > 0 && (
-        <RosterView title="Not Active (NA)" players={naList} headerColor="bg-slate-500" view={view} isMyTeam={isMyTeam} />
+        <RosterView title="Not Active (NA)" players={naList} headerColor="text-slate-500" view={view} isMyTeam={isMyTeam} defaultOpen={false} />
       )}
       
       {injuredList.length > 0 && (
-        <RosterView title="Injured List (IL)" players={injuredList} headerColor="bg-red-900" view={view} isMyTeam={isMyTeam} />
+        <RosterView title="Injured List (IL)" players={injuredList} headerColor="text-red-700" view={view} isMyTeam={isMyTeam} defaultOpen={false} />
       )}
     </div>
   );

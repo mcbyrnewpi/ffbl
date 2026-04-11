@@ -1,7 +1,7 @@
 // src/components/teams/PlayerCard.tsx
-import PlayerHeadshot from './PlayerHeadshot';
 import { AlertTriangle, Trophy } from 'lucide-react';
 import PlayerActionMenu from './PlayerActionMenu';
+import PlayerHeadshot from './PlayerHeadshot';
 
 interface PlayerCardProps {
   player: any;
@@ -12,7 +12,6 @@ interface PlayerCardProps {
 
 export default function PlayerCard({ player, onLinkClick, onNameClick, isMyTeam }: PlayerCardProps) {
   
-  // 🌟 Calculate Age
   const age = player.mlbRawData?.currentAge || 
     (player.birthdate ? Math.floor((new Date().getTime() - new Date(player.birthdate).getTime()) / 31557600000) : '??');
 
@@ -24,10 +23,11 @@ export default function PlayerCard({ player, onLinkClick, onNameClick, isMyTeam 
     const pos = player.positions?.[0]?.abbrev || player.mlbRawData?.primaryPosition?.abbreviation;
     const isPitcher = pos === 'P' || pos === 'SP' || pos === 'RP';
 
-    // Try to get current season stats first, fallback to career stats
     const statGroup = isPitcher ? 'pitching' : 'hitting';
-    const statBlock = player.mlbRawData.stats.find((s: any) => s.type?.displayName === 'season' && s.group?.displayName === statGroup)?.splits?.[0]?.stat
-      || player.mlbRawData.stats.find((s: any) => s.type?.displayName === 'career' && s.group?.displayName === statGroup)?.splits?.[0]?.stat;
+    
+    const statBlock = player.mlbRawData.stats.find(
+      (s: any) => s.type?.displayName === 'season' && s.group?.displayName === statGroup
+    )?.splits?.[0]?.stat;
 
     if (!statBlock) return null;
 
@@ -43,7 +43,6 @@ export default function PlayerCard({ player, onLinkClick, onNameClick, isMyTeam 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 group relative flex flex-col hover:shadow-md transition-all hover:z-50 focus-within:z-50">
       
-      {/* 1. TOP OVERLAYS */}
       <div className="absolute top-2 inset-x-2 flex justify-between items-start z-30 pointer-events-none">
         {player.status !== 'ACTIVE' ? (
           <span className="bg-red-600 text-white text-[9px] font-black px-1.5 py-0.5 rounded shadow-sm uppercase tracking-wider">
@@ -66,15 +65,11 @@ export default function PlayerCard({ player, onLinkClick, onNameClick, isMyTeam 
         )}
       </div>
 
-      {/* 2. CLICKABLE HEADSHOT AREA */}
       <button 
         onClick={onNameClick}
-        className="relative h-36 overflow-hidden bg-slate-100 flex flex-col items-center flex-shrink-0 w-full group/img focus:outline-none rounded-t-xl"
+        className="relative h-36 overflow-hidden bg-slate-100 flex flex-col items-center flex-shrink-0 w-full group/img focus:outline-none rounded-t-xl border-b border-slate-200"
       >
-        <PlayerHeadshot 
-          player={player} 
-          className="group-hover/img:scale-105 transition-transform duration-500" 
-        />
+        <PlayerHeadshot player={player} />
 
         {player.isTop100 && player.prospectRank && (
           <div className="absolute bottom-1.5 z-10 animate-in zoom-in duration-300">
@@ -90,15 +85,14 @@ export default function PlayerCard({ player, onLinkClick, onNameClick, isMyTeam 
         </div>
       </button>
 
-      {/* 3. PLAYER INFO */}
       <div className="p-3 flex-grow flex flex-col">
         <div className="flex justify-between items-start mb-2 gap-2">
           <button 
             onClick={onNameClick}
             className="text-left min-w-0 flex-grow group/name focus:outline-none"
           >
-            <span className="text-[10px] font-medium text-slate-500 block leading-tight">{player.firstName}</span>
-            <h3 className="font-black text-slate-800 leading-tight truncate group-hover:name:text-blue-600 transition-colors">
+            <span className="text-[10px] font-bold text-slate-500 block leading-tight uppercase tracking-wide">{player.firstName}</span>
+            <h3 className="font-black text-slate-900 leading-tight truncate group-hover/name:text-blue-600 transition-colors">
               {player.lastName}
             </h3>
           </button>
@@ -108,9 +102,7 @@ export default function PlayerCard({ player, onLinkClick, onNameClick, isMyTeam 
           </span>
         </div>
         
-        {/* DYNAMIC SUBTEXT ROW */}
         <div className="flex flex-col gap-1 pt-2 border-t border-slate-50 text-[10px] font-bold uppercase tracking-wide">
-           {/* Top Row: Age & ETA */}
            <div className="flex items-center gap-1.5 text-slate-400">
              <span>Age: {age}</span>
              {isMinorLeaguer && player.prospectEta && (
@@ -121,7 +113,6 @@ export default function PlayerCard({ player, onLinkClick, onNameClick, isMyTeam 
              )}
            </div>
 
-           {/* Bottom Row: Quick Stats */}
            {quickStats ? (
              <div className="text-slate-600 truncate tracking-normal">
                {quickStats}
@@ -133,7 +124,6 @@ export default function PlayerCard({ player, onLinkClick, onNameClick, isMyTeam 
            )}
         </div>
 
-        {/* 4. PLAYER ACTIONS */}
         <div className="mt-3 pt-3 border-t border-slate-100 relative">
            <PlayerActionMenu player={player} isMyTeam={!!isMyTeam} />
         </div>
