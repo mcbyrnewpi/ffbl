@@ -6,8 +6,8 @@ import TradeFlowDiagram from './TradeFlowDiagram';
 interface TradeSummaryProps {
   tradeAssetsList: UIAsset[];
   involvedTeamIds: string[];
-  getTeamName?: (id: string) => string;       // ⬅️ Made optional
-  teamDictionary?: Record<string, string>;    // ⬅️ Added for Server Components
+  getTeamName?: (id: string) => string;
+  teamDictionary?: Record<string, string>;  
   onBack?: () => void;
   onSubmit?: () => void;
   isSubmitting?: boolean;

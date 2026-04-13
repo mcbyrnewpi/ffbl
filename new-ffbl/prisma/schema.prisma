@@ -513,7 +513,7 @@ model DraftPick {
 
 model Trade {
   id               String      @id @default(cuid())
-  status           TradeStatus @default(PENDING) // UPDATED: Uses Enum
+  status           TradeStatus @default(PENDING)
   initiatingTeamId String
 
   aiAnalysis Json?

@@ -116,15 +116,15 @@ export default function BaseballCard({ player }: { player: any }) {
 
             <div className="relative flex-grow bg-white border-2 border-slate-300 overflow-hidden shadow-inner">
               {isLegend ? (
-                <div className="absolute top-2 left-2 z-10 bg-yellow-400 border-2 border-yellow-800 px-2 py-0.5 shadow-[3px_3px_0px_rgba(133,77,14,1)] rotate-[-2deg]">
+                <div className="absolute top-2 left-2 z-10 bg-yellow-400 border-2 border-yellow-800 px-2 py-0.5 shadow-[3px_3px_0px_rgba(133,77,14,1)] rotate-[-2deg] [backface-visibility:hidden]">
                   <span className="text-[10px] font-black text-yellow-900 uppercase italic flex items-center gap-1"><Star size={10} fill="currentColor" /> FFBL LEGEND</span>
                 </div>
               ) : isRetired ? (
-                <div className="absolute top-2 left-2 z-10 bg-[#4a3c31] border-2 border-[#2a221c] px-2 py-0.5 rotate-[-2deg]">
+                <div className="absolute top-2 left-2 z-10 bg-[#4a3c31] border-2 border-[#2a221c] px-2 py-0.5 rotate-[-2deg] [backface-visibility:hidden]">
                   <span className="text-[10px] font-black text-[#dac4a4] uppercase italic">ALUMNI</span>
                 </div>
               ) : isElite ? (
-                <div className="absolute top-2 left-2 z-10 bg-yellow-400 border-2 border-black px-2 py-0.5 shadow-[3px_3px_0px_rgba(0,0,0,1)] rotate-[-2deg]">
+                <div className="absolute top-2 left-2 z-10 bg-yellow-400 border-2 border-black px-2 py-0.5 shadow-[3px_3px_0px_rgba(0,0,0,1)] rotate-[-2deg] [backface-visibility:hidden]">
                   <span className="text-[10px] font-black text-black uppercase italic">TOP PROSPECT #{player.prospectRank}</span>
                 </div>
               ) : null}

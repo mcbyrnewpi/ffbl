@@ -248,6 +248,18 @@ export async function POST(request: Request) {
       return { status: "Trade successfully processed!", executed: true };
     });
 
+    // ==========================================
+    // 🤖 THE SPORTS MEDIA TRIGGER (Background Task)
+    // ==========================================
+    if (result.executed) {
+      const baseUrl = new URL(request.url).origin;
+      fetch(`${baseUrl}/api/ai/generate-trade-media`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tradeId })
+      }).catch(err => console.error("Failed to trigger AI Media:", err));
+    }
+
     return NextResponse.json(result, { status: 200 });
 
   } catch (error: any) {

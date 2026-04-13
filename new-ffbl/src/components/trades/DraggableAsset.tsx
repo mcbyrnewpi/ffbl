@@ -1,4 +1,5 @@
 import { useDraggable } from '@dnd-kit/core';
+import { useState, useEffect } from 'react';
 import PlayerHeadshot from '../teams/PlayerHeadshot';
 
 export default function DraggableAsset({ 
@@ -12,10 +13,23 @@ export default function DraggableAsset({
   onRemove?: () => void,
   onMobileAdd?: () => void
 }) {
+  const [isDesktop, setIsDesktop] = useState(true);
+  
+  useEffect(() => {
+    // Set initial value
+    setIsDesktop(window.innerWidth >= 768);
+    
+    // Add resize listener just in case they rotate their device
+    const handleResize = () => setIsDesktop(window.innerWidth >= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // If this is the overlay, we append a suffix so dnd-kit doesn't get confused by duplicate IDs
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: isOverlay ? `${asset.id}-overlay` : asset.id,
     data: asset, 
+    disabled: !isDesktop, 
   });
 
   // Only apply the raw CSS transform to the original item, the DragOverlay handles its own positioning
@@ -27,7 +41,7 @@ export default function DraggableAsset({
   // Visual states
   const baseClasses = "bg-white rounded-md border border-slate-200 p-2 flex items-center justify-between transition-all duration-200";
   const ghostClasses = isDragging && !isOverlay ? "opacity-30 border-dashed" : "shadow-sm hover:border-blue-300";
-  const overlayClasses = isOverlay ? "shadow-xl scale-105 ring-2 ring-blue-500 cursor-grabbing rotate-2 z-50" : "cursor-grab";
+  const overlayClasses = isOverlay ? "shadow-xl scale-105 ring-2 ring-blue-500 cursor-grabbing rotate-2 z-50" : (isDesktop ? "cursor-grab" : "");
 
   // 🎯 DRAFT PICK RENDER
   if (asset.type === 'PICK') {
@@ -52,21 +66,23 @@ export default function DraggableAsset({
               <button 
                 onPointerDown={(e) => e.stopPropagation()} // Stops dnd-kit from initiating a drag
                 onClick={(e) => { e.stopPropagation(); onRemove(); }}
-                className="p-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                className="p-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors z-10 relative"
                 title="Remove from block"
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
               </button>
             )}
 
-            <div className="text-slate-300 px-1 hidden md:block">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
-            </div>
+            {isDesktop && (
+              <div className="text-slate-300 px-1 hidden md:block">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+              </div>
+            )}
             
             {/* 📱 Mobile Add Button */}
-            {onMobileAdd && !isOverlay && (
+            {onMobileAdd && !isOverlay && !isDesktop && (
               <button 
-                className="p-1 text-slate-400 hover:text-blue-600 rounded hover:bg-blue-50 transition-colors md:hidden" 
+                className="p-1 text-slate-400 hover:text-blue-600 rounded hover:bg-blue-50 transition-colors md:hidden z-10 relative" 
                 onPointerDown={(e) => e.stopPropagation()} 
                 onClick={(e) => { e.stopPropagation(); onMobileAdd(); }}
               >
@@ -117,21 +133,23 @@ export default function DraggableAsset({
             <button 
               onPointerDown={(e) => e.stopPropagation()} // Stops dnd-kit from initiating a drag
               onClick={(e) => { e.stopPropagation(); onRemove(); }}
-              className="p-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+              className="p-1 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors z-10 relative"
               title="Remove from block"
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
             </button>
           )}
 
-          <div className="text-slate-300 px-1 hidden md:block">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
-          </div>
+          {isDesktop && (
+            <div className="text-slate-300 px-1 hidden md:block">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>
+            </div>
+          )}
           
           {/* 📱 Mobile Add Button */}
-          {onMobileAdd && !isOverlay && (
+          {onMobileAdd && !isOverlay && !isDesktop && (
             <button 
-              className="p-1 text-slate-400 hover:text-blue-600 rounded hover:bg-blue-50 transition-colors md:hidden" 
+              className="p-1 text-slate-400 hover:text-blue-600 rounded hover:bg-blue-50 transition-colors md:hidden z-10 relative" 
               onPointerDown={(e) => e.stopPropagation()} 
               onClick={(e) => { e.stopPropagation(); onMobileAdd(); }}
             >

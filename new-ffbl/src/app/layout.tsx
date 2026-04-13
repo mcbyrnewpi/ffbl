@@ -12,7 +12,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           
           <SideNav />
 
-          <main className="flex-1 w-full overflow-y-auto">
+          <main className="flex-1 w-full">
             {children}
           </main>
 

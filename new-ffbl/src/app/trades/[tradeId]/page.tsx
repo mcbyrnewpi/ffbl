@@ -6,6 +6,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import TradeSummary from '@/components/trades/TradeSummary';
 import { UIAsset } from '@/components/trades/TradeBuilder';
 import TradeActionButtons from '@/components/trades/TradeActionButtons';
+import TradeMediaSection from '@/components/trades/TradeMediaSection';
 
 export default async function TradeDetailsPage({ params }: { params: Promise<{ tradeId: string }> }) {
   const resolvedParams = await params;
@@ -21,7 +22,7 @@ export default async function TradeDetailsPage({ params }: { params: Promise<{ t
       assets: {
         include: { fromTeam: true, toTeam: true, player: true, draftPick: true }
       },
-      approvals: true // ⬅️ CRITICAL: Added this so we can count them!
+      approvals: true 
     }
   });
 
@@ -29,7 +30,6 @@ export default async function TradeDetailsPage({ params }: { params: Promise<{ t
 
   const isInitiator = trade.initiatingTeamId === myTeamId;
   
-  // ⬅️ NEW CALCULATIONS
   const userApproval = trade.approvals.find(a => a.userId === userId);
   const hasApproved = userApproval?.status === 'APPROVED';
   const pendingApprovalsCount = trade.approvals.filter(a => a.status === 'PENDING').length;
@@ -69,7 +69,7 @@ export default async function TradeDetailsPage({ params }: { params: Promise<{ t
       <span className="text-xl font-bold text-slate-900">
         {isInitiator ? "Your Proposal" : `Offer from ${initiatorName}`}
       </span>
-      <span className={`text-sm px-3 py-1 rounded-full ml-4 uppercase tracking-wider font-bold ${statusColors}`}>
+      <span className={`text-sm px-3 py-1 rounded-full ml-4 uppercase tracking-wider font-bold ${statusColors[trade.status] || 'bg-slate-100 text-slate-700'}`}>
         {trade.status}
       </span>
     </div>
@@ -78,27 +78,36 @@ export default async function TradeDetailsPage({ params }: { params: Promise<{ t
   const settings = await prisma.leagueSettings.findUnique({ where: { id: 1 } });
 
   return (
-    <div className="h-full bg-slate-50 min-h-screen">
-      <TradeSummary 
-        tradeAssetsList={uiAssets}
-        involvedTeamIds={involvedTeamIds}
-        teamDictionary={teamDictionary}
-        title={customTitle}
-        actionButtons={
-          <TradeActionButtons 
-            tradeId={trade.id} 
-            userId={userId}
-            teamId={myTeamId}
-            tradeAssets={trade.assets}
-            settings={settings}
-            isInitiator={isInitiator}
-            status={trade.status} 
-            redirectTo="/trades"
-            hasApproved={hasApproved} // ⬅️ NEW
-            pendingApprovalsCount={pendingApprovalsCount} // ⬅️ NEW
-          />
-        }
-      />
+    <div className="h-full bg-slate-50 min-h-screen px-4 py-8">
+      <div className="max-w-5xl mx-auto w-full">
+        
+        {/* 🎙️ Move the Media Network to the very top! */}
+        {trade.status === 'PROCESSED' && (
+          <TradeMediaSection aiAnalysis={trade.aiAnalysis} />
+        )}
+
+        <TradeSummary 
+          tradeAssetsList={uiAssets}
+          involvedTeamIds={involvedTeamIds}
+          teamDictionary={teamDictionary}
+          title={customTitle}
+          actionButtons={
+            <TradeActionButtons 
+              tradeId={trade.id} 
+              userId={userId}
+              teamId={myTeamId}
+              tradeAssets={trade.assets as any}
+              settings={settings}
+              isInitiator={isInitiator}
+              status={trade.status} 
+              redirectTo="/trades"
+              hasApproved={hasApproved} 
+              pendingApprovalsCount={pendingApprovalsCount} 
+            />
+          }
+        />
+
+      </div>
     </div>
   );
 }

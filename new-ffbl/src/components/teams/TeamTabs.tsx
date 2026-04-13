@@ -14,8 +14,8 @@ export default function TeamTabs({ teamId }: { teamId: string }) {
   ];
 
   return (
-    <div className="border-b border-slate-200 mt-4">
-      <nav className="-mb-px flex space-x-8">
+    <div className="border-b border-slate-200 mt-4 w-full">
+      <nav className="-mb-px flex space-x-6 sm:space-x-8 overflow-x-auto no-scrollbar whitespace-nowrap">
         {tabs.map((tab) => {
           // Exact match keeps the active states from stepping on each other's toes
           const isActive = pathname === tab.href;

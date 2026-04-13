@@ -71,6 +71,34 @@ export default function SideNav() {
               </>
             )}
           </nav>
+          {/* MOBILE USER PROFILE BOTTOM BAR */}
+          <div className="mt-auto pt-4 pb-2 px-4 border-t border-slate-100">
+            {status === 'loading' ? (
+               <div className="text-xs text-slate-400 font-bold animate-pulse">Loading...</div>
+            ) : session ? (
+              <div className="flex flex-col gap-1">
+                <div className="text-sm font-black text-slate-900 truncate">
+                  {session?.user?.name || session?.user?.email || ""}
+                </div>
+                <div className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-3">
+                  {(session?.user as any)?.role || 'OWNER'}
+                </div>
+                <button 
+                  onClick={() => signOut()} 
+                  className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-red-600 transition-colors w-fit"
+                >
+                  <LogOut size={16} /> Sign Out
+                </button>
+              </div>
+            ) : (
+              <button 
+                onClick={() => signIn()} 
+                className="flex items-center gap-2 text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors"
+              >
+                <LogIn size={16} /> Sign In
+              </button>
+            )}
+          </div>
         </div>
       )}
 
