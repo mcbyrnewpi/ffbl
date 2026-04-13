@@ -83,7 +83,10 @@ export default async function TradeDetailsPage({ params }: { params: Promise<{ t
         
         {/* 🎙️ Move the Media Network to the very top! */}
         {trade.status === 'PROCESSED' && (
-          <TradeMediaSection aiAnalysis={trade.aiAnalysis} />
+          <TradeMediaSection 
+            aiAnalysis={trade.aiAnalysis} 
+            tradeId={trade.id}
+          />
         )}
 
         <TradeSummary 

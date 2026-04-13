@@ -56,25 +56,55 @@ export async function POST(request: Request) {
     }).join('\n');
 
     // 4. Force Gemini to return our exact JSON structure!
-    const { object } = await generateObject({
-      model: google('gemini-2.5-flash'),
-      schema: z.object({
-        theStathead: z.string().describe("The analytical breakdown. Format the text using markdown."),
-        theScout: z.string().describe("The dynasty outlook. Format the text using markdown."),
-        theShockJock: z.string().describe("The radio script dialogue. Format the text using markdown."),
-      }),
-      system: `You are the driving force behind a Fantasy Baseball Media Network. A massive trade has just occurred. You need to provide three distinct analytical reactions. 
+    const aiSchema = z.object({
+      theStathead: z.string().describe("The analytical breakdown. Format the text using markdown."),
+      theScout: z.string().describe("The dynasty outlook. Format the text using markdown."),
+      theShockJock: z.string().describe("The radio script dialogue. Format the text using markdown."),
+    });
+
+    const systemPrompt = `You are the driving force behind a Fantasy Baseball Media Network. A massive trade has just occurred. You need to provide three distinct analytical reactions. 
       
       Personality 1 (Stats Guy): You are a massive nerd who relies entirely on advanced analytics, positional scarcity, regression, and immediate MLB impact. You despise "gut feel" and traditional scouting. Give a highly analytical breakdown of who won right now. If there are draft picks involved: a first round pick is equivalent to a top 100 milb prospect. A second round pick is equivalent to a top 150 prospect. A third round pick is equivalent to a very young international signing or a relief with the potential to get a closer role. Fourth and Fifth round picks are essentially guys that were dropped in the offseason.
       
       Personality 2 (Dynasty Guy): You are a grizzled, old-school minor league scout. You only care about the 2-5 year championship window. You look at projectable frames, bat speed, minor league levels, and prospect rankings. Tell us which franchise set themselves up for a dynasty. If there are draft picks involved: a first round pick is equivalent to a top 100 milb prospect. A second round pick is equivalent to a top 150 prospect. A third round pick is equivalent to a very young international signing or a relief with the potential to get a closer role. Fourth and Fifth round picks are essentially guys that were dropped in the offseason.
       
-      Personality 3 (Family Guy): You are Stewie and Brian Griffin from Family Guy broadcasting a sports talk radio show. Write this entirely as a script dialogue. Brian tries to sound like a pretentious sports analyst using cliches, while Stewie ruthlessly insults Brian, roasts the managers involved in the trade, and delivers shockingly accurate, cynical fantasy baseball analysis. Once in a while Peter or another character will butt in wondering what Stewie and Brian are talking about, but not every trade.`,
-      prompt: `Analyze this trade:\n\n${cleanTradeSummary}`,
-    });
+      Personality 3 (Family Guy): You are Stewie and Brian Griffin from Family Guy broadcasting a sports talk radio show. 
+        Write this entirely as a script dialogue. 
+        CRITICAL: Do not use the phrases "seismic shift," "shockwaves," or "fantasy landscape" in the intro. 
+        Every episode must have a unique, creative show title and a different opening hook. 
+        Brian should try to be a "serious" analyst using annoying sports-talk-radio tropes, while Stewie is 
+        cynically brilliant, ruthlessly insulting Brian's intelligence and the managers' competence. 
+        Focus the banter on the specific players traded—if a player is old, made of glass, or a "never-was," 
+        Stewie should weaponize those specific facts. 
+        Occasionally, other characters like Peter (asking unrelated questions), Quagmire (distracted by a manager's 
+        team name), Cleveland, or other characters might interrupt for a single line of dialogue.`;
+
+    const userPrompt = `Analyze this trade:\n\n${cleanTradeSummary}`;
+
+    // THE HEAVY HITTER SETUP (Pro primary, Flash fallback)
+    let aiObject;
+    try {
+      console.log("Attempting to generate premium media with gemini-2.5-pro...");
+      const { object } = await generateObject({
+        model: google('gemini-2.5-pro'), 
+        schema: aiSchema,
+        system: systemPrompt,
+        prompt: userPrompt,
+      });
+      aiObject = object;
+    } catch (error) {
+      console.warn("⚠️ 2.5-pro is overloaded or timed out. Falling back to 2.5-flash!");
+      const { object } = await generateObject({
+        model: google('gemini-2.5-flash'),
+        schema: aiSchema,
+        system: systemPrompt,
+        prompt: userPrompt,
+      });
+      aiObject = object;
+    }
 
     // Catch Gemini if it stuffs the entire payload inside theShockJock
-    let cleanAnalysis = { ...object };
+    let cleanAnalysis = { ...aiObject };
     if (typeof cleanAnalysis.theShockJock === 'string' && cleanAnalysis.theShockJock.trim().startsWith('{"theStathead"')) {
       try {
         const parsed = JSON.parse(cleanAnalysis.theShockJock);
@@ -92,9 +122,75 @@ export async function POST(request: Request) {
       }
     });
 
-    // Note: We will hook up the Resend Email function right here in the next step!
+    // ==========================================
+    // 📧 6. FIRE THE RESEND EMAIL BLAST!
+    // ==========================================
+    
+    // 1. Fetch all User emails from the database
+    const allUsers = await prisma.user.findMany({
+      where: { 
+        email: { not: null } 
+      },
+      select: { email: true }
+    });
+
+    const recipientEmails = allUsers
+      .map(u => u.email as string)
+      .filter(email => email.length > 0);
+
+    // 2. Prepare Grouped Assets and Subject (Keep your existing logic)
+    const groupedAssets: Record<string, string[]> = {};
+    trade.assets.forEach(asset => {
+      const toTeamName = teamMap[asset.toTeamId];
+      const assetName = asset.player 
+        ? `${(asset.player as any).firstName} ${(asset.player as any).lastName}` 
+        : `a ${asset.draftPick?.year} Round ${asset.draftPick?.round} Pick`;
+        
+      if (!groupedAssets[toTeamName]) {
+        groupedAssets[toTeamName] = [];
+      }
+      groupedAssets[toTeamName].push(assetName);
+    });
+
+    const tradeDetails = Object.keys(groupedAssets)
+      .sort((a, b) => a.localeCompare(b))
+      .map(teamName => ({
+        teamName,
+        assets: groupedAssets[teamName]
+      }));
+
+    const teamNames = Object.values(teamMap);
+    const dateString = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    
+    const emailSubject = teamNames.length === 2 
+      ? `🚨 FFBL Trade - ${dateString}: ${teamNames[0]} & ${teamNames[1]}`
+      : `🚨 FFBL Trade - ${dateString}: ${teamNames.length}-team trade finalized!`;
+
+    const { resend } = await import('@/lib/resend');
+    const { TradeAnnouncementEmail } = await import('@/emails/TradeAnnouncementEmail');
+
+    try {
+      if (recipientEmails.length > 0) {
+        await resend.emails.send({
+          from: process.env.EMAIL_FROM || 'FFBL Commissioner <onboarding@resend.dev>',
+          to: recipientEmails, 
+          subject: emailSubject,
+          react: TradeAnnouncementEmail({ 
+            subject: emailSubject, 
+            tradeDetails, 
+            tradeId,
+            appUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+          }),
+        });
+        console.log(`Trade email successfully dispatched to ${recipientEmails.length} managers.`);
+      }
+    } catch (emailError) {
+      console.error("Failed to send trade announcement email:", emailError);
+    }
 
     return NextResponse.json({ success: true, aiAnalysis: cleanAnalysis }, { status: 200 });
+
+// ... [Keep existing catch blocks] ...
 
   } catch (error) {
     console.error("AI Media Generation Error:", error);

@@ -3,23 +3,68 @@
 
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Bot, LineChart, Glasses, MessageSquareWarning, ChevronDown } from 'lucide-react';
+import { useSession } from 'next-auth/react';
+import { Bot, LineChart, Glasses, MessageSquareWarning, ChevronDown, RotateCw } from 'lucide-react';
 
-export default function TradeMediaSection({ aiAnalysis }: { aiAnalysis: any }) {
+export default function TradeMediaSection({ aiAnalysis, tradeId }: { aiAnalysis: any, tradeId: string }) {
+  const { data: session } = useSession();
   const [activeTab, setActiveTab] = useState<'stathead' | 'scout' | 'shockjock'>('stathead');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
+  // Identify if the current user is the Commissioner
+  const isCommish = (session?.user as any)?.role === 'ADMIN' || (session?.user as any)?.role === 'COMMISH';
+
+  // Manual trigger for the Commissioner to rerun analysis
+  const handleForceGenerate = async () => {
+    setIsGenerating(true);
+    try {
+      const res = await fetch('/api/ai/generate-trade-media', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tradeId })
+      });
+      
+      if (res.ok) {
+        window.location.reload(); // Refresh to pull in the newly generated data
+      } else {
+        alert("Failed to generate media. Check the server logs.");
+      }
+    } catch (error) {
+      console.error("Force Generation Error:", error);
+      alert("An error occurred while trying to trigger the analysis.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  // State: Analysis doesn't exist yet
   if (!aiAnalysis) {
     return (
-      <div className="bg-white rounded-xl p-8 text-center border border-slate-200 flex flex-col items-center gap-3 mb-8 shadow-sm">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-blue-600 rounded-full animate-spin"></div>
-        <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">The writers are currently publishing their columns...</p>
-        <p className="text-[10px] text-slate-400">Refresh the page in a few moments.</p>
+      <div className="bg-white rounded-xl p-8 text-center border border-slate-200 flex flex-col items-center gap-4 mb-8 shadow-sm animate-in fade-in duration-500">
+        <div className={`w-10 h-10 border-4 border-slate-200 border-t-blue-600 rounded-full ${isGenerating ? 'animate-spin' : ''}`}></div>
+        
+        <div className="space-y-1">
+          <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">
+            {isGenerating ? "Writers are drafting their takes..." : "The writers are currently publishing their columns..."}
+          </p>
+          {!isGenerating && <p className="text-[10px] text-slate-400">Refresh the page in a few moments.</p>}
+        </div>
+
+        {/* Commissioner Emergency CTA */}
+        {isCommish && !isGenerating && (
+          <button 
+            onClick={handleForceGenerate}
+            className="group mt-2 flex items-center gap-2 px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-emerald-400 rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-lg active:scale-95 border border-slate-700"
+          >
+            <RotateCw size={14} className="group-hover:rotate-180 transition-transform duration-500" />
+            Commish: Force Media Analysis
+          </button>
+        )}
       </div>
     );
   }
 
-  // 🌟 The Ultimate AI Sanitizer
   let statheadText = aiAnalysis?.theStathead || "Analysis unavailable.";
   let scoutText = aiAnalysis?.theScout || "Analysis unavailable.";
   let shockjockText = aiAnalysis?.theShockJock || "Analysis unavailable.";
