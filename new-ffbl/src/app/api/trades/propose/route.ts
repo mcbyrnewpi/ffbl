@@ -2,6 +2,10 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { ApprovalStatus, TradeStatus } from '@prisma/client';
+import { Resend } from 'resend';
+import { TradeProposedEmail } from '@/emails/TradeProposedEmail';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request: Request) {
   try {
@@ -179,6 +183,82 @@ export async function POST(request: Request) {
         }
       });
     });
+
+    // ==========================================
+    // 📧 SEND "TRADE PROPOSED" NOTIFICATIONS
+    // ==========================================
+    if (newTrade) {
+      try {
+        // 1. Identify which teams are receiving this proposal (exclude the initiator)
+        const allTeamIds = newTrade.assets.flatMap(a => [a.fromTeamId, a.toTeamId]);
+        const receivingTeamIds = [...new Set(allTeamIds)].filter(id => id !== initiatingTeamId);
+
+        let recipientEmails: string[] = [];
+
+        // 2. Check for staging/test override
+        if (process.env.TEST_EMAIL_OVERRIDE) {
+          console.log(`🧪 [STAGING OVERRIDE] Sending Proposal to: ${process.env.TEST_EMAIL_OVERRIDE}`);
+          recipientEmails = [process.env.TEST_EMAIL_OVERRIDE];
+        } else {
+          // 3. Production: Fetch emails for the primary managers of the receiving teams
+          const receivingManagers = await prisma.user.findMany({
+            where: {
+              teamId: { in: receivingTeamIds },
+              email: { not: null }
+            },
+            select: { email: true }
+          });
+          recipientEmails = receivingManagers.map(m => m.email as string);
+        }
+
+        if (recipientEmails.length > 0) {
+          // 4. Group the assets by team for the email UI
+          const groupedAssets: Record<string, string[]> = {};
+          let initiatingTeamName = 'A manager';
+
+          newTrade.assets.forEach(asset => {
+            const toTeamName = asset.toTeamNameSnapshot || 'Unknown Team';
+            if (asset.fromTeamId === initiatingTeamId) {
+              initiatingTeamName = asset.fromTeamNameSnapshot || 'A manager';
+            }
+
+            const assetName = asset.playerNameSnapshot 
+              ? asset.playerNameSnapshot 
+              : asset.pickNameSnapshot || 'Draft Pick';
+              
+            if (!groupedAssets[toTeamName]) {
+              groupedAssets[toTeamName] = [];
+            }
+            groupedAssets[toTeamName].push(assetName);
+          });
+
+          const tradeDetails = Object.keys(groupedAssets)
+            .sort((a, b) => a.localeCompare(b))
+            .map(teamName => ({
+              teamName,
+              assets: groupedAssets[teamName]
+            }));
+
+          // 5. Fire off the email
+          const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+          await resend.emails.send({
+            from: process.env.EMAIL_FROM || 'FFBL Commissioner <onboarding@resend.dev>',
+            to: recipientEmails,
+            subject: `FFBL TRADE OFFER: A trade has been proposed to you by ${initiatingTeamName}`,
+            react: TradeProposedEmail({
+              initiatingTeamName,
+              tradeDetails,
+              tradeId: newTrade.id,
+              appUrl
+            })
+          });
+          
+          console.log(`Sent trade proposal email to ${recipientEmails.length} managers.`);
+        }
+      } catch (emailErr) {
+        console.error("Non-fatal error: Failed to send proposal email:", emailErr);
+      }
+    }
 
     // 4. Send the successful response back to the frontend
     return NextResponse.json(newTrade, { status: 201 });

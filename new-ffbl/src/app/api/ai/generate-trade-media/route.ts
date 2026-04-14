@@ -171,8 +171,8 @@ export async function POST(request: Request) {
     const dateString = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     
     const emailSubject = teamNames.length === 2 
-      ? `🚨 FFBL Trade - ${dateString}: ${teamNames[0]} & ${teamNames[1]}`
-      : `🚨 FFBL Trade - ${dateString}: ${teamNames.length}-team trade finalized!`;
+      ? `${dateString} FFBL Trade Announcement: ${teamNames[0]} & ${teamNames[1]}`
+      : `${dateString} FFBL Trade Announcement: ${teamNames.length}-team trade finalized!`;
 
     const { resend } = await import('@/lib/resend');
     const { TradeAnnouncementEmail } = await import('@/emails/TradeAnnouncementEmail');
