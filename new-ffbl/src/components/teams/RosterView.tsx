@@ -32,7 +32,7 @@ export default function RosterView({ title, players, headerColor, view, defaultO
   });
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col transition-all">
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col transition-all relative focus-within:z-10">
       
       <button 
         onClick={() => setIsOpen(!isOpen)}
@@ -51,7 +51,7 @@ export default function RosterView({ title, players, headerColor, view, defaultO
       </button>
 
       {isOpen && (
-        <div className="animate-in fade-in slide-in-from-top-2 duration-200 bg-white rounded-b-xl overflow-hidden">
+        <div className="animate-in fade-in slide-in-from-top-2 duration-200 bg-white rounded-b-xl">
           {view === 'list' ? (
                <RosterTable 
                  players={sortedPlayers} 
@@ -60,7 +60,7 @@ export default function RosterView({ title, players, headerColor, view, defaultO
                  onNameClick={(player: any) => setSelectedCardPlayer(player)}
                />
           ) : (
-            <div className="p-4 md:p-6 bg-slate-50/50 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            <div className="p-4 md:p-6 bg-slate-50/50 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 rounded-b-xl">
               {sortedPlayers.map((p: any) => (
                 <PlayerCard 
                   key={p.id} 

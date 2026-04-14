@@ -15,7 +15,7 @@ export default function RosterTable({
   isMyTeam = false 
 }: RosterTableProps) {
   return (
-    <div className="overflow-x-auto pb-48 -mb-48">
+    <div className="overflow-x-auto pb-48 -mb-48 rounded-b-xl">
       <table className="w-full text-left border-collapse">
         <thead className="bg-slate-50 border-b border-slate-200 text-[10px] uppercase text-slate-400 font-bold tracking-widest">
           <tr>
