@@ -471,7 +471,7 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
              </div>
              
              {/* DYNAMIC GRID - STACKED VERTICALLY */}
-             <div className="flex flex-col gap-6 flex-grow content-start">
+             <div className="flex flex-col gap-6 flex-grow content-start px-2 py-1">
                {involvedTeamIds.map(teamId => {
                  const teamAssets = assets.filter(a => a.currentZone === `trade-block-${teamId}`);
                  const isViewing = viewingTeamId === teamId; 

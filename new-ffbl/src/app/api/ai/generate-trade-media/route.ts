@@ -126,17 +126,25 @@ export async function POST(request: Request) {
     // 📧 6. FIRE THE RESEND EMAIL BLAST!
     // ==========================================
     
-    // 1. Fetch all User emails from the database
-    const allUsers = await prisma.user.findMany({
-      where: { 
-        email: { not: null } 
-      },
-      select: { email: true }
-    });
+    let recipientEmails: string[] = [];
 
-    const recipientEmails = allUsers
-      .map(u => u.email as string)
-      .filter(email => email.length > 0);
+    // 1. Check for a test override first - Staging/Local testing
+    if (process.env.TEST_EMAIL_OVERRIDE) {
+      console.log(`🧪 [STAGING OVERRIDE] Sending trade email ONLY to: ${process.env.TEST_EMAIL_OVERRIDE}`);
+      recipientEmails = [process.env.TEST_EMAIL_OVERRIDE];
+    } else {
+      // Prod - Fetch all User emails from the database
+      const allUsers = await prisma.user.findMany({
+        where: { 
+          email: { not: null } 
+        },
+        select: { email: true }
+      });
+
+      recipientEmails = allUsers
+        .map(u => u.email as string)
+        .filter(email => email.length > 0);
+    }
 
     // 2. Prepare Grouped Assets and Subject (Keep your existing logic)
     const groupedAssets: Record<string, string[]> = {};
@@ -189,8 +197,6 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ success: true, aiAnalysis: cleanAnalysis }, { status: 200 });
-
-// ... [Keep existing catch blocks] ...
 
   } catch (error) {
     console.error("AI Media Generation Error:", error);
