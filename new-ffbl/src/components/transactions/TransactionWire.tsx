@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { ArrowRightLeft } from 'lucide-react';
 
-type FilterType = 'ALL' | 'ADD' | 'DROP' | 'TRADE' | 'PROMOTE' | 'DEMOTE' | 'PLACE_ON_IL' | 'DRAFT';
+type FilterType = 'ALL' | 'ADD' | 'DROP' | 'TRADE' | 'PROMOTE' | 'DEMOTE' | 'PLACE_ON_IL' | 'PLACE_ON_IL_60' | 'DRAFT';
 
 interface UnifiedTransaction {
   id: string;

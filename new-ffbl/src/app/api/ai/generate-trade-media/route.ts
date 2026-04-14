@@ -1,4 +1,3 @@
-// src/app/api/ai/generate-trade-media/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { google } from '@ai-sdk/google';
@@ -15,7 +14,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No tradeId provided" }, { status: 400 });
     }
 
-    // 1. Fetch the fully completed trade and its assets
+    // 1. Fetch the completed trade
     const trade = await prisma.trade.findUnique({
       where: { id: tradeId },
       include: {
@@ -32,7 +31,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Trade not found or not processed." }, { status: 400 });
     }
 
-    // 2. We need to fetch the team names manually since assets only have teamIds
+    // 2. Map team names for display
     const teamIds = [...new Set(trade.assets.flatMap(a => [a.fromTeamId, a.toTeamId]))];
     const teams = await prisma.team.findMany({
       where: { id: { in: teamIds } },
@@ -42,29 +41,90 @@ export async function POST(request: Request) {
     const teamMap: Record<string, string> = {};
     teams.forEach(t => teamMap[t.id] = t.name);
 
-    // 3. Format the data into a clean, readable string for the AI
-    const cleanTradeSummary = trade.assets.map(asset => {
-      const from = teamMap[asset.fromTeamId];
-      const to = teamMap[asset.toTeamId];
-      if (asset.player) {
-        const p = asset.player as any;
-        return `Player: ${p.firstName} ${p.lastName} (Age: ${p.mlbRawData?.currentAge || '??'}, Level: ${p.level}, Top 100 Rank: ${p.prospectRank || 'None'}) moved from ${from} to ${to}.`;
-      } else if (asset.draftPick) {
-        return `Draft Pick: ${asset.draftPick.year} Round ${asset.draftPick.round} moved from ${from} to ${to}.`;
-      }
-      return 'Unknown Asset';
-    }).join('\n');
+    // ==========================================================
+    // 📧 STEP 3: FIRE THE EMAIL BLAST FIRST (Reliability Mode)
+    // ==========================================================
+    let recipientEmails: string[] = [];
+    if (process.env.TEST_EMAIL_OVERRIDE) {
+      console.log(`🧪 [STAGING OVERRIDE] Sending Proposal to: ${process.env.TEST_EMAIL_OVERRIDE}`);
+      recipientEmails = [process.env.TEST_EMAIL_OVERRIDE];
+    } else {
+      const allUsers = await prisma.user.findMany({
+        where: { email: { not: null } },
+        select: { email: true }
+      });
+      recipientEmails = allUsers.map(u => u.email as string).filter(e => e.length > 0);
+    }
 
-    // 4. Force Gemini to return our exact JSON structure!
-    const aiSchema = z.object({
-      theStathead: z.string().describe("The analytical breakdown. Format the text using markdown."),
-      theScout: z.string().describe("The dynasty outlook. Format the text using markdown."),
-      theShockJock: z.string().describe("The radio script dialogue. Format the text using markdown."),
+    const groupedAssets: Record<string, string[]> = {};
+    trade.assets.forEach(asset => {
+      const toTeamName = teamMap[asset.toTeamId];
+      // Format asset name with pick ownership for the email
+      const assetName = asset.player 
+        ? `${(asset.player as any).firstName} ${(asset.player as any).lastName}` 
+        : `${asset.draftPick?.year} Round ${asset.draftPick?.round} Pick (${teamMap[asset.draftPick?.originalOwnerId || ''] || 'Unknown'})`;
+        
+      if (!groupedAssets[toTeamName]) groupedAssets[toTeamName] = [];
+      groupedAssets[toTeamName].push(assetName);
     });
 
-    const systemPrompt = `You are the driving force behind a Fantasy Baseball Media Network. A massive trade has just occurred. You need to provide three distinct analytical reactions. 
+    const tradeDetails = Object.keys(groupedAssets).sort().map(teamName => ({
+      teamName,
+      assets: groupedAssets[teamName]
+    }));
+
+    const teamNames = Object.values(teamMap);
+    const dateString = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const emailSubject = `${dateString} FFBL Trade: ${teamNames.join(' & ')}`;
+
+    try {
+      const { resend } = await import('@/lib/resend');
+      const { TradeAnnouncementEmail } = await import('@/emails/TradeAnnouncementEmail');
+      if (recipientEmails.length > 0) {
+        await resend.emails.send({
+          from: process.env.EMAIL_FROM || 'FFBL Commissioner <onboarding@resend.dev>',
+          to: recipientEmails,
+          subject: emailSubject,
+          react: TradeAnnouncementEmail({ 
+            subject: emailSubject, 
+            tradeDetails, 
+            tradeId, 
+            appUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000' 
+          }),
+        });
+        console.log("✅ Trade Announcement Email dispatched.");
+      }
+    } catch (emailError) {
+      console.error("❌ Email failed to send, but proceeding to AI:", emailError);
+    }
+
+    // ==========================================================
+    // 🤖 STEP 4: GENERATE AI MEDIA (Multi-Layer Fallback)
+    // ==========================================================
+    let cleanAnalysis = null;
+
+    try {
+      const cleanTradeSummary = trade.assets.map(asset => {
+        const from = teamMap[asset.fromTeamId];
+        const to = teamMap[asset.toTeamId];
+        if (asset.player) {
+          const p = asset.player as any;
+          return `Player: ${p.firstName} ${p.lastName} (Age: ${p.mlbRawData?.currentAge || '??'}, Level: ${p.level}, Top 100 Rank: ${p.prospectRank || 'None'}) moved from ${from} to ${to}.`;
+        } else if (asset.draftPick) {
+          return `Draft Pick: ${asset.draftPick.year} Round ${asset.draftPick.round} moved from ${from} to ${to}.`;
+        }
+        return 'Unknown';
+      }).join('\n');
+
+      const aiSchema = z.object({
+        theStathead: z.string().describe("The analytical breakdown. Format the text using markdown."),
+        theScout: z.string().describe("The dynasty outlook. Format the text using markdown."),
+        theShockJock: z.string().describe("The radio script dialogue. Format the text using markdown."),
+      });
+
+      const systemPrompt = `You are the driving force behind a Fantasy Baseball Media Network. A trade has just occurred. You need to provide three distinct analytical reactions. 
       
-      Personality 1 (Stats Guy): You are a massive nerd who relies entirely on advanced analytics, positional scarcity, regression, and immediate MLB impact. You despise "gut feel" and traditional scouting. Give a highly analytical breakdown of who won right now. If there are draft picks involved: a first round pick is equivalent to a top 100 milb prospect. A second round pick is equivalent to a top 150 prospect. A third round pick is equivalent to a very young international signing or a relief with the potential to get a closer role. Fourth and Fifth round picks are essentially guys that were dropped in the offseason.
+      Personality 1 (Stats Guy): You are a baseball stats nerd who relies entirely on advanced analytics, positional scarcity, regression, and immediate MLB impact. You despise "gut feel" and traditional scouting. Give a highly analytical breakdown of who won right now. If there are draft picks involved: a first round pick is equivalent to a top 100 milb prospect. A second round pick is equivalent to a top 150 prospect. A third round pick is equivalent to a very young international signing or a relief with the potential to get a closer role. Fourth and Fifth round picks are essentially guys that were dropped in the offseason.
       
       Personality 2 (Dynasty Guy): You are a grizzled, old-school minor league scout. You only care about the 2-5 year championship window. You look at projectable frames, bat speed, minor league levels, and prospect rankings. Tell us which franchise set themselves up for a dynasty. If there are draft picks involved: a first round pick is equivalent to a top 100 milb prospect. A second round pick is equivalent to a top 150 prospect. A third round pick is equivalent to a very young international signing or a relief with the potential to get a closer role. Fourth and Fifth round picks are essentially guys that were dropped in the offseason.
       
@@ -79,127 +139,60 @@ export async function POST(request: Request) {
         Occasionally, other characters like Peter (asking unrelated questions), Quagmire (distracted by a manager's 
         team name), Cleveland, or other characters might interrupt for a single line of dialogue.`;
 
-    const userPrompt = `Analyze this trade:\n\n${cleanTradeSummary}`;
+      const userPrompt = `Analyze this trade:\n\n${cleanTradeSummary}`;
 
-    // THE HEAVY HITTER SETUP (Pro primary, Flash fallback)
-    let aiObject;
-    try {
-      console.log("Attempting to generate premium media with gemini-2.5-pro...");
-      const { object } = await generateObject({
-        model: google('gemini-2.5-pro'), 
-        schema: aiSchema,
-        system: systemPrompt,
-        prompt: userPrompt,
-      });
-      aiObject = object;
-    } catch (error) {
-      console.warn("⚠️ 2.5-pro is overloaded or timed out. Falling back to 2.5-flash!");
-      const { object } = await generateObject({
-        model: google('gemini-2.5-flash'),
-        schema: aiSchema,
-        system: systemPrompt,
-        prompt: userPrompt,
-      });
-      aiObject = object;
-    }
-
-    // Catch Gemini if it stuffs the entire payload inside theShockJock
-    let cleanAnalysis = { ...aiObject };
-    if (typeof cleanAnalysis.theShockJock === 'string' && cleanAnalysis.theShockJock.trim().startsWith('{"theStathead"')) {
-      try {
-        const parsed = JSON.parse(cleanAnalysis.theShockJock);
-        cleanAnalysis = parsed;
-      } catch (e) {
-        console.error("Failed to parse nested AI JSON", e);
-      }
-    }
-
-    // 5. Save the CLEAN generated media directly to the Trade record
-    await prisma.trade.update({
-      where: { id: tradeId },
-      data: {
-        aiAnalysis: cleanAnalysis 
-      }
-    });
-
-    // ==========================================
-    // 📧 6. FIRE THE RESEND EMAIL BLAST!
-    // ==========================================
-    
-    let recipientEmails: string[] = [];
-
-    // 1. Check for a test override first - Staging/Local testing
-    if (process.env.TEST_EMAIL_OVERRIDE) {
-      console.log(`🧪 [STAGING OVERRIDE] Sending trade email ONLY to: ${process.env.TEST_EMAIL_OVERRIDE}`);
-      recipientEmails = [process.env.TEST_EMAIL_OVERRIDE];
-    } else {
-      // Prod - Fetch all User emails from the database
-      const allUsers = await prisma.user.findMany({
-        where: { 
-          email: { not: null } 
-        },
-        select: { email: true }
-      });
-
-      recipientEmails = allUsers
-        .map(u => u.email as string)
-        .filter(email => email.length > 0);
-    }
-
-    // 2. Prepare Grouped Assets and Subject (Keep your existing logic)
-    const groupedAssets: Record<string, string[]> = {};
-    trade.assets.forEach(asset => {
-      const toTeamName = teamMap[asset.toTeamId];
-      const assetName = asset.player 
-        ? `${(asset.player as any).firstName} ${(asset.player as any).lastName}` 
-        : `a ${asset.draftPick?.year} Round ${asset.draftPick?.round} Pick`;
-        
-      if (!groupedAssets[toTeamName]) {
-        groupedAssets[toTeamName] = [];
-      }
-      groupedAssets[toTeamName].push(assetName);
-    });
-
-    const tradeDetails = Object.keys(groupedAssets)
-      .sort((a, b) => a.localeCompare(b))
-      .map(teamName => ({
-        teamName,
-        assets: groupedAssets[teamName]
-      }));
-
-    const teamNames = Object.values(teamMap);
-    const dateString = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    
-    const emailSubject = teamNames.length === 2 
-      ? `${dateString} FFBL Trade Announcement: ${teamNames[0]} & ${teamNames[1]}`
-      : `${dateString} FFBL Trade Announcement: ${teamNames.length}-team trade finalized!`;
-
-    const { resend } = await import('@/lib/resend');
-    const { TradeAnnouncementEmail } = await import('@/emails/TradeAnnouncementEmail');
-
-    try {
-      if (recipientEmails.length > 0) {
-        await resend.emails.send({
-          from: process.env.EMAIL_FROM || 'FFBL Commissioner <onboarding@resend.dev>',
-          to: recipientEmails, 
-          subject: emailSubject,
-          react: TradeAnnouncementEmail({ 
-            subject: emailSubject, 
-            tradeDetails, 
-            tradeId,
-            appUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-          }),
+      const generateWithModel = async (modelId: string) => {
+        const { object } = await generateObject({
+          model: google(modelId),
+          schema: aiSchema,
+          system: systemPrompt,
+          prompt: userPrompt,
         });
-        console.log(`Trade email successfully dispatched to ${recipientEmails.length} managers.`);
+        return object;
+      };
+
+      let aiObject;
+      try {
+        console.log("Tier 1: Trying Gemini 3.1 Pro (Preview)...");
+        aiObject = await generateWithModel('gemini-3.1-pro-preview');
+      } catch (e1) {
+        try {
+          console.warn("Tier 2 Fallback: Trying Gemini 2.5 Pro (Stable)...");
+          aiObject = await generateWithModel('gemini-2.5-pro');
+        } catch (e2) {
+          console.warn("Tier 3 Fallback: Trying Gemini 2.5 Flash (Safety)...");
+          aiObject = await generateWithModel('gemini-2.5-flash');
+        }
       }
-    } catch (emailError) {
-      console.error("Failed to send trade announcement email:", emailError);
+
+      // Final cleanup check
+      if (typeof aiObject.theShockJock === 'string' && aiObject.theShockJock.trim().startsWith('{"theStathead"')) {
+        try {
+          aiObject = JSON.parse(aiObject.theShockJock);
+        } catch (e) {
+          console.error("Failed to parse nested AI JSON", e);
+        }
+      }
+
+      cleanAnalysis = aiObject;
+
+      // Update the Trade record
+      await prisma.trade.update({
+        where: { id: tradeId },
+        data: { aiAnalysis: cleanAnalysis }
+      });
+
+    } catch (aiError) {
+      console.error("❌ All AI models failed. Trade completed without analysis:", aiError);
     }
 
-    return NextResponse.json({ success: true, aiAnalysis: cleanAnalysis }, { status: 200 });
+    return NextResponse.json({ 
+      success: true, 
+      aiAnalysis: cleanAnalysis || { error: "Scouts are still debating. Check back in a few minutes!" } 
+    }, { status: 200 });
 
   } catch (error) {
-    console.error("AI Media Generation Error:", error);
-    return NextResponse.json({ error: "Failed to generate AI Media" }, { status: 500 });
+    console.error("Internal Route Error:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
