@@ -2,7 +2,7 @@
 
 ## ⚾ 1. The Project Manifesto
 **Project Title:** FFBL Modernization (2026 Rebuild)  
-**Core Stack:** Next.js 15 (App Router), Prisma 7, PostgreSQL, NextAuth.js, Tailwind CSS, Vercel AI SDK, React Flow (@xyflow/react).  
+**Core Stack:** Next.js 15 (App Router), Prisma 7, PostgreSQL, NextAuth.js, Tailwind CSS, Vercel AI SDK, React Flow (@xyflow/react), Resend + React Email.  
 **Architecture Strategy:** A "Dual-Era" database.
 * **The Quarantine (Legacy):** 2015–2025 data stored in lowercase tables (e.g., `players`, `users`, `transactions`) using `Int` IDs. This is treated as a strictly read-only historical archive.
 * **The Modern Era (Current):** 2026+ data stored in PascalCase tables (e.g., `Player`, `Team`, `Transaction`) using `String` (CUID) IDs.
@@ -88,27 +88,32 @@ Once a player is selected, UI dynamically renders actions based on `Status` and 
 * **Live MLB Pipeline Integration:** Prospect cards natively display "Top 100" gold badges and ETA dates directly on minor league roster cards and lists.
 * **Poison Pill UI:** Farm System grids and lists explicitly highlight ineligible players with glowing red borders, tinted backgrounds, and explicit warning flags detailing the exact rule violation.
 
+### Phase 6: AI Media & League Communications
+* **The AI Media Network:** Integrated Vercel AI SDK with Google's `gemini-2.5-flash` to automatically generate highly structured, entertaining trade analysis upon trade completion. Features three distinct personalities: `theStathead` (advanced analytics), `theScout` (dynasty window evaluation), and `theShockJock` (a custom Family Guy radio script). 
+* **Transactional Email Blasts:** Built custom `React Email` templates triggered via Resend to alert managers to league events. Covers "New Trade Proposals" (sent to involved managers) and "Trade Finalized Announcements" (blast to the entire league with AI analysis links).
+* **The Staging Email Override:** Bulletproofed the API routes with `process.env.TEST_EMAIL_OVERRIDE` to ensure staging/local testing safely routes all generated emails to the developer's inbox rather than blasting the entire database of league managers.
+
 ---
 
 ## 🛠️ 6. Development Roadmap (The Work Ahead)
 
-### Phase 6: Historical API (The Quarantine Bridge)
+### Phase 7: Historical API (The Quarantine Bridge)
 * `GET /api/history/books` & `GET /api/history/posts`: Fetch legacy archives.
 * `GET /api/history/transactions`: Federated query stitching modern `Transaction` logs with `LegacyTransaction` records via `legacyId`.
 
-### Phase 7: The AI GM Assistant (Gemini via Vercel AI SDK)
-* *Trade Evaluator:* Generates scouting reports on pending deals.
+### Phase 8: The AI GM Assistant (Gemini via Vercel AI SDK)
 * *Roster Hole Detection:* Scans the league to find ideal trade partners based on surpluses/deficits.
-* *Commish Bot:* Automated weekly power rankings.
+* *Commish Bot:* Automated weekly power rankings based on active stats and recent moves.
 
-### Phase 8: Frictionless Auth & Comms Layer
+### Phase 9: Frictionless Auth & Comms Layer
 * *Magic Links:* NextAuth + Resend for non-Gmail users.
-* *Transactional Emails:* Automated pings for trade offers/expirations.
 * *Trade Comments (`POST /api/trades/comments`):* Build the threaded negotiation backend so managers can chat inside the War Room.
 
 ---
 
 ## ⚠️ 7. Critical Architecture & Session Notes
+* **Environment Variable Scoping:** Local `.env` is for development database URLs and local overrides. `.env.local` is for specific Next.js overrides (avoid putting DB URLs here to prevent confusion). Vercel Dashboard strictly handles Staging/Production variables. Never rely on commenting out production email/notification code for staging tests; always use environment overrides like `TEST_EMAIL_OVERRIDE`.
+* **AI Model Selection:** `gemini-2.5-pro` is incredibly powerful but "heavy" and prone to overload/timeouts during high-volume generation. `gemini-2.5-flash` is the preferred primary model for fast, reliable, and cost-effective creative text generation.
 * **Prisma Relational Strictness:** Always verify `include` blocks. Nested relational data (like team logos on a player, or team objects inside a `hallOfFame` array) will return `undefined` unless explicitly called and selected in the Prisma query. Overwriting Prisma outputs with `.map()` can accidentally destroy this nested data.
 * **Tailwind Input Contrast:** UI `<input>` and `<textarea>` elements often inherit light text colors from parent wrappers. Always apply explicit text colors (e.g., `text-slate-900`) to ensure typed text remains readable against light backgrounds.
 * **MLB Minor League Search:** The standard MLB API `people/search` endpoint defaults to `sportId=1` (Majors only). To find prospects, you MUST explicitly pass `sportIds=1,11,12,13,14,16,5442` in the fetch URL.
@@ -117,6 +122,7 @@ Once a player is selected, UI dynamically renders actions based on `Status` and 
 * **Escrow Locks:** When a manager agrees to drop/demote a player as a condition of a trade, that player receives an `isTradeLocked = true` padlock just like the players actually changing teams.
 * **Lazy Evaluation for Expirations:** No chron jobs needed. When the Trade UI loads, instantly flip any `PENDING` trades to `CANCELLED` (and unlock their assets) if `expiresAt < now()`.
 * **Next.js 15 Async Params (CRITICAL):** `params` and `searchParams` in Route Handlers are **Promises**. You must `await` them before accessing IDs.
-* **CSS Z-Index Traps:** Always remove `overflow-hidden` from outer grid wrappers when rendering Dropdowns, and use `hover:z-50 focus-within:z-50` on card containers so popup menus layer correctly.
+* **CSS Z-Index & Overflow Traps:** * Always remove `overflow-hidden` from outer grid wrappers when rendering Dropdowns, and use native Tailwind like `focus-within:z-10` natively on the active card to raise it above siblings. 
+  * For horizontally scrolling tables (`overflow-x-auto`) that trap dropdowns, use the "Padding Hack" (`pb-48 -mb-48`) to give the menu physical room to render without creating blank white space on the page.
 * **The MLB CDN Trick:** We *never* save image URLs to the database. We only save the `mlbId` and dynamically inject it into the `img.mlbstatic.com` string.
 * **Shohei Ohtani Rule:** Because `mlbId` is strictly `@unique`, legacy split players (e.g., Batter vs. Pitcher versions) will only have one linked profile.

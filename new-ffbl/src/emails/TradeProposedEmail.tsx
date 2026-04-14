@@ -27,7 +27,7 @@ export const TradeProposedEmail = ({
           </Section>
           
           <Section style={content}>
-            <Text style={heading}>🚨 You have a new offer on the table 🚨</Text>
+            <Text style={heading}>You have a new offer on the table</Text>
             <Text style={paragraph}>
               <strong>{initiatingTeamName}</strong> has proposed a trade that includes your team. Details below:
             </Text>

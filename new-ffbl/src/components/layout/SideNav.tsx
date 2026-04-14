@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Users, LayoutDashboard, ArrowRightLeft, Shield, Search, Menu, X, LogOut, LogIn, ShieldAlert } from 'lucide-react';
+import { Users, LayoutDashboard, ArrowRightLeft, Shield, Search, Menu, X, LogOut, LogIn, ShieldAlert, Activity } from 'lucide-react';
 import GlobalSearch from './GlobalSearch';
 import { useSession, signIn, signOut } from 'next-auth/react';
 
@@ -17,9 +17,10 @@ export default function SideNav() {
 
   const navLinks = [
     { href: '/', icon: <LayoutDashboard size={18} />, label: 'Dashboard' },
+    { href: '/teams', icon: <Shield size={18} />, label: 'Franchises' },
     { href: '/players', icon: <Search size={18} />, label: 'Player Search' },
     { href: '/trades', icon: <ArrowRightLeft size={18} />, label: 'Trade Center' },
-    { href: '/teams', icon: <Shield size={18} />, label: 'Franchises' },
+    { href: '/transactions', icon: <Activity size={18} />, label: 'Transactions'},
     { href: '/league', icon: <Users size={18} />, label: 'League Info' },
   ];
 

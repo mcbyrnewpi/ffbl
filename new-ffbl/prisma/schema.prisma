@@ -507,6 +507,8 @@ model DraftPick {
   season      Season       @relation(fields: [year], references: [year])
   tradeAssets TradeAsset[]
 
+  transactions   Transaction[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 }
@@ -522,6 +524,7 @@ model Trade {
   approvals TradeApproval[]
   assets    TradeAsset[]
   comments  TradeComment[]
+  transactions Transaction[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
@@ -602,11 +605,18 @@ enum ApprovalStatus {
 model Transaction {
   id       String    @id @default(cuid())
   type     TransType
-  playerId String
-  player   Player    @relation(fields: [playerId], references: [id])
+
+  playerId String?
+  player   Player?    @relation(fields: [playerId], references: [id])
+
+  draftPickId String?
+  draftPick   DraftPick? @relation(fields: [draftPickId], references: [id])
 
   teamId String?
   team   Team?   @relation(fields: [teamId], references: [id])
+
+  tradeId     String?   
+  trade       Trade?    @relation(fields: [tradeId], references: [id])
 
   details   String?
   createdAt DateTime @default(now())
@@ -616,6 +626,7 @@ enum TransType {
   ADD
   DROP
   TRADE
+  DRAFT
   PROMOTE
   DEMOTE
   PLACE_ON_IL

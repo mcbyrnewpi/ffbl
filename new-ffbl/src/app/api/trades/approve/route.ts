@@ -191,7 +191,8 @@ export async function POST(request: Request) {
             type: 'TRADE',
             playerId: asset.playerId!,
             teamId: asset.toTeamId,
-            details: `Acquired via trade from team ${asset.fromTeamId}.`
+            tradeId: trade.id,
+            details: `Traded from ${asset.fromTeamNameSnapshot} to ${asset.toTeamNameSnapshot}`
           }
         });
       }
@@ -200,6 +201,8 @@ export async function POST(request: Request) {
       const tradedPicks = trade.assets.filter(a => a.draftPickId);
       if (tradedPicks.length > 0) {
         for (const asset of tradedPicks) {
+          
+          // 1. Update the Draft Pick Owner
           await tx.draftPick.update({
             where: { id: asset.draftPickId! },
             data: { 
@@ -207,6 +210,18 @@ export async function POST(request: Request) {
               isTradeLocked: false 
             }
           });
+
+          // 2. Create the Transaction (MUST be inside the loop with asset!)
+          await tx.transaction.create({
+            data: {
+              type: 'TRADE',
+              draftPickId: asset.draftPickId!,
+              teamId: asset.toTeamId,
+              tradeId: trade.id,
+              details: `Acquired ${asset.pickNameSnapshot || 'Draft Pick'} via trade from ${asset.fromTeamNameSnapshot}.`
+            }
+          });
+
         }
       }
 
