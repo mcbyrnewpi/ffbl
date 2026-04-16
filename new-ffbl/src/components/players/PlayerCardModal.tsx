@@ -1,9 +1,8 @@
-// src/components/players/PlayerCardModal.tsx
 "use client";
 
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { X, ArrowRightLeft, Lock } from 'lucide-react';
+import { X, ArrowRightLeft, Lock, CalendarOff } from 'lucide-react'; // Added CalendarOff icon
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import BaseballCard from './BaseballCard';
@@ -18,6 +17,7 @@ interface PlayerCardModalProps {
 
 export default function PlayerCardModal({ isOpen, onClose, player }: PlayerCardModalProps) {
   const [mounted, setMounted] = useState(false);
+  const [isDeadlinePassed, setIsDeadlinePassed] = useState(false); // Track deadline status
   const router = useRouter();
   
   // Get the logged-in user's team context
@@ -29,7 +29,26 @@ export default function PlayerCardModal({ isOpen, onClose, player }: PlayerCardM
   // Ensure we only render the portal after the component mounts on the client
   useEffect(() => {
     setMounted(true);
-  }, []);
+    
+    // Fetch settings to check trade deadline
+    const checkDeadline = async () => {
+      try {
+        const res = await fetch('/api/settings');
+        if (res.ok) {
+          const settings = await res.json();
+          if (settings.tradeDeadline) {
+            setIsDeadlinePassed(new Date() > new Date(settings.tradeDeadline));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch settings for deadline check", err);
+      }
+    };
+    
+    if (isOpen) {
+      checkDeadline();
+    }
+  }, [isOpen]);
 
   // Lock background scrolling when modal is open
   useEffect(() => {
@@ -109,18 +128,27 @@ export default function PlayerCardModal({ isOpen, onClose, player }: PlayerCardM
                 </div>
               )}
 
-              {/* Scenario 2: Rival Player -> Propose Trade */}
+              {/* Scenario 2: Rival Player -> Propose Trade (WITH DEADLINE CHECK) */}
               {player.teamId && player.teamId !== myTeamId && !player.isTradeLocked && (
-                <button
-                  onClick={() => {
-                    onClose();
-                    router.push(`/trades/build?addPlayer=${player.id}`);
-                  }}
-                  className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-3 px-4 rounded-xl transition-colors shadow-xl border border-blue-500"
-                >
-                  <ArrowRightLeft size={16} />
-                  Propose Trade
-                </button>
+                isDeadlinePassed ? (
+                  <div 
+                    className="flex-1 flex items-center justify-center gap-2 bg-slate-200 text-slate-400 text-sm font-bold py-3 px-4 rounded-xl shadow-inner border border-slate-300 cursor-not-allowed"
+                    title="The trade deadline has passed"
+                  >
+                    <CalendarOff size={16} /> Deadline Passed
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => {
+                      onClose();
+                      router.push(`/trades/build?addPlayer=${player.id}`);
+                    }}
+                    className="flex-1 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold py-3 px-4 rounded-xl transition-colors shadow-xl border border-blue-500"
+                  >
+                    <ArrowRightLeft size={16} />
+                    Propose Trade
+                  </button>
+                )
               )}
 
               {/* Scenario 3: Trade Locked Indicator */}

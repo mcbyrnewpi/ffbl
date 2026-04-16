@@ -1,10 +1,21 @@
-// src/components/teams/PlayerActionMenu.tsx
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // Added useEffect
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { ArrowRightLeft, UserMinus, UserPlus, ArrowUpCircle, ArrowDownCircle, Stethoscope, Ban, Settings, ChevronDown, Lock } from 'lucide-react';
+import { 
+  ArrowRightLeft, 
+  UserMinus, 
+  UserPlus, 
+  ArrowUpCircle, 
+  ArrowDownCircle, 
+  Stethoscope, 
+  Ban, 
+  Settings, 
+  ChevronDown, 
+  Lock,
+  CalendarOff
+} from 'lucide-react';
 
 interface Props {
   player: any;
@@ -19,9 +30,28 @@ export default function PlayerActionMenu({ player, isMyTeam, dropUp = false }: P
 
   const [isOpen, setIsOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isDeadlinePassed, setIsDeadlinePassed] = useState(false); // Track deadline status
   
   const [showIl60Form, setShowIl60Form] = useState(false);
   const [retroDate, setRetroDate] = useState("");
+
+  // Check trade deadline status on mount
+  useEffect(() => {
+    const checkDeadline = async () => {
+      try {
+        const res = await fetch('/api/settings');
+        if (res.ok) {
+          const settings = await res.json();
+          if (settings.tradeDeadline) {
+            setIsDeadlinePassed(new Date() > new Date(settings.tradeDeadline));
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch settings for deadline check", err);
+      }
+    };
+    checkDeadline();
+  }, []);
 
   const handleAction = async (payload: any) => {
     setIsProcessing(true);
@@ -120,8 +150,19 @@ export default function PlayerActionMenu({ player, isMyTeam, dropUp = false }: P
     );
   }
 
-  // 🌟 STATE 2: SOMEONE ELSE'S TEAM
+  // 🌟 STATE 2: SOMEONE ELSE'S TEAM (WITH DEADLINE CHECK)
   if (!isMyTeam) {
+    if (isDeadlinePassed) {
+      return (
+        <div 
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 text-slate-400 text-xs font-bold rounded-lg border border-slate-200 shadow-sm whitespace-nowrap cursor-not-allowed"
+          title="The trade deadline has passed"
+        >
+          <CalendarOff size={14} /> Trade Closed
+        </div>
+      );
+    }
+
     return (
       <button 
         onClick={(e) => {
