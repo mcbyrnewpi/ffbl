@@ -18,6 +18,7 @@ interface Props {
   redirectTo?: string;
   hasApproved?: boolean;
   pendingApprovalsCount?: number;
+  isDeadlinePassed?: boolean;
 }
 
 export default function TradeActionButtons({ 
@@ -30,7 +31,8 @@ export default function TradeActionButtons({
   status, 
   redirectTo, 
   hasApproved, 
-  pendingApprovalsCount 
+  pendingApprovalsCount,
+  isDeadlinePassed = false
 }: Props) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
