@@ -62,6 +62,9 @@ export default async function TradesDashboard() {
   });
 
   const settings = await prisma.leagueSettings.findUnique({ where: { id: 1 } });
+  
+  // Determine if the trade deadline has passed
+  const isDeadlinePassed = settings?.tradeDeadline ? new Date() > settings.tradeDeadline : false;
 
   return (
     <div className="p-4 md:p-8 max-w-6xl mx-auto w-full">
@@ -71,12 +74,22 @@ export default async function TradesDashboard() {
           <p className="text-slate-500 mt-1 font-medium">Review and respond to pending offers</p>
         </div>
         
-        <Link 
-          href="/trades/build"
-          className="w-full sm:w-auto px-6 py-4 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl sm:rounded-lg shadow-sm shadow-blue-500/25 transition-all text-center flex-shrink-0"
-        >
-          Propose Trade
-        </Link>
+        {/* Conditionally render the Propose Trade button based on the deadline */}
+        {isDeadlinePassed ? (
+          <div 
+            className="w-full sm:w-auto px-6 py-4 sm:py-3 bg-slate-200 text-slate-400 font-black rounded-xl sm:rounded-lg shadow-inner text-center flex-shrink-0 cursor-not-allowed border border-slate-300"
+            title="The FFBL trade deadline has passed"
+          >
+            Deadline Passed
+          </div>
+        ) : (
+          <Link 
+            href="/trades/build"
+            className="w-full sm:w-auto px-6 py-4 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl sm:rounded-lg shadow-sm shadow-blue-500/25 transition-all text-center flex-shrink-0"
+          >
+            Propose Trade
+          </Link>
+        )}
       </div>
 
       {pendingTrades.length === 0 ? (
@@ -169,6 +182,7 @@ export default async function TradesDashboard() {
                       status={trade.status}
                       hasApproved={hasApproved}
                       pendingApprovalsCount={pendingApprovalsCount}
+                      isDeadlinePassed={isDeadlinePassed} // Pass it down if we need it there too!
                     />
                   </div>
 

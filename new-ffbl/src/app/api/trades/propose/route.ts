@@ -10,7 +10,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    // ⬅️ NEW: Destructure correspondingMoves
+    // Destructure correspondingMoves
     const { initiatingTeamId, expiresInDays, assets, correspondingMoves, counteringTradeId } = body;
 
     // 1. Basic Payload Validation
@@ -20,6 +20,19 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
+
+    // --- TRADE DEADLINE CHECK ---
+    const settings = await prisma.leagueSettings.findUnique({
+      where: { id: 1 }
+    });
+
+    if (settings?.tradeDeadline && new Date() > settings.tradeDeadline) {
+      return NextResponse.json(
+        { error: "The FFBL trade deadline has passed. No new trades can be proposed at this time." },
+        { status: 403 }
+      );
+    }
+    // ------------------------------------
 
     // 2. Calculate the Expiration Date (if provided)
     let expiresAt: Date | null = null;
@@ -43,15 +56,14 @@ export async function POST(request: Request) {
     // 4. The Mega-Transaction
     const newTrade = await prisma.$transaction(async (tx) => {
       
-      // --- 💥 NEW: Handle Counter Trades ---
+      // --- Handle Counter Trades ---
       if (counteringTradeId) {
         // Mark the old trade as CANCELLED
         await tx.trade.update({
           where: { id: counteringTradeId },
           data: { status: TradeStatus.CANCELLED }
         });
-      } // ⬅️ FIX 1: ADDED MISSING BRACKET
-
+      }
 
       // --- 🏗️ SNAPSHOT GATHERING ---
       

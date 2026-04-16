@@ -1,4 +1,4 @@
-// src/app/api/trades/approve.ts
+// src/app/api/trades/approve/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -11,6 +11,19 @@ export async function POST(request: Request) {
     if (!tradeId || !userId) {
       return NextResponse.json({ error: "Missing tradeId or userId" }, { status: 400 });
     }
+
+    // --- TRADE DEADLINE CHECK ---
+    const settings = await prisma.leagueSettings.findUnique({
+      where: { id: 1 }
+    });
+
+    if (settings?.tradeDeadline && new Date() > settings.tradeDeadline) {
+      return NextResponse.json(
+        { error: "The FFBL trade deadline has passed. Pending trades can no longer be approved." },
+        { status: 403 }
+      );
+    }
+    // ------------------------------------
 
     const result = await prisma.$transaction(async (tx) => {
       // 1. Fetch trade with approvals (including user data for team IDs) and assets
@@ -235,10 +248,11 @@ export async function POST(request: Request) {
       // 🛑 6. THE BOUNCER (Roster Limit Enforcement)
       // ==========================================
       
-      const settings = await tx.leagueSettings.findUnique({ where: { id: 1 } });
-      if (!settings) throw new Error("League settings not found.");
+      // Note: We use settings here again, but we just grab it locally inside the tx to be safe
+      const txSettings = await tx.leagueSettings.findUnique({ where: { id: 1 } });
+      if (!txSettings) throw new Error("League settings not found.");
 
-      if (settings.enforceRosterLimits) {
+      if (txSettings.enforceRosterLimits) {
         const uniqueTeamIds = [...new Set(trade.assets.flatMap(a => [a.fromTeamId, a.toTeamId]))];
 
         for (const teamId of uniqueTeamIds) {
@@ -250,13 +264,13 @@ export async function POST(request: Request) {
           const ilCount = await tx.player.count({ where: { teamId, status: 'IL' } });
           const naCount = await tx.player.count({ where: { teamId, status: 'NA' } });
 
-          if (mlbCount > settings.mlbLimit) throw new Error(`Team ${teamId} exceeds the MLB limit (${mlbCount}/${settings.mlbLimit}).`);
-          if (aaaCount > settings.aaaLimit) throw new Error(`Team ${teamId} exceeds the AAA limit (${aaaCount}/${settings.aaaLimit}).`);
-          if (aaCount > settings.aaLimit) throw new Error(`Team ${teamId} exceeds the AA limit (${aaCount}/${settings.aaLimit}).`);
-          if (aCount > settings.aLimit) throw new Error(`Team ${teamId} exceeds the A limit (${aCount}/${settings.aLimit}).`);
+          if (mlbCount > txSettings.mlbLimit) throw new Error(`Team ${teamId} exceeds the MLB limit (${mlbCount}/${txSettings.mlbLimit}).`);
+          if (aaaCount > txSettings.aaaLimit) throw new Error(`Team ${teamId} exceeds the AAA limit (${aaaCount}/${txSettings.aaaLimit}).`);
+          if (aaCount > txSettings.aaLimit) throw new Error(`Team ${teamId} exceeds the AA limit (${aaCount}/${txSettings.aaLimit}).`);
+          if (aCount > txSettings.aLimit) throw new Error(`Team ${teamId} exceeds the A limit (${aCount}/${txSettings.aLimit}).`);
           
-          if (ilCount > settings.ilLimit) throw new Error(`Team ${teamId} exceeds the IL limit (${ilCount}/${settings.ilLimit}).`);
-          if (naCount > settings.naLimit) throw new Error(`Team ${teamId} exceeds the NA limit (${naCount}/${settings.naLimit}).`);
+          if (ilCount > txSettings.ilLimit) throw new Error(`Team ${teamId} exceeds the IL limit (${ilCount}/${txSettings.ilLimit}).`);
+          if (naCount > txSettings.naLimit) throw new Error(`Team ${teamId} exceeds the NA limit (${naCount}/${txSettings.naLimit}).`);
         }
       }
 

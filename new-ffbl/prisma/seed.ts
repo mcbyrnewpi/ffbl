@@ -4,6 +4,7 @@ import pg from 'pg';
 import 'dotenv/config';
 import { seedPositions } from './seed-positions';
 import { seedSettings } from './seed-settings';
+import { seedHistory } from './seed-history';
 
 // 1. Setup the connection pool and adapter
 const connectionString = process.env.DATABASE_URL;
@@ -22,6 +23,8 @@ async function main() {
     // 3. Pass the initialized prisma instance into our seed function
     await seedPositions(prisma);
     await seedSettings(prisma);
+    await seedHistory(prisma);
+    
     console.log('✅ All seeds completed.');
   } catch (e) {
     console.error('❌ Seed failed:', e);

@@ -27,6 +27,7 @@
 ### User, Team, & Draft Pick Mapping
 * **User Identity:** Legacy `email` maps to modern `User.email` (trimmed/lowercased) as the primary NextAuth key.
 * **Roles:** Legacy `commish` / `admin` booleans map to the `User.role` Enum (`COMMISH`, `ADMIN`, `OWNER`).
+* **Co-Managers:** Handled gracefully via multiple `User` records tied to the same `teamId`. The `isPrimaryManager` boolean dictates ultimate franchise authority.
 * **Team Lore:** Custom minor league names (e.g., `aaa`) mapped to `aaaAffiliateName`, `aaaLogoUrl`, etc., for dynamic branding.
 * **Draft Picks (2027/2028):** Year & Round extracted via Regex from legacy `players.last_name`. Original/Current Owners mapped using `TEAM_ALIAS_MAP` for rebranded franchises.
 
@@ -61,7 +62,7 @@ Once a player is selected, UI dynamically renders actions based on `Status` and 
 * **Team-Scoped Stat Syncs:** Global header button allows Owners (and Admins) to pull fresh MLB stats for their specific roster via `POST /api/teams/[teamId]/sync-stats`. Uses `lastStatSync` to enforce a 24-hour cooldown.
 
 ### Phase 2: API, Roster Engine, & Frontend Foundations
-* **Identity, Settings, & Rosters:** `GET /api/users/me`, `GET /api/settings`, and `GET /api/rosters/[teamId]` endpoints built.
+* **Identity, Settings, & Rosters:** `GET /api/users/me`, `GET /api/settings`, and `GET /api/rosters/[teamId]` endpoints built. Magic Link Auth fully wired up via Resend.
 * **The Bouncer (Minor League Eligibility):** Programmatic rule enforcement via `src/lib/roster-rules.ts`. Checks MLB career limits (650 AB, 250 IP, 85 App), age caps (AAA:25, AA:24, A:22), Rehab blocks, and MiLB active exemptions. 
 * **The Poison Pill:** `validateTeamFarmSystem` scans a franchise's entire farm system. If *any* player violates a rule, the entire API blocks new minor league additions until the manager drops or promotes the offending player. Bouncer simulates pending moves to avoid database deadlocks during promotions.
 * **The 60-Day IL Lock:** API accepts a retroactive date and uses bulletproof millisecond-math to calculate an `il60UnlockDate`. Frontend UI traps the player, showing the "Eligible" date and blocking all moves except "Drop Player" until 60 days have passed.
@@ -90,24 +91,41 @@ Once a player is selected, UI dynamically renders actions based on `Status` and 
 
 ### Phase 6: AI Media & League Communications
 * **The AI Media Network:** Integrated Vercel AI SDK with Google's `gemini-2.5-flash` to automatically generate highly structured, entertaining trade analysis upon trade completion. Features three distinct personalities: `theStathead` (advanced analytics), `theScout` (dynasty window evaluation), and `theShockJock` (a custom Family Guy radio script). 
-* **Transactional Email Blasts:** Built custom `React Email` templates triggered via Resend to alert managers to league events. Covers "New Trade Proposals" (sent to involved managers) and "Trade Finalized Announcements" (blast to the entire league with AI analysis links).
+* **Transactional Email Blasts:** Built custom `React Email` templates triggered via Resend to alert managers to league events. Covers "New Trade Proposals" (sent to involved managers), "Trade Finalized Announcements", and "Magic Links".
 * **The Staging Email Override:** Bulletproofed the API routes with `process.env.TEST_EMAIL_OVERRIDE` to ensure staging/local testing safely routes all generated emails to the developer's inbox rather than blasting the entire database of league managers.
 
 ---
 
 ## 🛠️ 6. Development Roadmap (The Work Ahead)
 
-### Phase 7: Historical API (The Quarantine Bridge)
-* `GET /api/history/books` & `GET /api/history/posts`: Fetch legacy archives.
-* `GET /api/history/transactions`: Federated query stitching modern `Transaction` logs with `LegacyTransaction` records via `legacyId`.
+### Phase 7: The Quarantine Bridge & Historical Records
+*(Focusing on the 2015-2025 legacy data and displaying the league's rich history)*
+* **Historical Transaction APIs:** `GET /api/history/transactions` federated query stitching modern `Transaction` logs with `LegacyTransaction` records via `legacyId`.
+* **The Record Books:** Dedicated pages for Team and Individual Records (powered by the seeded `LeagueRecord` table) to showcase impressive historical numbers.
+* **Past Champions Hall:** A permanent display page honoring past FFBL champions.
+* **League History Hub:** A general information page powered by the `LeagueDocument` model (editable by the Commissioner) that serves as the official lore and history document of the FFBL.
 
-### Phase 8: The AI GM Assistant (Gemini via Vercel AI SDK)
-* *Roster Hole Detection:* Scans the league to find ideal trade partners based on surpluses/deficits.
-* *Commish Bot:* Automated weekly power rankings based on active stats and recent moves.
+### Phase 8: The Commissioner Suite & League Settings
+*(Expanding administrative control over the league)*
+* **The Commish Dashboard:** A protected route for Commish-only tools.
+* **League Settings Control:** Interfaces to manually manage standings, establish the Draft Order, toggle `isDraftOpen`, roll over the `currentSeason`, and set the `tradeDeadline`.
+* **League Announcements:** Ability for the Commish to post to the `Announcement` model. This should instantly trigger a Resend email blast to the league and pin the update to the user dashboard.
+* **Championship Management:** Tools for the Commissioner to easily crown and add new champions to the history page.
 
-### Phase 9: Frictionless Auth & Comms Layer
-* *Magic Links:* NextAuth + Resend for non-Gmail users.
-* *Trade Comments (`POST /api/trades/comments`):* Build the threaded negotiation backend so managers can chat inside the War Room.
+### Phase 9: The Draft Room
+*(A dedicated, real-time war room for the off-season draft)*
+* **Draft Activation:** Commissioner-controlled toggle (`isDraftOpen`) to officially open the draft.
+* **Live Pick Syncing:** The team that owns the active pick can sync a player directly to that pick. 
+  * *Note: Drafted status is achieved simply by updating the `DraftPick.playerId` field. Players remain `ACTIVE` in their core status to avoid roster logic collisions.*
+* **Draft Board UI:** A side-by-side visual board showing the Draft Picks matched with the drafted players in real-time, utilizing the `DraftPick.pickTime` timestamp for accurate ordering.
+
+### Phase 10: The Front Office & Dashboard Polish
+*(Enhancing day-to-day user experience and team management)*
+* **Dashboard Enhancements:** Flesh out the global Home Page / User Dashboard with relevant active widgets (recent trades, upcoming draft picks, live league announcements, standings snippet).
+* **Co-Manager Delegation:** Build the UI to invite a co-manager to a franchise and assign granular permissions (leveraging the existing `User.isPrimaryManager` schema boolean).
+
+### Phase 11: Future Communications (Tentative)
+* **Internal Comms Layer:** Potential implementation of an internal message board or direct messaging capability directly within the site.
 
 ---
 
@@ -126,3 +144,4 @@ Once a player is selected, UI dynamically renders actions based on `Status` and 
   * For horizontally scrolling tables (`overflow-x-auto`) that trap dropdowns, use the "Padding Hack" (`pb-48 -mb-48`) to give the menu physical room to render without creating blank white space on the page.
 * **The MLB CDN Trick:** We *never* save image URLs to the database. We only save the `mlbId` and dynamically inject it into the `img.mlbstatic.com` string.
 * **Shohei Ohtani Rule:** Because `mlbId` is strictly `@unique`, legacy split players (e.g., Batter vs. Pitcher versions) will only have one linked profile.
+* **Draft Implementation Strategy:** Never use a `DRAFTED` status on the `Player` model. Draft events are historic and belong strictly to the `DraftPick` model via the `playerId` relation. A single player can theoretically be associated with multiple `DraftPick`s over their lifetime.
