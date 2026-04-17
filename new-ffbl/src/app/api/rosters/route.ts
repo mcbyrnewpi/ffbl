@@ -14,11 +14,7 @@ export async function GET(request: NextRequest) {
       where: { teamId: teamId },
       include: {
         team: true,
-        positions: {
-          include: {
-            position: true
-          }
-        },
+        positions: true, 
         prospectRankings: true
       },
       orderBy: {
