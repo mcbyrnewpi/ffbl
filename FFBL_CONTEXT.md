@@ -87,30 +87,25 @@ Once a player is selected, UI dynamically renders actions based on `Status` and 
 * **Accessibility & High-Contrast Design:** Re-engineered the back of the Baseball Card to eliminate colorblindness/accessibility issues. Replaced low-contrast amber/brown backgrounds with an "Aged Letterpress" textured parchment theme, utilizing deep slate text, drop-shadow indentations, and pure white stat plaques for maximum legibility while retaining the vintage physical feel.
 * **Advanced Sabermetrics:** The back of the card includes a `STD | ADV` toggle, dynamically calculating and mapping K%, BB%, BABIP, AB/HR, K/9, BB/9, and WHIP directly from the MLB JSON payloads. Gracefully handles `TWP` (Two-Way Players) like Ohtani.
 * **Live MLB Pipeline Integration:** Prospect cards natively display "Top 100" gold badges and ETA dates directly on minor league roster cards and lists.
-* **Poison Pill UI:** Farm System grids and lists explicitly highlight ineligible players with glowing red borders, tinted backgrounds, and explicit warning flags detailing the exact rule violation.
 
 ### Phase 6: AI Media & League Communications
-* **The AI Media Network:** Integrated Vercel AI SDK with Google's `gemini-2.5-flash` to automatically generate highly structured, entertaining trade analysis upon trade completion. Features three distinct personalities: `theStathead` (advanced analytics), `theScout` (dynasty window evaluation), and `theShockJock` (a custom Family Guy radio script). 
-* **Transactional Email Blasts:** Built custom `React Email` templates triggered via Resend to alert managers to league events. Covers "New Trade Proposals" (sent to involved managers), "Trade Finalized Announcements", and "Magic Links".
-* **The Staging Email Override:** Bulletproofed the API routes with `process.env.TEST_EMAIL_OVERRIDE` to ensure staging/local testing safely routes all generated emails to the developer's inbox rather than blasting the entire database of league managers.
+* **The AI Media Network:** Integrated Vercel AI SDK with Google's `gemini-2.5-flash` to automatically generate highly structured, entertaining trade analysis upon trade completion. Features three distinct personalities: `theStathead`, `theScout`, and `theShockJock`. 
+* **Transactional Email Blasts:** Built custom `React Email` templates triggered via Resend to alert managers to league events.
+
+### Phase 7: The Commissioner Suite & Core Governance
+* **The Commish Center:** A protected, tabbed dashboard (`CommishCenter`) serving as the central hub for all administrative actions, isolating dangerous API sync tools behind safe UX layers.
+* **League Settings Engine:** `LeagueSettingsManager` interfaces with a self-healing `PATCH /api/settings` route that dynamically generates missing database rows with default FFBL limits (`25/6/6/6`). Grants Commish control over the trade deadline and master roster limit toggles.
+* **Announcements & Broadcasts:** `AnnouncementManager` allows the Commish to draft and pin rich-text league updates. Integrates directly with Resend and a custom `AnnouncementEmail.tsx` React component to blast fully branded, high-contrast emails to all managers. Includes a strict `TEST_EMAIL_OVERRIDE` guardrail.
+* **Championship Management:** `SeasonManager` allows the creation and editing of historical championship records (`PATCH /api/seasons`). Powers the fully redesigned, single-row, high-contrast `ChampionsHallPage` to memorialize league history.
 
 ---
 
 ## 🛠️ 6. Development Roadmap (The Work Ahead)
 
-### Phase 7: The Quarantine Bridge & Historical Records
-*(Focusing on the 2015-2025 legacy data and displaying the league's rich history)*
-* **Historical Transaction APIs:** `GET /api/history/transactions` federated query stitching modern `Transaction` logs with `LegacyTransaction` records via `legacyId`.
+### Phase 8: League Lore & Historic Records
+* **League History Hub (The Documents Tab):** A rich-text editor within the Commish Center to manage the `LeagueDocument` model, serving as the official home for the FFBL Constitution and historical rule changes.
 * **The Record Books:** Dedicated pages for Team and Individual Records (powered by the seeded `LeagueRecord` table) to showcase impressive historical numbers.
-* **Past Champions Hall:** A permanent display page honoring past FFBL champions.
-* **League History Hub:** A general information page powered by the `LeagueDocument` model (editable by the Commissioner) that serves as the official lore and history document of the FFBL.
-
-### Phase 8: The Commissioner Suite & League Settings
-*(Expanding administrative control over the league)*
-* **The Commish Dashboard:** A protected route for Commish-only tools.
-* **League Settings Control:** Interfaces to manually manage standings, establish the Draft Order, toggle `isDraftOpen`, roll over the `currentSeason`, and set the `tradeDeadline`.
-* **League Announcements:** Ability for the Commish to post to the `Announcement` model. This should instantly trigger a Resend email blast to the league and pin the update to the user dashboard.
-* **Championship Management:** Tools for the Commissioner to easily crown and add new champions to the history page.
+* **Historical Transaction APIs:** `GET /api/history/transactions` federated query stitching modern `Transaction` logs with `LegacyTransaction` records via `legacyId`.
 
 ### Phase 9: The Draft Room
 *(A dedicated, real-time war room for the off-season draft)*

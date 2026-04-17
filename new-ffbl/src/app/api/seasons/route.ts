@@ -14,11 +14,13 @@ export async function GET() {
   }
 }
 
+// CREATE NEW
 export async function POST(request: Request) {
   try {
-    // 🛡️ Protect the route: Only the COMMISH can add new seasons
     const session = await getServerSession(authOptions);
-    if (!session?.user || (session.user as any).role !== "COMMISH") {
+    const userRole = (session?.user as any)?.role;
+
+    if (!session?.user || (userRole !== "COMMISH" && userRole !== "ADMIN")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -46,5 +48,42 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Failed to create season:", error);
     return NextResponse.json({ error: "Failed to create season" }, { status: 500 });
+  }
+}
+
+// UPDATE EXISTING
+export async function PATCH(request: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    const userRole = (session?.user as any)?.role;
+
+    if (!session?.user || (userRole !== "COMMISH" && userRole !== "ADMIN")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { 
+      year, ffblChampion, playoffMvp, regularSeasonBest, 
+      alChamp, nlChamp, mlbMvp, mlbCyYoung, mlbRoy 
+    } = body;
+
+    const updatedSeason = await prisma.season.update({
+      where: { year: parseInt(year) },
+      data: {
+        ffblChampion,
+        playoffMvp,
+        regularSeasonBest,
+        alChamp,
+        nlChamp,
+        mlbMvp,
+        mlbCyYoung,
+        mlbRoy,
+      },
+    });
+
+    return NextResponse.json(updatedSeason);
+  } catch (error) {
+    console.error("Failed to update season:", error);
+    return NextResponse.json({ error: "Failed to update season" }, { status: 500 });
   }
 }
