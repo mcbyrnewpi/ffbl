@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Users, LayoutDashboard, ArrowRightLeft, Shield, Search, Menu, X, LogOut, LogIn, ShieldAlert, Activity } from 'lucide-react';
+import { Users, LayoutDashboard, ArrowRightLeft, Shield, Search, Menu, X, LogOut, LogIn, ShieldAlert, Activity, BookOpen } from 'lucide-react';
 import GlobalSearch from './GlobalSearch';
 import { useSession, signIn, signOut } from 'next-auth/react';
+
 
 export default function SideNav() {
   const [isOpen, setIsOpen] = useState(false);
@@ -21,7 +22,7 @@ export default function SideNav() {
     { href: '/players', icon: <Search size={18} />, label: 'Player Search' },
     { href: '/trades', icon: <ArrowRightLeft size={18} />, label: 'Trade Center' },
     { href: '/transactions', icon: <Activity size={18} />, label: 'Transactions'},
-    { href: '/league', icon: <Users size={18} />, label: 'League Info' },
+    { href: '/history', icon: <BookOpen size={18} />, label: 'League Info' },
   ];
 
   return (
