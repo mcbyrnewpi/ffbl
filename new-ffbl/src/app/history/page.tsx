@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "The official rules and history of the Franklin Fantasy Baseball League.",
 };
 
-export const revalidate = 60; 
+export const revalidate = 0; 
 
 export default async function HistoryPage() {
   const doc = await prisma.leagueDocument.findUnique({
