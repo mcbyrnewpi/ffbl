@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, Trophy, Medal, ScrollText } from "lucide-react";
+import { BookOpen, Trophy, Medal, ScrollText, Scale } from "lucide-react";
 
 export default function HistoryLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   const tabs = [
     { name: "FFBL History", href: "/history", icon: BookOpen, exact: true },
+    { name: "League Rules", href: "/history/rules", icon: Scale, exact: true },
     { name: "Hall of Champions", href: "/history/champions", icon: Trophy, exact: false },
     { name: "Team Records", href: "/history/team-records", icon: Medal, exact: false },
     { name: "Player Records", href: "/history/player-records", icon: Medal, exact: false },
