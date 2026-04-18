@@ -1,3 +1,4 @@
+// src/app/admin/commish/page.tsx
 "use client";
 
 import { useState } from 'react';
@@ -9,6 +10,8 @@ import AnnouncementManager from '@/components/admin/AnnouncementManager';
 import DataSyncManager from '@/components/admin/DataSyncManager';
 import DocumentManager from '@/components/admin/DocumentManager';
 import RecordManager from '@/components/admin/RecordManager';
+import PageContainer from '@/components/layout/PageContainer';
+import PageHeader from '@/components/layout/PageHeader';
 
 // Split 'history' into 'champions' and 'records'
 type TabType = 'announcements' | 'sync' | 'champions' | 'records' | 'settings' | 'docs';
@@ -19,9 +22,11 @@ export default function CommishCenter() {
 
   if (status === "loading") {
     return (
-      <div className="flex justify-center items-center min-h-[50vh]">
-        <div className="animate-pulse text-slate-400 font-bold tracking-widest uppercase text-sm">Verifying Credentials...</div>
-      </div>
+      <PageContainer>
+        <div className="flex justify-center items-center min-h-[50vh]">
+          <div className="animate-pulse text-slate-400 font-bold tracking-widest uppercase text-sm">Verifying Credentials...</div>
+        </div>
+      </PageContainer>
     );
   }
 
@@ -30,11 +35,13 @@ export default function CommishCenter() {
 
   if (!isCommishOrAdmin) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
-        <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-6 shadow-inner"><Lock size={32} className="text-slate-400" /></div>
-        <h1 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">Access Denied</h1>
-        <p className="text-slate-500 font-medium max-w-md mx-auto text-sm">This area is restricted to League Commissioners and Administrators.</p>
-      </div>
+      <PageContainer>
+        <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+          <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-6 shadow-inner"><Lock size={32} className="text-slate-400" /></div>
+          <h1 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">Access Denied</h1>
+          <p className="text-slate-500 font-medium max-w-md mx-auto text-sm">This area is restricted to League Commissioners and Administrators.</p>
+        </div>
+      </PageContainer>
     );
   }
 
@@ -50,14 +57,11 @@ export default function CommishCenter() {
   );
 
   return (
-    <div className="max-w-6xl mx-auto py-8 px-4">
-      <header className="flex items-center gap-4 border-b border-slate-200 pb-6 mb-8">
-        <div className="p-3 bg-slate-900 rounded-xl shadow-md rotate-3"><ShieldAlert className="text-amber-400" size={28} /></div>
-        <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Commish Center</h1>
-          <p className="text-slate-600 mt-1 text-base">League administration, historical records, and global controls.</p>
-        </div>
-      </header>
+    <PageContainer>
+      <PageHeader 
+        title="Commish Center"
+        subtitle="League administration, historical records, and global controls."
+      />
 
       <div className="flex overflow-x-auto border-b border-slate-200 mb-8 no-scrollbar">
         <TabButton id="announcements" label="Announcements" icon={Megaphone} />
@@ -79,6 +83,6 @@ export default function CommishCenter() {
         {activeTab === 'docs' && <div className="max-w-4xl"><DocumentManager /></div>}
         {activeTab === 'sync' && <DataSyncManager />}
       </div>
-    </div>
+    </PageContainer>
   );
 }

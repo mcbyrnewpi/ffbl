@@ -78,15 +78,10 @@ Once a player is selected, UI dynamically renders actions based on `Status` and 
 * **Deep-Linked Trade Initiation:** Reads `?addPlayer=id` or `?counter=id` from the URL to instantly bypass Prisma limits, pre-load opponent rosters, and drop targeted assets straight into the user's "Receives" block. 
 * **The Escrow System (`CorrespondingMovesModal`):** "The Bouncer" integrated directly into the trade flow to enforce corresponding drops/demotions prior to API execution.
 * **The Flow Engine (`TradeFlowDiagram.tsx`):** Custom `@xyflow/react` implementation rendering a Left-to-Right bipartite graph, routing perfectly curved lines through standalone Asset Nodes with dynamic stat ribbons.
-* **Modern Manager Dashboards:** `PlayerActionMenu` deployed across all grids/lists. Farm system upgraded to a vertical-stack layout allowing responsive grids to "breathe" with slick z-index overlapping and dynamic `dropUp` dropdowns for bottom-screen elements.
 
 ### Phase 5: The Baseball Card & UI Polish
 * **The 3D Baseball Card (`BaseballCard.tsx`):** A flippable, interactive master player profile. Features high-res headshots, dynamic positional badges, FFBL status on the front, and nested stats/scouting reports on the back.
-* **Dynamic Affiliate Branding:** The card intelligently parses `player.level` and dynamically swaps the visual franchise branding to the corresponding Minor League Affiliate's name and custom logo.
-* **Quick Stats Snapshot:** Front-facing cards parse the `mlbRawData` payload to extract and calculate Age, prospect ETA, and a context-aware stat line (e.g., `3.45 ERA • 120 K` for pitchers vs. `.285 AVG • 24 HR` for hitters).
-* **Accessibility & High-Contrast Design:** Re-engineered the back of the Baseball Card to eliminate colorblindness/accessibility issues. Replaced low-contrast amber/brown backgrounds with an "Aged Letterpress" textured parchment theme, utilizing deep slate text, drop-shadow indentations, and pure white stat plaques for maximum legibility while retaining the vintage physical feel.
-* **Advanced Sabermetrics:** The back of the card includes a `STD | ADV` toggle, dynamically calculating and mapping K%, BB%, BABIP, AB/HR, K/9, BB/9, and WHIP directly from the MLB JSON payloads. Gracefully handles `TWP` (Two-Way Players) like Ohtani.
-* **Live MLB Pipeline Integration:** Prospect cards natively display "Top 100" gold badges and ETA dates directly on minor league roster cards and lists.
+* **Global UI Standardization:** Implemented universal `<PageContainer>` and `<PageHeader>` layout wrappers. De-bloated typography from heavy `font-black` to premium SaaS `font-bold`. Unified tabs, paddings, and alignment across the Homepage, Franchises, Trades, Transactions, and Commish Centers.
 
 ### Phase 6: AI Media & League Communications
 * **The AI Media Network:** Integrated Vercel AI SDK with Google's `gemini-2.5-flash` to automatically generate highly structured, entertaining trade analysis upon trade completion. Features three distinct personalities: `theStathead`, `theScout`, and `theShockJock`. 
@@ -95,17 +90,17 @@ Once a player is selected, UI dynamically renders actions based on `Status` and 
 ### Phase 7: The Commissioner Suite & Core Governance
 * **The Commish Center:** A protected, tabbed dashboard (`CommishCenter`) serving as the central hub for all administrative actions, isolating dangerous API sync tools behind safe UX layers.
 * **League Settings Engine:** `LeagueSettingsManager` interfaces with a self-healing `PATCH /api/settings` route that dynamically generates missing database rows with default FFBL limits (`25/6/6/6`). Grants Commish control over the trade deadline and master roster limit toggles.
-* **Announcements & Broadcasts:** `AnnouncementManager` allows the Commish to draft and pin rich-text league updates. Integrates directly with Resend and a custom `AnnouncementEmail.tsx` React component to blast fully branded, high-contrast emails to all managers. Includes a strict `TEST_EMAIL_OVERRIDE` guardrail.
+* **Announcements & Broadcasts:** `AnnouncementManager` allows the Commish to draft and pin rich-text league updates. Integrates directly with Resend and a custom `AnnouncementEmail.tsx` React component to blast fully branded, high-contrast emails to all managers.
+* **League Lore & Historic Records:** Created the `DocumentManager` for rich-text HTML generation. Dynamically injected the official FFBL Constitution (`rules`) and History (`history`) into sleek, document-style reading views on the frontend.
 * **Championship Management:** `SeasonManager` allows the creation and editing of historical championship records (`PATCH /api/seasons`). Powers the fully redesigned, single-row, high-contrast `ChampionsHallPage` to memorialize league history.
+
+### Phase 8: Historic Records & Archives
+* **The Record Books:** Dedicated pages for Team and Individual Records (powered by the seeded `LeagueRecord` table) to showcase impressive historical numbers.
+* **Historical Transaction APIs:** `GET /api/history/transactions` federated query stitching modern `Transaction` logs with `LegacyTransaction` records via `legacyId`.
 
 ---
 
 ## 🛠️ 6. Development Roadmap (The Work Ahead)
-
-### Phase 8: League Lore & Historic Records
-* **League History Hub (The Documents Tab):** A rich-text editor within the Commish Center to manage the `LeagueDocument` model, serving as the official home for the FFBL Constitution and historical rule changes.
-* **The Record Books:** Dedicated pages for Team and Individual Records (powered by the seeded `LeagueRecord` table) to showcase impressive historical numbers.
-* **Historical Transaction APIs:** `GET /api/history/transactions` federated query stitching modern `Transaction` logs with `LegacyTransaction` records via `legacyId`.
 
 ### Phase 9: The Draft Room
 *(A dedicated, real-time war room for the off-season draft)*
@@ -116,27 +111,24 @@ Once a player is selected, UI dynamically renders actions based on `Status` and 
 
 ### Phase 10: The Front Office & Dashboard Polish
 *(Enhancing day-to-day user experience and team management)*
-* **Dashboard Enhancements:** Flesh out the global Home Page / User Dashboard with relevant active widgets (recent trades, upcoming draft picks, live league announcements, standings snippet).
+* **Dashboard Content Strategy:** Wire up the "Most Recent Announcement" to the top of the homepage. Build a Live Standings Widget based on active league data. Include interactive "Sticky" elements (Manager of the Week, Ego/Lore widgets).
 * **Co-Manager Delegation:** Build the UI to invite a co-manager to a franchise and assign granular permissions (leveraging the existing `User.isPrimaryManager` schema boolean).
 
-### Phase 11: Future Communications (Tentative)
-* **Internal Comms Layer:** Potential implementation of an internal message board or direct messaging capability directly within the site.
+### Phase 11: Media & Asset Management
+* **Cloudinary Media Library Integration:** Enhance the `CldUploadWidget` across the Commish Center and Team Edit pages to utilize `image_search` and `local` sources, allowing managers to browse and reuse previously uploaded legacy assets (logos, historic photos) without duplicating uploads.
 
 ---
 
 ## ⚠️ 7. Critical Architecture & Session Notes
-* **Environment Variable Scoping:** Local `.env` is for development database URLs and local overrides. `.env.local` is for specific Next.js overrides (avoid putting DB URLs here to prevent confusion). Vercel Dashboard strictly handles Staging/Production variables. Never rely on commenting out production email/notification code for staging tests; always use environment overrides like `TEST_EMAIL_OVERRIDE`.
+* **Next.js 15 Data Caching (Vercel):** Aggressive SSG caching will bake empty database states into production during Vercel builds. For live DB fetches (like History documents or Rules), ensure `export const revalidate = 0;` is present to force fresh dynamic rendering.
+* **API Route Signatures:** Next.js throws build errors if a route defines dynamic `params` (e.g., `Promise<{ teamId: string }>`) but doesn't live inside a bracketed folder (like `[teamId]`). For static path endpoints (like `/api/rosters`), use `request.url` and `searchParams.get('teamId')` instead.
+* **Environment Variable Scoping:** Local `.env` is for development database URLs and local overrides. `.env.local` is for specific Next.js overrides. Vercel Dashboard strictly handles Staging/Production variables. 
 * **AI Model Selection:** `gemini-2.5-pro` is incredibly powerful but "heavy" and prone to overload/timeouts during high-volume generation. `gemini-2.5-flash` is the preferred primary model for fast, reliable, and cost-effective creative text generation.
-* **Prisma Relational Strictness:** Always verify `include` blocks. Nested relational data (like team logos on a player, or team objects inside a `hallOfFame` array) will return `undefined` unless explicitly called and selected in the Prisma query. Overwriting Prisma outputs with `.map()` can accidentally destroy this nested data.
-* **Tailwind Input Contrast:** UI `<input>` and `<textarea>` elements often inherit light text colors from parent wrappers. Always apply explicit text colors (e.g., `text-slate-900`) to ensure typed text remains readable against light backgrounds.
-* **MLB Minor League Search:** The standard MLB API `people/search` endpoint defaults to `sportId=1` (Majors only). To find prospects, you MUST explicitly pass `sportIds=1,11,12,13,14,16,5442` in the fetch URL.
+* **Prisma Relational Strictness:** Always verify `include` blocks. Nested relational data (like team objects inside a `hallOfFame` array) will return `undefined` unless explicitly called and selected in the Prisma query.
+* **Tailwind Input Contrast:** UI `<input>` and `<textarea>` elements often inherit light text colors from parent wrappers. Always apply explicit text colors (e.g., `text-slate-900`).
 * **The "Locked Keys" Deadlock:** When running the `validateTeamFarmSystem` (Poison Pill) check during a roster move, you *must* pass the `pendingMove` object to the bouncer. Otherwise, a player currently violating a rule will trigger the system to block the very transaction attempting to fix them.
 * **Asset-Driven Trades:** Trades do not have a single `receivingTeamId`. The web of a trade is defined entirely by `fromTeamId` and `toTeamId` on individual `TradeAsset` records.
 * **Escrow Locks:** When a manager agrees to drop/demote a player as a condition of a trade, that player receives an `isTradeLocked = true` padlock just like the players actually changing teams.
-* **Lazy Evaluation for Expirations:** No chron jobs needed. When the Trade UI loads, instantly flip any `PENDING` trades to `CANCELLED` (and unlock their assets) if `expiresAt < now()`.
-* **Next.js 15 Async Params (CRITICAL):** `params` and `searchParams` in Route Handlers are **Promises**. You must `await` them before accessing IDs.
-* **CSS Z-Index & Overflow Traps:** * Always remove `overflow-hidden` from outer grid wrappers when rendering Dropdowns, and use native Tailwind like `focus-within:z-10` natively on the active card to raise it above siblings. 
-  * For horizontally scrolling tables (`overflow-x-auto`) that trap dropdowns, use the "Padding Hack" (`pb-48 -mb-48`) to give the menu physical room to render without creating blank white space on the page.
+* **CSS Z-Index & Overflow Traps:** For horizontally scrolling tables (`overflow-x-auto`) that trap dropdowns, use the "Padding Hack" (`pb-48 -mb-48`) to give the menu physical room to render without creating blank white space on the page.
 * **The MLB CDN Trick:** We *never* save image URLs to the database. We only save the `mlbId` and dynamically inject it into the `img.mlbstatic.com` string.
-* **Shohei Ohtani Rule:** Because `mlbId` is strictly `@unique`, legacy split players (e.g., Batter vs. Pitcher versions) will only have one linked profile.
-* **Draft Implementation Strategy:** Never use a `DRAFTED` status on the `Player` model. Draft events are historic and belong strictly to the `DraftPick` model via the `playerId` relation. A single player can theoretically be associated with multiple `DraftPick`s over their lifetime.
+* **Draft Implementation Strategy:** Never use a `DRAFTED` status on the `Player` model. Draft events are historic and belong strictly to the `DraftPick` model via the `playerId` relation.
