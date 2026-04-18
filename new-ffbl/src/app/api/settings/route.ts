@@ -48,24 +48,30 @@ export async function PATCH(request: Request) {
     }
 
     const body = await request.json();
-    const { 
-      tradeDeadline, 
-      enforceRosterLimits, 
-      mlbLimit, aaaLimit, aaLimit, aLimit, ilLimit, naLimit 
-    } = body;
+    
+    // Build the update payload dynamically. 
+    // This allows partial updates (like just hitting "Start Draft") without overriding roster limits to NaN.
+    const updateData: any = {};
+
+    if (body.tradeDeadline !== undefined) {
+      updateData.tradeDeadline = body.tradeDeadline ? new Date(body.tradeDeadline) : null;
+    }
+    
+    if (body.enforceRosterLimits !== undefined) updateData.enforceRosterLimits = Boolean(body.enforceRosterLimits);
+    if (body.isDraftOpen !== undefined) updateData.isDraftOpen = Boolean(body.isDraftOpen);
+    if (body.currentSeason !== undefined) updateData.currentSeason = parseInt(body.currentSeason);
+
+    // Roster Limits
+    if (body.mlbLimit !== undefined) updateData.mlbLimit = parseInt(body.mlbLimit);
+    if (body.aaaLimit !== undefined) updateData.aaaLimit = parseInt(body.aaaLimit);
+    if (body.aaLimit !== undefined) updateData.aaLimit = parseInt(body.aaLimit);
+    if (body.aLimit !== undefined) updateData.aLimit = parseInt(body.aLimit);
+    if (body.ilLimit !== undefined) updateData.ilLimit = parseInt(body.ilLimit);
+    if (body.naLimit !== undefined) updateData.naLimit = parseInt(body.naLimit);
 
     const updatedSettings = await prisma.leagueSettings.update({
       where: { id: 1 },
-      data: {
-        tradeDeadline: tradeDeadline ? new Date(tradeDeadline) : null,
-        enforceRosterLimits,
-        mlbLimit: parseInt(mlbLimit),
-        aaaLimit: parseInt(aaaLimit),
-        aaLimit: parseInt(aaLimit),
-        aLimit: parseInt(aLimit),
-        ilLimit: parseInt(ilLimit),
-        naLimit: parseInt(naLimit),
-      },
+      data: updateData,
     });
 
     return NextResponse.json(updatedSettings);

@@ -98,16 +98,25 @@ Once a player is selected, UI dynamically renders actions based on `Status` and 
 * **The Record Books:** Dedicated pages for Team and Individual Records (powered by the seeded `LeagueRecord` table) to showcase impressive historical numbers.
 * **Historical Transaction APIs:** `GET /api/history/transactions` federated query stitching modern `Transaction` logs with `LegacyTransaction` records via `legacyId`.
 
+### Phase 9: The Draft Engine & Commish Controls
+* **Settings API Optimization:** `PATCH /api/settings` accepts partial updates, protecting roster limits from being accidentally wiped out when toggling booleans.
+* **Standings Integration:** * Standings grid allows manual record updates and includes an "Auto-Rank" button that sorts by Win % and assigns 1-16.
+  * Active season (e.g., 2026) inherently sets the Target Draft Year to `currentSeason + 1` (e.g., 2027).
+* **Draft Lottery Manager:** Commish can use a drag-and-drop `dnd-kit` UI to set the post-lottery draft order. The `PATCH /api/admin/draft-order` dynamically updates the `pickNumber` across all 5 rounds based on the `originalOwnerId`.
+* **Live Draft Room UI:** * Dynamic Polling (15s when active, 60s when paused) keeps server load light.
+  * Distinct active pick highlighting and team-specific "Make Pick" controls to prevent unauthorized selections.
+  * Clean `<img>` tags with `onError` fallback hide broken MLB CDN headshot links.
+* **The "Make Pick" Engine:**
+  * **Omni-Search:** The search modal queries `GET /api/players` with `?searchMlb=true` and uses a 400ms debounce to prevent API spam.
+  * **MLB Cloud Injection:** If a prospect only exists on MLB.com (`isExternal: true`), the frontend hits `POST /api/players` to automatically construct their DB record first, then passes the new local ID to the draft transaction.
+  * **Transactions:** `POST /api/draft/make-pick` assigns the player, updates their `teamId`, and generates a Transaction log.
+* **Commish War Room Controls:**
+  * Dedicated "Start / Pause" draft controls.
+  * Commish-only "Undo Pick" button that safely strips the player from the roster, clears the draft slot, and deletes the transaction log.
+
 ---
 
 ## 🛠️ 6. Development Roadmap (The Work Ahead)
-
-### Phase 9: The Draft Room
-*(A dedicated, real-time war room for the off-season draft)*
-* **Draft Activation:** Commissioner-controlled toggle (`isDraftOpen`) to officially open the draft.
-* **Live Pick Syncing:** The team that owns the active pick can sync a player directly to that pick. 
-  * *Note: Drafted status is achieved simply by updating the `DraftPick.playerId` field. Players remain `ACTIVE` in their core status to avoid roster logic collisions.*
-* **Draft Board UI:** A side-by-side visual board showing the Draft Picks matched with the drafted players in real-time, utilizing the `DraftPick.pickTime` timestamp for accurate ordering.
 
 ### Phase 10: The Front Office & Dashboard Polish
 *(Enhancing day-to-day user experience and team management)*
@@ -131,4 +140,6 @@ Once a player is selected, UI dynamically renders actions based on `Status` and 
 * **Escrow Locks:** When a manager agrees to drop/demote a player as a condition of a trade, that player receives an `isTradeLocked = true` padlock just like the players actually changing teams.
 * **CSS Z-Index & Overflow Traps:** For horizontally scrolling tables (`overflow-x-auto`) that trap dropdowns, use the "Padding Hack" (`pb-48 -mb-48`) to give the menu physical room to render without creating blank white space on the page.
 * **The MLB CDN Trick:** We *never* save image URLs to the database. We only save the `mlbId` and dynamically inject it into the `img.mlbstatic.com` string.
+* **Image Fallbacks (Next.js 404 Spam):** The Next.js `<Image>` component throws server-side 500/404s if an external URL is broken. For dynamic MLB headshots that might not exist yet, use standard `<img src="..." onError={(e) => e.currentTarget.style.display = 'none'} />` to gracefully hide broken images without polluting server logs.
+* **Debouncing Search Inputs:** Always use a `setTimeout` debounce (e.g., 400ms) on text inputs that trigger external API searches (like MLB Stats) to prevent rate-limiting and frontend lag.
 * **Draft Implementation Strategy:** Never use a `DRAFTED` status on the `Player` model. Draft events are historic and belong strictly to the `DraftPick` model via the `playerId` relation.
