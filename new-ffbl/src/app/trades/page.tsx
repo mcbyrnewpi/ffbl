@@ -5,6 +5,8 @@ import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import TradeActionButtons from '@/components/trades/TradeActionButtons';
 import RecentTrades from '@/components/trades/RecentTrades';
+import PageContainer from '@/components/layout/PageContainer';
+import PageHeader from '@/components/layout/PageHeader';
 
 export default async function TradesDashboard() {
   const session = await getServerSession(authOptions);
@@ -13,14 +15,16 @@ export default async function TradesDashboard() {
 
   if (!myTeamId) {
     return (
-      <div className="p-8 text-center text-slate-500 mt-20">
-        <h2 className="text-2xl font-bold text-slate-700 mb-2">No Franchise Assigned</h2>
-        <p>You must be assigned to a team to view the Trade Center.</p>
-      </div>
+      <PageContainer>
+        <div className="p-8 text-center text-slate-500 mt-20">
+          <h2 className="text-2xl font-bold text-slate-700 mb-2">No Franchise Assigned</h2>
+          <p>You must be assigned to a team to view the Trade Center.</p>
+        </div>
+      </PageContainer>
     );
   }
 
-  // 🔍 Fetch all PENDING trades where my team is involved
+  // ⚾ Fetch all PENDING trades where my team is involved
   const pendingTrades = await prisma.trade.findMany({
     where: {
       status: 'PENDING',
@@ -49,7 +53,7 @@ export default async function TradesDashboard() {
     orderBy: { createdAt: 'desc' }
   });
 
-  // 🔍 Fetch recent PROCESSED trades (limit to last 20 for performance)
+  // ⚾ Fetch recent PROCESSED trades (limit to last 20 for performance)
   const processedTrades = await prisma.trade.findMany({
     where: { status: 'PROCESSED' },
     include: {
@@ -67,17 +71,15 @@ export default async function TradesDashboard() {
   const isDeadlinePassed = settings?.tradeDeadline ? new Date() > settings.tradeDeadline : false;
 
   return (
-    <div className="p-4 md:p-8 max-w-6xl mx-auto w-full">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-5 mb-8">
-        <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Trade Center</h1>
-          <p className="text-slate-500 mt-1 font-medium">Review and respond to pending offers</p>
-        </div>
-        
+    <PageContainer>
+      <PageHeader 
+        title="Trade Center"
+        subtitle="Review and respond to pending offers"
+      >
         {/* Conditionally render the Propose Trade button based on the deadline */}
         {isDeadlinePassed ? (
           <div 
-            className="w-full sm:w-auto px-6 py-4 sm:py-3 bg-slate-200 text-slate-400 font-black rounded-xl sm:rounded-lg shadow-inner text-center flex-shrink-0 cursor-not-allowed border border-slate-300"
+            className="w-full sm:w-auto px-6 py-2.5 bg-slate-200 text-slate-400 font-bold rounded-lg shadow-inner text-center flex-shrink-0 cursor-not-allowed border border-slate-300"
             title="The FFBL trade deadline has passed"
           >
             Deadline Passed
@@ -85,20 +87,20 @@ export default async function TradesDashboard() {
         ) : (
           <Link 
             href="/trades/build"
-            className="w-full sm:w-auto px-6 py-4 sm:py-3 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-xl sm:rounded-lg shadow-sm shadow-blue-500/25 transition-all text-center flex-shrink-0"
+            className="w-full sm:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-sm transition-all text-center flex-shrink-0"
           >
             Propose Trade
           </Link>
         )}
-      </div>
+      </PageHeader>
 
       {pendingTrades.length === 0 ? (
-        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center shadow-sm">
+        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center shadow-sm mb-12">
           <div className="text-4xl mb-4">🤝</div>
           <h3 className="text-lg font-bold text-slate-700">No Pending Trades</h3>
         </div>
       ) : (
-        <div className="grid gap-6">
+        <div className="grid gap-6 mb-12">
           {pendingTrades.map((trade) => {
             const isInitiator = trade.initiatingTeamId === myTeamId;
             const initiatorName = trade.assets.find(a => a.fromTeamId === trade.initiatingTeamId)?.fromTeam.name 
@@ -182,7 +184,7 @@ export default async function TradesDashboard() {
                       status={trade.status}
                       hasApproved={hasApproved}
                       pendingApprovalsCount={pendingApprovalsCount}
-                      isDeadlinePassed={isDeadlinePassed} // Pass it down if we need it there too!
+                      isDeadlinePassed={isDeadlinePassed} 
                     />
                   </div>
 
@@ -195,6 +197,6 @@ export default async function TradesDashboard() {
 
       <RecentTrades trades={processedTrades} myTeamId={myTeamId} />
     
-    </div>
+    </PageContainer>
   );
 }

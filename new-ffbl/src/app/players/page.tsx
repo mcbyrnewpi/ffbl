@@ -7,7 +7,9 @@ import { useSession } from 'next-auth/react';
 import { MILB_PARENT_MAP } from '@/lib/milb-map'; 
 import AddPlayerMenu from '@/components/players/AddPlayerMenu';
 import PlayerCardModal from '@/components/players/PlayerCardModal';
-import { Trophy, X } from 'lucide-react'; // 🌟 Added X icon here
+import { Trophy, X } from 'lucide-react';
+import PageContainer from '@/components/layout/PageContainer';
+import PageHeader from '@/components/layout/PageHeader';
 
 // --- THE HEADSHOT COMPONENT ---
 const PlayerHeadshot = ({ player }: { player: any }) => {
@@ -228,11 +230,11 @@ function PlayerSearchContent() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto py-8 px-4">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">Player Database</h1>
-        <p className="text-slate-500">Browse the waiver wire, find prospects, or search the MLB for new rookies.</p>
-      </div>
+    <PageContainer>
+      <PageHeader 
+        title="Player Database"
+        subtitle="Browse the waiver wire, find prospects, or search the MLB for new rookies."
+      />
 
       <div className="flex flex-col gap-5 mb-8 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
         
@@ -559,7 +561,7 @@ function PlayerSearchContent() {
         onClose={() => setSelectedPlayer(null)} 
         player={selectedPlayer} 
       />
-    </div>
+    </PageContainer>
   );
 }
 
