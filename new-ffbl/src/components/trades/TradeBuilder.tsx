@@ -27,9 +27,11 @@ interface Props {
   initialPicks: any[];
   initialCounterTrade?: any | null; 
   addPlayerId?: string;
+  addPickId?: string; 
+  partnerTeamId?: string; 
 }
 
-export default function TradeBuilder({ initialTeams, initialPlayers, initialPicks, initialCounterTrade, addPlayerId }: Props) {
+export default function TradeBuilder({ initialTeams, initialPlayers, initialPicks, initialCounterTrade, addPlayerId, addPickId, partnerTeamId }: Props) {
   const router = useRouter();
   const { data: session } = useSession();
   const [isMounted, setIsMounted] = useState(false);
@@ -60,6 +62,7 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
 
   const [assets, setAssets] = useState<UIAsset[]>(() => {
     const getZone = (type: string, dbId: string) => {
+      // 1. Counter Trade Logic
       if (initialCounterTrade) {
         const foundAsset = initialCounterTrade.assets.find((a: any) => 
           (type === 'PLAYER' && a.playerId === dbId) || 
@@ -67,8 +70,13 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
         );
         if (foundAsset) return `trade-block-${foundAsset.toTeamId}`;
       }
+      // 2. Add Player Logic (Receiving)
       if (addPlayerId && type === 'PLAYER' && dbId === addPlayerId) {
          return `trade-block-${CURRENT_USER_TEAM_ID}`;
+      }
+      // 3. Add Pick Logic (Trading Away)
+      if (addPickId && type === 'PICK' && dbId === addPickId && partnerTeamId) {
+         return `trade-block-${partnerTeamId}`; 
       }
       return 'roster';
     };
@@ -105,6 +113,11 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
       const uniqueTeams = Array.from(new Set(allTeams)) as string[];
       if (!uniqueTeams.includes(CURRENT_USER_TEAM_ID)) uniqueTeams.push(CURRENT_USER_TEAM_ID);
       return uniqueTeams;
+    }
+
+    // If we launched from the Draft Room, build the blocks instantly
+    if (partnerTeamId && partnerTeamId !== CURRENT_USER_TEAM_ID) {
+      return [CURRENT_USER_TEAM_ID, partnerTeamId];
     }
 
     if (addPlayerId) {
@@ -374,7 +387,7 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
                       {initialTeams.map(team => (
                         <button
                           key={team.id}
-                          className={`w-full text-left px-4 py-3 sm:py-2 text-base sm:text-sm font-bold transition-colors border-b border-slate-50 last:border-0 ${
+                          className={`w-full text-left px-4 py-3 sm:py-2 text-base sm:text-sm font-bold transition-colors border-b border-slate-50 last:border-0 flex items-center gap-3 ${
                             viewingTeamId === team.id ? 'bg-blue-50 text-blue-600' : 'text-slate-700 hover:bg-slate-50 hover:text-blue-600'
                           }`}
                           onClick={() => {
@@ -382,7 +395,14 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
                             setIsViewingTeamSelectOpen(false);
                           }}
                         >
-                          {team.name}
+                          <div className="w-6 h-6 bg-white rounded-full overflow-hidden border border-slate-200 shrink-0 flex items-center justify-center">
+                            {team.logoUrl ? (
+                              <img src={team.logoUrl} alt={team.name} className="object-contain w-full h-full" />
+                            ) : (
+                              <span className="text-[8px] font-black text-slate-400">{team.name.substring(0,2).toUpperCase()}</span>
+                            )}
+                          </div>
+                          <span className="truncate">{team.name}</span>
                         </button>
                       ))}
                     </div>
@@ -454,13 +474,20 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
                             .map(team => (
                               <button
                                 key={team.id}
-                                className="w-full text-left px-4 py-3 sm:py-2 text-base sm:text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-colors border-b border-slate-50 last:border-0"
+                                className="w-full text-left px-4 py-3 sm:py-2 text-base sm:text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-colors border-b border-slate-50 last:border-0 flex items-center gap-3"
                                 onClick={() => {
                                   setInvolvedTeamIds(prev => [...prev, team.id]);
                                   setIsTeamSelectOpen(false);
                                 }}
                               >
-                                {team.name}
+                                <div className="w-6 h-6 bg-slate-100 rounded-full overflow-hidden border border-slate-200 shrink-0 flex items-center justify-center">
+                                  {team.logoUrl ? (
+                                    <img src={team.logoUrl} alt={team.name} className="object-contain w-full h-full" />
+                                  ) : (
+                                    <span className="text-[8px] font-black text-slate-400">{team.name.substring(0,2).toUpperCase()}</span>
+                                  )}
+                                </div>
+                                <span className="truncate">{team.name}</span>
                               </button>
                             ))}
                         </div>

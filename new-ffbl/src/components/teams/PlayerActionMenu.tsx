@@ -1,6 +1,7 @@
+// src/components/teams/PlayerActionMenu.tsx
 "use client";
 
-import { useState, useEffect } from 'react'; // Added useEffect
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { 
@@ -17,6 +18,23 @@ import {
   CalendarOff
 } from 'lucide-react';
 
+// 🌟 THE SPAM FIX: A module-level cache so 40 player cards share 1 single API request
+let cachedSettingsPromise: Promise<any> | null = null;
+let cachedSettings: any = null;
+
+const fetchSettings = () => {
+  if (cachedSettings) return Promise.resolve(cachedSettings);
+  if (!cachedSettingsPromise) {
+    cachedSettingsPromise = fetch('/api/settings')
+      .then(res => res.json())
+      .then(data => {
+        cachedSettings = data;
+        return data;
+      });
+  }
+  return cachedSettingsPromise;
+};
+
 interface Props {
   player: any;
   isMyTeam: boolean;
@@ -30,27 +48,18 @@ export default function PlayerActionMenu({ player, isMyTeam, dropUp = false }: P
 
   const [isOpen, setIsOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isDeadlinePassed, setIsDeadlinePassed] = useState(false); // Track deadline status
+  const [isDeadlinePassed, setIsDeadlinePassed] = useState(false);
   
   const [showIl60Form, setShowIl60Form] = useState(false);
   const [retroDate, setRetroDate] = useState("");
 
-  // Check trade deadline status on mount
+  // 🌟 Use the cached fetch instead of raw fetch
   useEffect(() => {
-    const checkDeadline = async () => {
-      try {
-        const res = await fetch('/api/settings');
-        if (res.ok) {
-          const settings = await res.json();
-          if (settings.tradeDeadline) {
-            setIsDeadlinePassed(new Date() > new Date(settings.tradeDeadline));
-          }
-        }
-      } catch (err) {
-        console.error("Failed to fetch settings for deadline check", err);
+    fetchSettings().then(settings => {
+      if (settings?.tradeDeadline) {
+        setIsDeadlinePassed(new Date() > new Date(settings.tradeDeadline));
       }
-    };
-    checkDeadline();
+    }).catch(err => console.error("Failed to fetch settings for deadline check", err));
   }, []);
 
   const handleAction = async (payload: any) => {
@@ -100,49 +109,10 @@ export default function PlayerActionMenu({ player, isMyTeam, dropUp = false }: P
             }`}>
               <div className="px-3 py-1.5 text-[10px] font-black uppercase text-slate-400 tracking-wider">Assign to Level</div>
               
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (!myTeamId) return alert("You must be assigned to a franchise.");
-                  handleAction({ teamId: myTeamId, level: 'MLB', status: 'ACTIVE' });
-                }} 
-                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 text-left"
-              >
-                <ArrowUpCircle size={14} className="text-emerald-500" /> Add to MLB
-              </button>
-              
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (!myTeamId) return alert("You must be assigned to a franchise.");
-                  handleAction({ teamId: myTeamId, level: 'AAA', status: 'ACTIVE' });
-                }} 
-                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 text-left"
-              >
-                <ArrowDownCircle size={14} className="text-orange-500" /> Add to AAA
-              </button>
-              
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (!myTeamId) return alert("You must be assigned to a franchise.");
-                  handleAction({ teamId: myTeamId, level: 'AA', status: 'ACTIVE' });
-                }} 
-                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 text-left"
-              >
-                <ArrowDownCircle size={14} className="text-orange-500" /> Add to AA
-              </button>
-              
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (!myTeamId) return alert("You must be assigned to a franchise.");
-                  handleAction({ teamId: myTeamId, level: 'A', status: 'ACTIVE' });
-                }} 
-                className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 text-left"
-              >
-                <ArrowDownCircle size={14} className="text-orange-500" /> Add to A
-              </button>
+              <button onClick={(e) => { e.stopPropagation(); if (!myTeamId) return alert("You must be assigned to a franchise."); handleAction({ teamId: myTeamId, level: 'MLB', status: 'ACTIVE' }); }} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 text-left"><ArrowUpCircle size={14} className="text-emerald-500" /> Add to MLB</button>
+              <button onClick={(e) => { e.stopPropagation(); if (!myTeamId) return alert("You must be assigned to a franchise."); handleAction({ teamId: myTeamId, level: 'AAA', status: 'ACTIVE' }); }} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 text-left"><ArrowDownCircle size={14} className="text-orange-500" /> Add to AAA</button>
+              <button onClick={(e) => { e.stopPropagation(); if (!myTeamId) return alert("You must be assigned to a franchise."); handleAction({ teamId: myTeamId, level: 'AA', status: 'ACTIVE' }); }} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 text-left"><ArrowDownCircle size={14} className="text-orange-500" /> Add to AA</button>
+              <button onClick={(e) => { e.stopPropagation(); if (!myTeamId) return alert("You must be assigned to a franchise."); handleAction({ teamId: myTeamId, level: 'A', status: 'ACTIVE' }); }} className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 text-left"><ArrowDownCircle size={14} className="text-orange-500" /> Add to A</button>
             </div>
           </>
         )}
@@ -312,4 +282,4 @@ export default function PlayerActionMenu({ player, isMyTeam, dropUp = false }: P
       )}
     </div>
   );
-}
+}2

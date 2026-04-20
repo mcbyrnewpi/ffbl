@@ -18,7 +18,7 @@ export default async function TeamPage({ params }: { params: Promise<{ teamId: s
         include: { 
           positions: true, 
           prospectRankings: true, 
-          team: true // 🌟 We fetch the full team (with logos!) here
+          team: true
         }, 
         orderBy: [{ level: 'desc' }, { lastName: 'asc' }] 
       }
@@ -27,7 +27,6 @@ export default async function TeamPage({ params }: { params: Promise<{ teamId: s
 
   if (!team) return null;
 
-  // 🌟 No more .map() overwrite! Just use the native team.players
   const mlbActive = team.players.filter(p => p.level === 'MLB' && p.status === 'ACTIVE');
   const naList = team.players.filter(p => p.status === 'NA');
   const injuredList = team.players.filter(p => p.status !== 'ACTIVE' && p.status !== 'NA');

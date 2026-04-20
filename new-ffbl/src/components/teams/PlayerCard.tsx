@@ -10,6 +10,13 @@ interface PlayerCardProps {
   isMyTeam?: boolean;
 }
 
+const MiniStat = ({ label, value }: { label: string, value: any }) => (
+  <div className="flex flex-col">
+    <span className="text-[8px] text-slate-400 font-bold uppercase tracking-wider leading-none">{label}</span>
+    <span className="text-[11px] font-black text-slate-800 leading-tight">{value !== undefined && value !== null ? value : '-'}</span>
+  </div>
+);
+
 export default function PlayerCard({ player, onLinkClick, onNameClick, isMyTeam }: PlayerCardProps) {
   
   const age = player.mlbRawData?.currentAge || 
@@ -32,13 +39,32 @@ export default function PlayerCard({ player, onLinkClick, onNameClick, isMyTeam 
     if (!statBlock) return null;
 
     if (isPitcher) {
-      return `${statBlock.era || '-'} ERA • ${statBlock.strikeOuts || '-'} K`;
+      const kbb = (statBlock.strikeOuts !== undefined && statBlock.baseOnBalls > 0) 
+        ? (statBlock.strikeOuts / statBlock.baseOnBalls).toFixed(2) : '-';
+        
+      return (
+        <div className="grid grid-cols-3 gap-x-2 gap-y-1.5 mt-0.5">
+          <MiniStat label="W" value={statBlock.wins} />
+          <MiniStat label="SV" value={statBlock.saves} />
+          <MiniStat label="K" value={statBlock.strikeOuts} />
+          <MiniStat label="ERA" value={statBlock.era} />
+          <MiniStat label="WHIP" value={statBlock.whip} />
+          <MiniStat label="K/BB" value={kbb} />
+        </div>
+      );
     } else {
-      return `${statBlock.avg || '-'} AVG • ${statBlock.homeRuns || '-'} HR`;
+      return (
+        <div className="grid grid-cols-3 gap-x-2 gap-y-1.5 mt-0.5">
+          <MiniStat label="R" value={statBlock.runs} />
+          <MiniStat label="HR" value={statBlock.homeRuns} />
+          <MiniStat label="RBI" value={statBlock.rbi} />
+          <MiniStat label="SB" value={statBlock.stolenBases} />
+          <MiniStat label="AVG" value={statBlock.avg} />
+          <MiniStat label="OPS" value={statBlock.ops} />
+        </div>
+      );
     }
   };
-
-  const quickStats = getQuickStats();
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 group relative flex flex-col hover:shadow-md transition-all hover:z-50 focus-within:z-50">
@@ -52,11 +78,7 @@ export default function PlayerCard({ player, onLinkClick, onNameClick, isMyTeam 
 
         {!player.mlbId && onLinkClick && (
           <button 
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onLinkClick();
-            }}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onLinkClick(); }}
             className="pointer-events-auto text-amber-500 hover:text-amber-600 hover:bg-amber-50 p-1.5 rounded-full transition-colors shadow-md border border-amber-200 bg-white"
             title="Link MLB Profile"
           >
@@ -102,8 +124,8 @@ export default function PlayerCard({ player, onLinkClick, onNameClick, isMyTeam 
           </span>
         </div>
         
-        <div className="flex flex-col gap-1 pt-2 border-t border-slate-50 text-[10px] font-bold uppercase tracking-wide">
-           <div className="flex items-center gap-1.5 text-slate-400">
+        <div className="flex flex-col gap-1 pt-2 border-t border-slate-50">
+           <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400 mb-0.5">
              <span>Age: {age}</span>
              {isMinorLeaguer && player.prospectEta && (
                <>
@@ -113,18 +135,15 @@ export default function PlayerCard({ player, onLinkClick, onNameClick, isMyTeam 
              )}
            </div>
 
-           {quickStats ? (
-             <div className="text-slate-600 truncate tracking-normal">
-               {quickStats}
-             </div>
-           ) : (
-             <div className="text-slate-300 italic truncate">
+           {/* NEW STAT GRID */}
+           {getQuickStats() ? getQuickStats() : (
+             <div className="text-[10px] text-slate-300 italic truncate uppercase font-bold tracking-widest mt-1">
                No recent stats
              </div>
            )}
         </div>
 
-        <div className="mt-3 pt-3 border-t border-slate-100 relative">
+        <div className="mt-3 pt-3 border-t border-slate-100 relative mt-auto">
            <PlayerActionMenu player={player} isMyTeam={!!isMyTeam} />
         </div>
       </div>

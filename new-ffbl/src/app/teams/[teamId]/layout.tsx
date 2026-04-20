@@ -18,7 +18,12 @@ export default async function TeamLayout({ children, params }: { children: React
 
   const team = await prisma.team.findUnique({
     where: { id: teamId },
-    include: { managers: true, players: true }
+    include: { 
+      managers: {
+        orderBy: { createdAt: 'asc' } 
+      }, 
+      players: true 
+    }
   });
 
   if (!team) notFound();
@@ -31,6 +36,10 @@ export default async function TeamLayout({ children, params }: { children: React
   const myManagerRecord = team.managers.find(m => m.id === userId);
   const isPrimaryManager = myManagerRecord?.isPrimaryManager === true;
   const canEditTeam = isAdmin || (isMyTeam && isPrimaryManager);
+
+  // Extract Front Office Personnel
+  const primaryManager = team.managers.find(m => m.isPrimaryManager) || team.managers[0];
+  const coManagers = team.managers.filter(m => m.id !== primaryManager?.id);
 
   const draftPickCount = await prisma.draftPick.count({
     where: { currentOwnerId: teamId },
@@ -50,36 +59,51 @@ export default async function TeamLayout({ children, params }: { children: React
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-8">
+    <div className="min-h-screen bg-slate-50 p-4 sm:p-8">
       <div className="max-w-5xl mx-auto">
-        <header className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <div className="w-10 h-10 bg-white rounded-lg border border-slate-200 shadow-sm flex items-center justify-center overflow-hidden shrink-0">
-                {team.logoUrl ? (
-                  <img src={team.logoUrl} alt={team.name} className="w-full h-full object-contain p-0.5" />
-                ) : (
-                  <Shield size={20} className="text-slate-400" />
-                )}
-              </div>
-              <h1 className="text-3xl font-black text-slate-900">{team.name}</h1>
+        
+        <header className="mb-8 flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+          
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 items-start">
+            {/* LOGO */}
+            <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-xl border border-slate-200 shadow-sm flex items-center justify-center overflow-hidden shrink-0 mt-1">
+              {team.logoUrl ? (
+                <img src={team.logoUrl} alt={team.name} className="w-full h-full object-contain p-1" />
+              ) : (
+                <Shield size={32} className="text-slate-300" />
+              )}
             </div>
-            
-            {team.motto && (
-              <div className="ml-[52px] mb-3">
-                <span className="text-sm font-medium italic text-slate-500 flex items-center gap-1.5">
-                  <Quote size={12} className="text-slate-400" /> 
+
+            {/* TEAM INFO & ACTION BUTTONS */}
+            <div className="flex flex-col min-w-0">
+              <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-none mb-2 truncate">
+                {team.name}
+              </h1>
+
+              {team.motto && (
+                <span className="text-sm font-medium italic text-slate-500 flex items-center gap-1.5 mb-3 truncate">
+                  <Quote size={12} className="text-slate-400 shrink-0" /> 
                   {team.motto}
                 </span>
+              )}
+
+              {/* MANAGERS */}
+              <div className="flex flex-col gap-1 mb-4">
+                <p className="text-slate-600 flex items-center gap-2 text-sm">
+                  <User size={14} className="text-slate-400 shrink-0" /> 
+                  <span className="font-medium truncate">Manager: <span className="font-black text-slate-800">{primaryManager?.name || 'Unmanaged'}</span></span>
+                </p>
+                
+                {coManagers.length > 0 && (
+                  <p className="text-slate-500 text-xs sm:text-sm flex items-center gap-1.5 pl-[22px] truncate">
+                    <span className="italic shrink-0">Co-Managers:</span> 
+                    <span className="font-bold text-slate-700 truncate">{coManagers.map(m => m.name).join(', ')}</span>
+                  </p>
+                )}
               </div>
-            )}
-            
-            <div className="flex flex-wrap items-center gap-4 mt-2">
-              <p className="text-slate-500 flex items-center gap-2 font-medium">
-                <User size={16} /> Manager: {team.managers.find(m => m.isPrimaryManager)?.name || team.managers[0]?.name || 'Unmanaged'}
-              </p>
-              
-              <div className="flex items-center gap-2">
+
+              {/* ACTIONS */}
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                 {canSyncStats && (
                   <SyncStatsButton teamId={team.id} lastStatSync={team.lastStatSync} />
                 )}
@@ -87,9 +111,9 @@ export default async function TeamLayout({ children, params }: { children: React
                 {canEditTeam && (
                   <Link 
                     href={`/teams/${team.id}/edit`} 
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 text-slate-700 text-xs font-bold rounded-md hover:bg-slate-50 transition-colors shadow-sm"
+                    className="flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-300 text-slate-700 text-sm font-bold rounded-lg hover:bg-slate-50 transition-colors shadow-sm"
                   >
-                    <Settings size={14} />
+                    <Settings size={16} />
                     Settings
                   </Link>
                 )}
@@ -97,7 +121,8 @@ export default async function TeamLayout({ children, params }: { children: React
             </div>
           </div>
           
-          <div className="flex flex-wrap gap-2 md:gap-3">
+          {/* STAT BADGES */}
+          <div className="flex flex-wrap justify-start lg:justify-end gap-2 shrink-0">
             <StatBadge label="MLB" value={stats.mlb} color="text-blue-700 bg-blue-50 border-blue-200" />
             <StatBadge label="Minors" value={stats.minors} color="text-emerald-700 bg-emerald-50 border-emerald-200" />
             <StatBadge label="IL" value={stats.il} color="text-red-700 bg-red-50 border-red-200" />
@@ -105,6 +130,7 @@ export default async function TeamLayout({ children, params }: { children: React
             <StatBadge label="Picks" value={stats.picks} color="text-purple-700 bg-purple-50 border-purple-200" />
             <StatBadge label="HOF" value={stats.hof} color="text-amber-700 bg-amber-50 border-amber-200" />
           </div>
+
         </header>
 
         <TeamTabs teamId={teamId} />

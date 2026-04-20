@@ -17,13 +17,6 @@ export default function RosterTable({
   return (
     <div className="overflow-x-auto pb-48 -mb-48 rounded-b-xl">
       <table className="w-full text-left border-collapse">
-        <thead className="bg-slate-50 border-b border-slate-200 text-[10px] uppercase text-slate-400 font-bold tracking-widest">
-          <tr>
-            <th className="px-4 md:px-6 py-3 md:py-4">Player</th>
-            <th className="hidden lg:table-cell px-4 py-3 md:py-4 text-center">Current Stats</th>
-            <th className="px-4 md:px-6 py-3 md:py-4 text-right">Manage</th>
-          </tr>
-        </thead>
         <tbody className="divide-y divide-slate-100 bg-white">
           {players.map((player) => (
             <RosterRow 

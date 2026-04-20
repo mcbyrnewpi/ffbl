@@ -5,12 +5,14 @@ import TradeBuilder from '@/components/trades/TradeBuilder';
 export default async function TradeBuildPage({ 
   searchParams 
 }: { 
-  // ⬅️ 1. Add addPlayer to the expected params
-  searchParams: Promise<{ counter?: string, addPlayer?: string }> 
+  // 1. Add our new expected parameters
+  searchParams: Promise<{ counter?: string, addPlayer?: string, addPick?: string, partner?: string }> 
 }) {
   const resolvedParams = await searchParams;
   const counterTradeId = resolvedParams.counter;
-  const addPlayerId = resolvedParams.addPlayer; // ⬅️ 2. Extract it
+  const addPlayerId = resolvedParams.addPlayer; 
+  const addPickId = resolvedParams.addPick;
+  const partnerTeamId = resolvedParams.partner;
 
   // 1. Fetch the counter trade FIRST so we know which locked assets to bypass
   let counterTrade = null;
@@ -71,7 +73,9 @@ export default async function TradeBuildPage({
         initialPlayers={players} 
         initialPicks={picks} 
         initialCounterTrade={counterTrade}
-        addPlayerId={addPlayerId} // ⬅️ 3. Pass it down!
+        addPlayerId={addPlayerId} 
+        addPickId={addPickId}
+        partnerTeamId={partnerTeamId}
       />
     </div>
   );

@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { Loader2, Gavel, Clock, PauseCircle, CheckCircle2, ArrowRightLeft, UserPlus, PlayCircle, RotateCcw } from "lucide-react";
+import { Loader2, Gavel, Clock, PauseCircle, CheckCircle2, ArrowRightLeft, UserPlus, PlayCircle, RotateCcw, X } from "lucide-react";
 import PageContainer from "@/components/layout/PageContainer";
 import PageHeader from "@/components/layout/PageHeader";
 import Image from "next/image";
@@ -25,6 +25,10 @@ export default function DraftRoomPage() {
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
   const [isTogglingStatus, setIsTogglingStatus] = useState(false);
 
+  // NEW: Trade Partner Modal State
+  const [isTradePartnerModalOpen, setIsTradePartnerModalOpen] = useState(false);
+  const [teams, setTeams] = useState<any[]>([]);
+
   const fetchData = async () => {
     try {
       const res = await fetch("/api/draft/picks");
@@ -39,21 +43,15 @@ export default function DraftRoomPage() {
     }
   };
 
-  // 1. Fetch instantly when the component first loads
   useEffect(() => {
     fetchData();
   }, []);
 
-  // 2. Dynamic Polling Interval
   useEffect(() => {
-    // If paused, check once a minute just to see if the Commish opened it. 
-    // If active, poll every 15 seconds for live picks.
     const pollRate = isDraftOpen ? 15000 : 60000;
-    
     const interval = setInterval(() => {
       fetchData();
     }, pollRate);
-
     return () => clearInterval(interval);
   }, [isDraftOpen]);
 
@@ -81,7 +79,6 @@ export default function DraftRoomPage() {
     }
   };
 
-  // --- Undo Pick Handler ---
   const handleUndoPick = async (pickId: string, playerName: string) => {
     if (!confirm(`Are you sure you want to undo the selection of ${playerName}? This will return them to the free agent pool and put the team back on the clock.`)) return;
 
@@ -101,6 +98,20 @@ export default function DraftRoomPage() {
     } catch (error) {
       console.error("Undo error:", error);
       alert("An unexpected error occurred.");
+    }
+  };
+
+  // Fetch Teams for the Trade Partner Modal
+  const handleTradePickClick = async () => {
+    setIsTradePartnerModalOpen(true);
+    if (teams.length === 0) {
+      try {
+        const res = await fetch("/api/teams");
+        const data = await res.json();
+        setTeams(data);
+      } catch (e) {
+        console.error("Failed to fetch teams", e);
+      }
     }
   };
 
@@ -196,7 +207,7 @@ export default function DraftRoomPage() {
                     <UserPlus size={18} /> Make Pick
                   </button>
                   <button 
-                    onClick={() => router.push('/trades/build')}
+                    onClick={handleTradePickClick} // ⬅️ Trigger new modal here
                     className="bg-white hover:bg-slate-50 text-slate-700 border-2 border-slate-200 font-bold py-3.5 px-6 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm"
                   >
                     <ArrowRightLeft size={18} /> Trade Pick
@@ -260,7 +271,6 @@ export default function DraftRoomPage() {
 
                       {pick.player ? (
                         <>
-                          {/* NEW: Commish Undo Button */}
                           {isCommish && (
                             <button 
                               onClick={() => handleUndoPick(pick.id, `${pick.player.firstName} ${pick.player.lastName}`)}
@@ -323,6 +333,47 @@ export default function DraftRoomPage() {
            fetchData(); 
         }}
       />
+
+      {/* NEW: TRADE PARTNER MODAL */}
+      {isTradePartnerModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[85vh]">
+            <div className="px-6 py-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center shrink-0">
+              <div>
+                <h2 className="font-black text-slate-900 uppercase tracking-tight">Trade Pick</h2>
+                <p className="text-xs font-bold text-slate-500">Select a trade partner to open the War Room.</p>
+              </div>
+              <button onClick={() => setIsTradePartnerModalOpen(false)} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-full transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+              {teams.length === 0 ? (
+                <div className="flex justify-center py-8"><Loader2 className="animate-spin text-slate-300" size={24} /></div>
+              ) : (
+                <div className="space-y-2">
+                  {teams.filter(t => t.id !== userTeamId).map(team => (
+                    <button
+                      key={team.id}
+                      onClick={() => router.push(`/trades/build?addPick=${activePick?.id}&partner=${team.id}`)}
+                      className="w-full text-left px-4 py-3 font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-600 border border-transparent hover:border-blue-200 transition-colors rounded-xl flex items-center gap-3 shadow-sm bg-slate-50"
+                    >
+                      <div className="w-8 h-8 bg-white rounded-full overflow-hidden border border-slate-200 shrink-0 flex items-center justify-center">
+                         {team.logoUrl ? (
+                           <img src={team.logoUrl} alt={team.name} className="object-contain w-full h-full" />
+                         ) : (
+                           <span className="text-[10px] font-black text-slate-400">{team.name.substring(0,2).toUpperCase()}</span>
+                         )}
+                      </div>
+                      {team.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </PageContainer>
   );
 }
