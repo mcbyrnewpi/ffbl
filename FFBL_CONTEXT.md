@@ -114,22 +114,30 @@ Once a player is selected, UI dynamically renders actions based on `Status` and 
   * Dedicated "Start / Pause" draft controls.
   * Commish-only "Undo Pick" button that safely strips the player from the roster, clears the draft slot, and deletes the transaction log.
 
+### Phase 10: The Front Office & Co-Manager Delegation
+* **Co-Manager Delegation UI:** Built out the Team Settings page to view the active Front Office and invite Co-Managers. The public Franchise page also proudly displays the Primary Manager and all Co-Managers.
+* **Manager Permissions API:** Created `PATCH /api/users/[userId]` to securely allow team Founders or the Commish to `TOGGLE_PRIMARY` status or `REMOVE_FROM_TEAM` for any co-manager. Added a Commish-only override to permanently `DELETE` a user account from the league.
+
+### Phase 11: Media & Asset Management
+* **Cloudinary Media Library Integration:** Integrated the official `cloudinary` Node.js SDK to securely fetch historical league media via `/api/admin/media`. 
+* **Media Library UI:** Built the `MediaLibraryModal` to browse up to 500 historical images uploaded to the league account. Wired it up to the `LogoUploadWidget` (team edit page) and the Tiptap `DocumentManager` (Commish center) to allow managers to seamlessly reuse historic assets without duplicating uploads.
+
 ---
 
 ## 🛠️ 6. Development Roadmap (The Work Ahead)
 
-### Phase 10: The Front Office & Dashboard Polish
-*(Enhancing day-to-day user experience and team management)*
-* **Dashboard Content Strategy:** Wire up the "Most Recent Announcement" to the top of the homepage. Build a Live Standings Widget based on active league data. Include interactive "Sticky" elements (Manager of the Week, Ego/Lore widgets).
-* **Co-Manager Delegation:** Build the UI to invite a co-manager to a franchise and assign granular permissions (leveraging the existing `User.isPrimaryManager` schema boolean).
-
-### Phase 11: Media & Asset Management
-* **Cloudinary Media Library Integration:** Enhance the `CldUploadWidget` across the Commish Center and Team Edit pages to utilize `image_search` and `local` sources, allowing managers to browse and reuse previously uploaded legacy assets (logos, historic photos) without duplicating uploads.
+### Phase 12: Dashboard Polish & Live Data
+*(Enhancing day-to-day user experience on the Homepage)*
+* **Dashboard Content Strategy:** Wire up the "Most Recent Announcement" to the top of the homepage. 
+* **Live Standings Widget:** Build a sleek, compact standings table for the dashboard that calculates Win % and ranks the teams dynamically based on the current season.
+* **Engagement Widgets:** Include interactive "Sticky" elements (Manager of the Week, Ego/Lore widgets) to liven up the home screen.
 
 ---
 
 ## ⚠️ 7. Critical Architecture & Session Notes
 * **Next.js 15 Data Caching (Vercel):** Aggressive SSG caching will bake empty database states into production during Vercel builds. For live DB fetches (like History documents or Rules), ensure `export const revalidate = 0;` is present to force fresh dynamic rendering.
+* **Module-Level Promise Caching (The 40x Request Trap):** When rendering lists of components (like 40 player cards in a roster table) that all independently fetch the same API data (like league settings), move the `fetch()` into a module-level variable outside the component. This forces all 40 cards to share a single Promise, preventing Next.js from spamming the server with identical simultaneous requests.
+* **Cloudinary API Architecture:** Unsigned `CldUploadWidget` presets are great for client-side uploads, but securely querying an account's media library requires hitting the backend Node.js SDK (`cloudinary.search`) authenticated with your private `CLOUDINARY_API_KEY` and `CLOUDINARY_API_SECRET` to prevent unauthorized scraping.
 * **API Route Signatures:** Next.js throws build errors if a route defines dynamic `params` (e.g., `Promise<{ teamId: string }>`) but doesn't live inside a bracketed folder (like `[teamId]`). For static path endpoints (like `/api/rosters`), use `request.url` and `searchParams.get('teamId')` instead.
 * **Environment Variable Scoping:** Local `.env` is for development database URLs and local overrides. `.env.local` is for specific Next.js overrides. Vercel Dashboard strictly handles Staging/Production variables. 
 * **AI Model Selection:** `gemini-2.5-pro` is incredibly powerful but "heavy" and prone to overload/timeouts during high-volume generation. `gemini-2.5-flash` is the preferred primary model for fast, reliable, and cost-effective creative text generation.

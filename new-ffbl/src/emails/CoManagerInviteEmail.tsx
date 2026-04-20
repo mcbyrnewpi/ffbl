@@ -16,7 +16,7 @@ export default function CoManagerInviteEmail({ teamName, inviterName, inviteeNam
         <Container style={container}>
           <Section style={header}>
              <Img
-               src="https://res.cloudinary.com/dzd6ndt5u/image/upload/v1731804791/c6kxyj23hww9cmlcnsf0.png"
+               src="https://res.cloudinary.com/dzd6ndt5u/image/upload/q_auto/f_auto/v1776464781/FFBLLogo_evb63q.png"
                width="150"
                alt="FFBL Logo"
                style={logo}

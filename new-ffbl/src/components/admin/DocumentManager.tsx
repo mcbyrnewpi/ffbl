@@ -1,3 +1,4 @@
+// src/components/admin/DocumentManager.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -6,9 +7,10 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import { CldUploadWidget } from 'next-cloudinary';
+import MediaLibraryModal from '../ui/MediaLibraryModal';
 import { 
   FileText, Save, Loader2, Bold, Italic, Strikethrough, 
-  Heading1, Heading2, List, ListOrdered, Quote, Undo, Redo, Image as ImageIcon, UploadCloud 
+  Heading1, Heading2, List, ListOrdered, Quote, Undo, Redo, Image as ImageIcon, UploadCloud, Library 
 } from "lucide-react";
 
 export default function DocumentManager() {
@@ -19,6 +21,7 @@ export default function DocumentManager() {
   const [slug, setSlug] = useState("");
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
+  const [isLibraryOpen, setIsLibraryOpen] = useState(false);
 
   // Initialize Tiptap
   const editor = useEditor({
@@ -81,7 +84,13 @@ export default function DocumentManager() {
   const addImageManual = () => {
     const url = window.prompt('Paste the image URL here:');
     if (url && editor) {
-      editor.chain().focus().setImage({ src: url }).run();
+      editor.commands.setImage({ src: url });
+    }
+  };
+
+  const handleLibrarySelect = (url: string) => {
+    if (editor) {
+      editor.commands.setImage({ src: url });
     }
   };
 
@@ -120,12 +129,12 @@ export default function DocumentManager() {
 
   if (fetching) return <div className="flex justify-center py-12"><Loader2 className="animate-spin text-slate-300" /></div>;
 
-  const ToolbarButton = ({ onClick, isActive, icon: Icon, title }: any) => (
+  const ToolbarButton = ({ onClick, isActive, icon: Icon, title, className = "" }: any) => (
     <button
       type="button"
       onClick={onClick}
       title={title}
-      className={`p-2 rounded-lg transition-colors ${isActive ? 'bg-slate-200 text-slate-900 font-bold' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'}`}
+      className={`p-2 rounded-lg transition-colors ${isActive ? 'bg-slate-200 text-slate-900 font-bold' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'} ${className}`}
     >
       <Icon size={16} />
     </button>
@@ -181,14 +190,14 @@ export default function DocumentManager() {
             
             <div className="w-px h-6 bg-slate-300 mx-1" />
             
+            {/* NEW: FFBL Media Library Button */}
+            <ToolbarButton onClick={() => setIsLibraryOpen(true)} isActive={false} icon={Library} title="Browse Media Library" className="text-blue-600 hover:bg-blue-100" />
+
             {/* Cloudinary Upload Widget */}
             <CldUploadWidget 
               uploadPreset="ffbl_uploads" 
               onSuccess={(result: any) => {
-                // 1. Explicitly ensure the upload finished successfully
                 if (result.event === "success" && result.info?.secure_url) {
-                  // 2. Use .commands instead of .chain().focus() so it doesn't 
-                  // fail if the editor hasn't fully regained browser focus yet
                   editor?.commands.setImage({ src: result.info.secure_url });
                 }
               }}
@@ -200,8 +209,8 @@ export default function DocumentManager() {
                     e.preventDefault();
                     open();
                   }}
-                  className="p-2 rounded-lg transition-colors text-blue-600 hover:bg-blue-100"
-                  title="Upload Image"
+                  className="p-2 rounded-lg transition-colors text-slate-500 hover:bg-slate-200"
+                  title="Upload New Image"
                 >
                   <UploadCloud size={16} />
                 </button>
@@ -229,6 +238,12 @@ export default function DocumentManager() {
           {loading ? "Saving Document..." : "Save to Archives"}
         </button>
       </form>
+
+      <MediaLibraryModal 
+        isOpen={isLibraryOpen} 
+        onClose={() => setIsLibraryOpen(false)} 
+        onSelect={handleLibrarySelect} 
+      />
     </div>
   );
 }
