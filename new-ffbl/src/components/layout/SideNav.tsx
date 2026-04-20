@@ -7,7 +7,6 @@ import { Users, LayoutDashboard, ArrowRightLeft, Shield, Search, Menu, X, LogOut
 import GlobalSearch from './GlobalSearch';
 import { useSession, signIn, signOut } from 'next-auth/react';
 
-
 export default function SideNav() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
@@ -30,8 +29,12 @@ export default function SideNav() {
     <>
       {/* --- MOBILE TOP BAR --- */}
       <div className="md:hidden bg-white text-slate-900 p-4 flex justify-between items-center sticky top-0 z-50 border-b border-slate-200">
-        <Link href="/" className="font-black tracking-tighter text-xl text-slate-900 hover:opacity-80 transition-opacity">
-          FF<span className="text-blue-600">BL</span>
+        <Link href="/" className="hover:opacity-80 transition-opacity outline-none">
+          <img 
+            src="https://res.cloudinary.com/dzd6ndt5u/image/upload/q_auto/f_auto/v1776464781/FFBLLogo_evb63q.png" 
+            alt="FFBL Logo" 
+            className="h-8 w-auto object-contain drop-shadow-sm" 
+          />
         </Link>
         
         <div className="flex items-center gap-2">
@@ -108,8 +111,12 @@ export default function SideNav() {
       {/* --- DESKTOP SIDEBAR --- */}
       <aside className="hidden md:flex w-64 bg-white border-r border-slate-200 flex-col sticky top-0 h-screen shrink-0 shadow-sm">
         <div className="p-6">
-          <Link href="/" className="font-black tracking-tighter text-2xl text-slate-900 hover:opacity-80 transition-opacity block w-fit">
-            FF<span className="text-blue-600">BL</span>
+          <Link href="/" className="flex items-center gap-2 mb-2 animate-in fade-in duration-300 group block outline-none">
+            <img 
+              src="https://res.cloudinary.com/dzd6ndt5u/image/upload/q_auto/f_auto/v1776464781/FFBLLogo_evb63q.png" 
+              alt="FFBL Logo" 
+              className="h-12 w-auto object-contain drop-shadow-sm group-hover:scale-105 transition-transform duration-300" 
+            />
           </Link>
         </div>
 

@@ -139,7 +139,7 @@ export default function DraftRoomPage() {
     <PageContainer>
       <PageHeader 
         title={`${targetYear} FFBL Draft Room`}
-        subtitle="The war room is live. Keep track of the board and make your franchise-altering selections here."
+        subtitle="The war room is live. Keep track of the board and make your selections here."
       />
 
       <div className="max-w-6xl mx-auto space-y-8">
@@ -149,8 +149,8 @@ export default function DraftRoomPage() {
           <div className="bg-white rounded-2xl border-2 border-dashed border-slate-300 p-8 shadow-sm text-center relative overflow-hidden flex flex-col items-center justify-center">
             <div className="absolute top-0 left-0 w-full h-1.5 bg-amber-400"></div>
             <PauseCircle size={48} className="text-amber-500 mb-4" />
-            <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase">The Draft is Paused</h2>
-            <p className="text-slate-500 font-medium mt-2 mb-6">The Commissioner has not officially opened the draft clock. Hang tight.</p>
+            <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase">Hold your horses</h2>
+            <p className="text-slate-500 font-medium mt-2 mb-6">The Commissioner has not started the draft yet</p>
             
             {isCommish && (
               <button 
@@ -167,7 +167,7 @@ export default function DraftRoomPage() {
           <div className="bg-emerald-50 rounded-2xl border border-emerald-200 p-8 shadow-sm text-center">
             <CheckCircle2 size={48} className="text-emerald-500 mx-auto mb-4" />
             <h2 className="text-2xl font-black text-emerald-900 tracking-tight uppercase">The {targetYear} Draft is Complete</h2>
-            <p className="text-emerald-700 font-medium mt-2">All 5 rounds are in the books. Welcome to the new era of the FFBL.</p>
+            <p className="text-emerald-700 font-medium mt-2">Welcome to the new season!</p>
           </div>
         ) : activePick ? (
           <div className="bg-white rounded-2xl border-2 border-blue-500 shadow-xl overflow-hidden relative">
@@ -216,7 +216,7 @@ export default function DraftRoomPage() {
               ) : (
                 <div className="bg-slate-50 border border-slate-200 rounded-xl px-6 py-4 text-center shrink-0">
                   <p className="text-sm font-bold text-slate-900">Waiting on Selection...</p>
-                  <p className="text-xs font-medium text-slate-500 mt-0.5">Only franchise managers can make a pick.</p>
+                  <p className="text-xs font-medium text-slate-500 mt-0.5">If you want the pick, trade for the pick.</p>
                 </div>
               )}
             </div>

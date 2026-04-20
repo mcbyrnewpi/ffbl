@@ -6,15 +6,23 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
 export async function GET(req: Request) {
   try {
-    const settings = await prisma.leagueSettings.findUnique({ where: { id: 1 } });
-    const currentYear = settings?.currentSeason || new Date().getFullYear();
+    const { searchParams } = new URL(req.url);
+    const queryYear = searchParams.get('year');
+
+    let yearToFetch;
+    if (queryYear) {
+      yearToFetch = parseInt(queryYear);
+    } else {
+      const settings = await prisma.leagueSettings.findUnique({ where: { id: 1 } });
+      yearToFetch = settings?.currentSeason || new Date().getFullYear();
+    }
 
     const standings = await prisma.seasonStanding.findMany({
-      where: { year: currentYear },
+      where: { year: yearToFetch },
       orderBy: { rank: 'asc' }
     });
 
-    return NextResponse.json({ standings, currentYear });
+    return NextResponse.json({ standings, year: yearToFetch });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -29,18 +37,15 @@ export async function PATCH(req: Request) {
   }
 
   try {
-    const { standings } = await req.json();
+    const { standings, year } = await req.json();
+    const targetYear = parseInt(year);
 
-    // 1. Get current season from settings to assign new rows correctly
-    const settings = await prisma.leagueSettings.findUnique({ where: { id: 1 } });
-    const currentYear = settings?.currentSeason || new Date().getFullYear();
-
-    // 2. Ensure the Season record exists so we don't hit a Foreign Key error
+    // 1. Ensure the Season record exists so we don't hit a Foreign Key error
     await prisma.season.upsert({
-      where: { year: currentYear },
+      where: { year: targetYear },
       update: {},
       create: {
-        year: currentYear,
+        year: targetYear,
         ffblChampion: 'TBD',
         playoffMvp: 'TBD',
         regularSeasonBest: 'TBD',
@@ -50,7 +55,7 @@ export async function PATCH(req: Request) {
       }
     });
 
-    // 3. Process the creates vs updates
+    // 2. Use UPSERT to definitively prevent duplicates
     const updates = standings.map((s: any) => {
       const wins = parseInt(s.wins) || 0;
       const losses = parseInt(s.losses) || 0;
@@ -59,35 +64,28 @@ export async function PATCH(req: Request) {
       const totalGames = wins + losses + ties;
       const pct = totalGames > 0 ? (wins + (ties * 0.5)) / totalGames : 0;
 
-      const data = {
-        wins,
-        losses,
-        ties,
-        rank: parseInt(s.rank) || 0,
-        isPlayoffTeam: Boolean(s.isPlayoffTeam),
-        pct
-      };
-
-      // If the ID came from our frontend self-healing fallback, it's a new row
-      if (s.id.startsWith("temp_")) {
-        return prisma.seasonStanding.create({
-          data: {
-            ...data,
-            year: currentYear,
-            teamId: s.teamId,
-            teamName: s.teamName
+      return prisma.seasonStanding.upsert({
+        where: {
+          year_teamId: { // Uses the new composite unique constraint
+            year: targetYear,
+            teamId: s.teamId
           }
-        });
-      } else {
-        // Otherwise, update the existing row
-        return prisma.seasonStanding.update({
-          where: { id: s.id },
-          data
-        });
-      }
+        },
+        update: {
+          wins, losses, ties, rank: parseInt(s.rank) || 0, isPlayoffTeam: Boolean(s.isPlayoffTeam), pct,
+          teamName: s.teamName,
+          division: s.division || null
+        },
+        create: {
+          year: targetYear,
+          teamId: s.teamId,
+          teamName: s.teamName,
+          division: s.division || null,
+          wins, losses, ties, rank: parseInt(s.rank) || 0, isPlayoffTeam: Boolean(s.isPlayoffTeam), pct
+        }
+      });
     });
 
-    // Execute all updates/creates in a single transaction
     await prisma.$transaction(updates);
     
     return NextResponse.json({ message: "Standings updated successfully." });

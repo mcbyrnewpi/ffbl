@@ -3,9 +3,10 @@
 
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { ShieldAlert, RefreshCw, Trophy, Medal, Settings, FileText, Megaphone, Lock, Gavel } from 'lucide-react';
+import { ShieldAlert, RefreshCw, Trophy, Medal, Settings, FileText, Megaphone, Lock, Gavel, ListOrdered } from 'lucide-react';
 import SeasonManager from '@/components/admin/SeasonManager';
 import LeagueSettingsManager from '@/components/admin/LeagueSettingsManager';
+import StandingsManager from '@/components/admin/StandingsManager'; // 🌟 NEW
 import AnnouncementManager from '@/components/admin/AnnouncementManager';
 import DataSyncManager from '@/components/admin/DataSyncManager';
 import DocumentManager from '@/components/admin/DocumentManager';
@@ -14,8 +15,8 @@ import DraftOrderManager from '@/components/admin/DraftOrderManager';
 import PageContainer from '@/components/layout/PageContainer';
 import PageHeader from '@/components/layout/PageHeader';
 
-// Added 'draft' to the tab types
-type TabType = 'announcements' | 'draft' | 'sync' | 'champions' | 'records' | 'settings' | 'docs';
+// 🌟 Added 'standings' to TabType
+type TabType = 'announcements' | 'standings' | 'draft' | 'sync' | 'champions' | 'records' | 'settings' | 'docs';
 
 export default function CommishCenter() {
   const { data: session, status } = useSession();
@@ -66,7 +67,7 @@ export default function CommishCenter() {
 
       <div className="flex overflow-x-auto border-b border-slate-200 mb-8 no-scrollbar">
         <TabButton id="announcements" label="Announcements" icon={Megaphone} />
-        {/* NEW TAB: Draft Room */}
+        <TabButton id="standings" label="Standings" icon={ListOrdered} /> {/* 🌟 NEW TAB */}
         <TabButton id="draft" label="Draft Room" icon={Gavel} />
         <TabButton id="settings" label="League Settings" icon={Settings} />
         <TabButton id="champions" label="Champions" icon={Trophy} />
@@ -76,17 +77,12 @@ export default function CommishCenter() {
       </div>
 
       <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-        {activeTab === 'announcements' && <div className="max-w-3xl"><AnnouncementManager /></div>}
-        
-        {/* NEW COMPONENT RENDER */}
+        {activeTab === 'announcements' && <div className="max-w-3xl"><AnnouncementManager /></div>}       
+        {activeTab === 'standings' && <div className="max-w-4xl"><StandingsManager /></div>}
         {activeTab === 'draft' && <div className="max-w-3xl"><DraftOrderManager /></div>}
-        
-        {/* Note: Updated max-w-4xl to accommodate the new wider standings table */}
         {activeTab === 'settings' && <div className="max-w-4xl"><LeagueSettingsManager /></div>}
-        
         {activeTab === 'champions' && <div className="max-w-4xl"><SeasonManager /></div>}
         {activeTab === 'records' && <div className="max-w-4xl"><RecordManager /></div>}
-        
         {activeTab === 'docs' && <div className="max-w-4xl"><DocumentManager /></div>}
         {activeTab === 'sync' && <DataSyncManager />}
       </div>

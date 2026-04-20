@@ -1,9 +1,10 @@
+// src/app/api/announcements/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { Resend } from 'resend';
-import { AnnouncementEmail } from '@/emails/AnnouncementEmail'; // ⬅️ NEW IMPORT
+import { AnnouncementEmail } from '@/emails/AnnouncementEmail';
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -52,7 +53,6 @@ export async function POST(request: Request) {
       let emailList: string[] = [];
 
       if (process.env.TEST_EMAIL_OVERRIDE) {
-        console.log(`🧪 [STAGING OVERRIDE] Sending Announcement to: ${process.env.TEST_EMAIL_OVERRIDE}`);
         emailList = [process.env.TEST_EMAIL_OVERRIDE];
       } else {
         const managers = await prisma.user.findMany({
@@ -67,19 +67,39 @@ export async function POST(request: Request) {
           from: process.env.EMAIL_FROM || 'FFBL Commish <onboarding@resend.dev>',
           to: emailList,
           subject: `${title}`,
-          react: AnnouncementEmail({ 
-            title,
-            content,
-            authorName: userName
-          })
+          react: AnnouncementEmail({ title, content, authorName: userName })
         });
-        console.log(`Announcement email successfully sent to ${emailList.length} address(es).`);
       }
     }
 
     return NextResponse.json(announcement, { status: 201 });
   } catch (error) {
-    console.error("Failed to post announcement:", error);
     return NextResponse.json({ error: "Failed to post announcement" }, { status: 500 });
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+    const userRole = (session?.user as any)?.role;
+    const userId = (session?.user as any)?.id;
+
+    if (!userId || (userRole !== "COMMISH" && userRole !== "ADMIN")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { id, title, content, isPinned } = body;
+
+    if (!id) return NextResponse.json({ error: "Missing announcement ID" }, { status: 400 });
+
+    const announcement = await prisma.announcement.update({
+      where: { id },
+      data: { title, content, isPinned },
+    });
+
+    return NextResponse.json(announcement, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to update announcement" }, { status: 500 });
   }
 }

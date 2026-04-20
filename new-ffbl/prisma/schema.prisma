@@ -667,16 +667,18 @@ model SeasonStanding {
   season Season @relation(fields: [year], references: [year])
 
   teamId   String
-  team     Team   @relation(fields: [teamId], references: [id]) // NEW: Wired up the relation
+  team     Team   @relation(fields: [teamId], references: [id])
   teamName String
+  division String?
   rank     Int
 
   wins   Int
   losses Int
   ties   Int    @default(0)
   pct    Float?
-
   isPlayoffTeam Boolean @default(false)
+
+  @@unique([year, teamId])
 }
 
 model LeagueSettings {

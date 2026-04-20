@@ -2,7 +2,6 @@
 "use client";
 
 import { useState } from 'react';
-import ReactMarkdown from 'react-markdown';
 import { useSession } from 'next-auth/react';
 import { Bot, LineChart, Glasses, MessageSquareWarning, ChevronDown, RotateCw } from 'lucide-react';
 
@@ -85,15 +84,20 @@ export default function TradeMediaSection({ aiAnalysis, tradeId }: { aiAnalysis:
   const active = tabs.find(t => t.id === activeTab)!;
   const ActiveIcon = active.icon;
 
+  // Standardized AI Markdown Formatter
   const formatMarkdown = (text?: string) => {
     if (!text || text === "Analysis unavailable.") return "Analysis unavailable.";
-    const unescaped = text.replace(/\\n/g, '\n');
+    
+    // Catch JSON escaped newlines
+    let unescaped = text.replace(/\\n/g, '\n');
 
     return unescaped
-      .split('\n')
-      .map(line => line.trim())
-      .filter(line => line.length > 0)
-      .join('\n\n');
+      // 1. Detect end of sentences followed by "**" and force a paragraph break
+      .replace(/([.!?])\s+(?=\*\*)/g, '$1<br /><br />')
+      // 2. Convert **text** to high-contrast bold tags
+      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-black text-slate-900">$1</strong>')
+      // 3. Catch standard explicit newlines
+      .replace(/\n/g, '<br />');
   };
 
   const contentMap = {
@@ -108,21 +112,21 @@ export default function TradeMediaSection({ aiAnalysis, tradeId }: { aiAnalysis:
       container: 'bg-white border-slate-200 shadow-sm',
       header: 'bg-slate-50 border-b border-slate-100',
       headerIcon: 'text-blue-600',
-      prose: 'prose-slate text-slate-800'
+      text: 'text-slate-800'
     },
     scout: {
       iconBg: 'bg-amber-100 text-amber-700',
       container: 'bg-[#f8f9fa] bg-[url("https://www.transparenttextures.com/patterns/paper-fibers.png")] border-slate-200 shadow-sm',
       header: 'bg-white/60 border-b border-slate-200 backdrop-blur-sm',
       headerIcon: 'text-amber-700',
-      prose: 'prose-slate text-slate-900'
+      text: 'text-slate-900'
     },
     shockjock: {
       iconBg: 'bg-red-100 text-red-600',
       container: 'bg-white border-slate-200 shadow-sm',
       header: 'bg-slate-50 border-b border-slate-100',
       headerIcon: 'text-red-600',
-      prose: 'prose-slate text-slate-800'
+      text: 'text-slate-800'
     }
   };
 
@@ -200,16 +204,10 @@ export default function TradeMediaSection({ aiAnalysis, tradeId }: { aiAnalysis:
           )}
         </div>
 
-        <div className={`p-6 md:p-8 prose prose-sm max-w-none ${currentTheme.prose}`}>
-          <ReactMarkdown
-            components={{
-              // This physically forces Tailwind to add bottom margin and line height to EVERY paragraph, bypassing the 'prose' defaults completely!
-              p: ({ node, ...props }) => <p className="mb-6 last:mb-0 leading-relaxed" {...props} />
-            }}
-          >
-            {contentMap[active.id]}
-          </ReactMarkdown>
-        </div>
+        <div 
+          className={`p-6 md:p-8 text-sm font-medium leading-relaxed ${currentTheme.text}`}
+          dangerouslySetInnerHTML={{ __html: contentMap[active.id] }}
+        />
       </div>
     </div>
   );
