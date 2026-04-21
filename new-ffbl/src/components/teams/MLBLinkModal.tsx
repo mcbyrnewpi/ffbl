@@ -1,4 +1,4 @@
-// src/components/teams/MlbLinkModal.tsx
+// src/components/teams/MLBLinkModal.tsx
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -85,7 +85,6 @@ export default function MlbLinkModal({ player, isOpen, onClose }: MlbLinkModalPr
 
   if (!isOpen || !isMounted || !player) return null;
 
-  // Safely grab the local DOB (checks both modern birthdate and legacy dob fields just in case)
   const localDob = player.birthdate || player.dob;
   const formattedLocalDob = localDob ? new Date(localDob).toLocaleDateString() : 'Unknown';
 
@@ -106,30 +105,28 @@ export default function MlbLinkModal({ player, isOpen, onClose }: MlbLinkModalPr
           </button>
         </div>
 
-        {/* NEW: Local Player Reference Card */}
-        <div className="px-4 py-3 bg-indigo-50/50 border-b border-indigo-100 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {/* Database Icon / Avatar */}
-            <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-500">
+        {/* Local Player Reference Card */}
+        <div className="px-4 py-3 bg-indigo-50/50 border-b border-indigo-100 flex items-start sm:items-center justify-between">
+          <div className="flex items-start sm:items-center gap-3 w-full">
+            <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-500 shrink-0 mt-1 sm:mt-0">
               <Database size={18} />
             </div>
             
-            {/* Local DB Info */}
-            <div>
-              <div className="font-bold text-slate-800 flex items-center gap-2">
+            <div className="flex-1">
+              <div className="font-bold text-slate-800 flex flex-wrap items-center gap-2 leading-tight">
                 {player.firstName} {player.lastName}
                 <span className="text-[10px] font-bold text-indigo-600 bg-indigo-100 px-1.5 py-0.5 rounded uppercase tracking-wider">
                   Local DB Target
                 </span>
               </div>
-              <div className="text-xs text-slate-500 flex items-center gap-2 mt-0.5">
-                <span className="font-semibold text-slate-700">
+              <div className="text-xs text-slate-500 flex flex-wrap items-center gap-1.5 mt-1">
+                <span className="font-semibold text-slate-700 bg-white px-1.5 py-0.5 rounded shadow-sm border border-indigo-50/50">
                   {player.positions?.map((p: any) => p.abbrev).join(' / ') || '??'}
                 </span>
-                <span>•</span>
                 <span>{player.team?.name || 'Free Agent'} ({player.level || 'No Level'})</span>
-                <span>•</span>
-                <span>DOB: {formattedLocalDob}</span>
+                <span className="font-bold text-slate-800 bg-indigo-100 px-1.5 py-0.5 rounded">
+                  DOB: {formattedLocalDob}
+                </span>
               </div>
             </div>
           </div>
@@ -157,38 +154,42 @@ export default function MlbLinkModal({ player, isOpen, onClose }: MlbLinkModalPr
           ) : results.length > 0 ? (
             <div className="space-y-3">
               {results.map((mlbPlayer) => (
-                <div key={mlbPlayer.mlbId} className="flex items-center gap-4 p-3 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-blue-400 hover:shadow-md transition-all">
+                <div key={mlbPlayer.mlbId} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-3 bg-white border border-slate-200 rounded-xl shadow-sm hover:border-blue-400 hover:shadow-md transition-all">
                   
-                  {/* Bulletproof Image Fallback */}
-                  <div className="w-12 h-12 bg-slate-100 rounded-full overflow-hidden flex-shrink-0 border border-slate-200">
-                    <img 
-                      src={`https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120/v1/people/${mlbPlayer.mlbId}/headshot/silo/current.png`}
-                      alt={mlbPlayer.lastName}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.onerror = null;
-                        e.currentTarget.src = '/images/placeholders/no-player.svg';
-                      }} 
-                    />
-                  </div>
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
+                    <div className="w-12 h-12 bg-slate-100 rounded-full overflow-hidden flex-shrink-0 border border-slate-200">
+                      <img 
+                        src={`https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:silo:current.png/w_120/v1/people/${mlbPlayer.mlbId}/headshot/silo/current.png`}
+                        alt={mlbPlayer.lastName}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = '/images/placeholders/no-player.svg';
+                        }} 
+                      />
+                    </div>
 
-                  {/* MLB Info */}
-                  <div className="flex-grow min-w-0">
-                    <div className="font-bold text-slate-900 truncate">{mlbPlayer.firstName} {mlbPlayer.lastName}</div>
-                    <div className="text-xs text-slate-500 truncate mt-0.5">
-                      <span className="font-semibold text-slate-700">{mlbPlayer.mlbRawData?.primaryPosition?.abbreviation || '??'}</span>
-                      <span className="mx-1">•</span>
-                      {mlbPlayer.mlbRawData?.currentTeam?.name || 'No Current Affiliate'}
-                      <span className="mx-1">•</span>
-                      DOB: {mlbPlayer.mlbRawData?.birthDate ? new Date(mlbPlayer.mlbRawData.birthDate).toLocaleDateString() : 'Unknown'}
+                    <div className="flex-grow min-w-0">
+                      <div className="font-bold text-slate-900 leading-tight">{mlbPlayer.firstName} {mlbPlayer.lastName}</div>
+                      {/* 🌟 FIX: Wrappable data fields with clear visual separation */}
+                      <div className="text-xs text-slate-500 flex flex-wrap items-center gap-1.5 mt-1">
+                        <span className="font-semibold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded">
+                          {mlbPlayer.mlbRawData?.primaryPosition?.abbreviation || '??'}
+                        </span>
+                        <span className="text-slate-600">
+                          {mlbPlayer.mlbRawData?.currentTeam?.name || 'No Current Affiliate'}
+                        </span>
+                        <span className="font-bold text-slate-800 bg-blue-50 text-blue-700 px-1.5 py-0.5 rounded">
+                          DOB: {mlbPlayer.mlbRawData?.birthDate ? new Date(mlbPlayer.mlbRawData.birthDate).toLocaleDateString() : 'Unknown'}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Link Button */}
                   <button 
                     onClick={() => handleLink(mlbPlayer)}
                     disabled={isLinking}
-                    className="flex-shrink-0 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 px-4 py-2 rounded-lg text-sm font-bold transition-colors disabled:opacity-50"
+                    className="w-full sm:w-auto flex-shrink-0 bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 px-4 py-2 rounded-lg text-sm font-bold transition-colors disabled:opacity-50"
                   >
                     {isLinking ? 'Linking...' : 'Link Profile'}
                   </button>

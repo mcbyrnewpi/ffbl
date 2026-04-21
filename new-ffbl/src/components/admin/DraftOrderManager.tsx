@@ -22,7 +22,6 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-// --- Sub-component for individual draggable rows ---
 function SortableTeamRow({ team, pickNumber }: { team: any, pickNumber: number }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: team.teamId });
 
@@ -36,21 +35,22 @@ function SortableTeamRow({ team, pickNumber }: { team: any, pickNumber: number }
     <div 
       ref={setNodeRef} 
       style={style} 
-      className={`flex items-center gap-4 p-3 bg-white border rounded-xl shadow-sm transition-colors ${isDragging ? 'border-blue-500 shadow-md opacity-90' : 'border-slate-200 hover:border-slate-300'}`}
+      className={`flex items-center gap-3 sm:gap-4 p-3 bg-white border rounded-xl shadow-sm transition-colors ${isDragging ? 'border-blue-500 shadow-md opacity-90' : 'border-slate-200 hover:border-slate-300'}`}
     >
+      {/* 🌟 FIX: Added touch-none to prevent browser scroll hijacking, increased padding for bigger touch target */}
       <div 
         {...attributes} 
         {...listeners} 
-        className="cursor-grab active:cursor-grabbing p-2 text-slate-400 hover:text-blue-600 transition-colors"
+        className="cursor-grab active:cursor-grabbing p-3 -ml-2 text-slate-400 hover:text-blue-600 transition-colors touch-none"
       >
-        <GripVertical size={18} />
+        <GripVertical size={20} />
       </div>
-      <div className="flex items-center justify-center w-8 h-8 rounded bg-slate-100 text-slate-500 font-black text-sm">
+      <div className="flex items-center justify-center w-8 h-8 shrink-0 rounded bg-slate-100 text-slate-500 font-black text-sm">
         {pickNumber}
       </div>
-      <div className="flex-1">
-        <p className="font-bold text-slate-900">{team.teamName}</p>
-        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+      <div className="flex-1 min-w-0">
+        <p className="font-bold text-slate-900 truncate">{team.teamName}</p>
+        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 truncate">
           Regular Season: Rank {team.rank}
         </p>
       </div>
@@ -58,7 +58,6 @@ function SortableTeamRow({ team, pickNumber }: { team: any, pickNumber: number }
   );
 }
 
-// --- Main Manager Component ---
 export default function DraftOrderManager() {
   const [targetDraftYear, setTargetDraftYear] = useState<number>(new Date().getFullYear() + 1);
   const [standingsYear, setStandingsYear] = useState<number>(new Date().getFullYear());
@@ -66,10 +65,9 @@ export default function DraftOrderManager() {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
 
-  // Configure drag sensors
   const sensors = useSensors(
     useSensor(PointerSensor),
-    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 100, tolerance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
@@ -80,7 +78,6 @@ export default function DraftOrderManager() {
         const settingsData = await settingsRes.json();
         const activeYear = settingsData.currentSeason || new Date().getFullYear();
         
-        // Standings are from the active year (e.g., 2026), but we are drafting for the next year (2027)
         setStandingsYear(activeYear);
         setTargetDraftYear(activeYear + 1);
 
@@ -88,7 +85,6 @@ export default function DraftOrderManager() {
         const standingsData = await standingsRes.json();
         
         if (standingsData.standings) {
-          // Sort teams by rank DESCENDING (Worst team first = Pick 1)
           const reverseStandings = [...standingsData.standings].sort((a, b) => b.rank - a.rank);
           setTeams(reverseStandings);
         }
@@ -138,9 +134,9 @@ export default function DraftOrderManager() {
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden max-w-3xl">
-      <div className="px-6 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+      <div className="px-4 sm:px-6 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-blue-100 rounded-lg hidden sm:flex items-center justify-center">
             <Gavel size={16} className="text-blue-600" />
           </div>
           <div>
@@ -148,9 +144,8 @@ export default function DraftOrderManager() {
           </div>
         </div>
         
-        {/* NEW: Explicit Draft Year Target */}
         <div className="flex items-center gap-2">
-          <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Target Draft:</label>
+          <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest hidden sm:inline">Target Draft:</label>
           <input 
             type="number" 
             value={targetDraftYear} 
@@ -160,7 +155,7 @@ export default function DraftOrderManager() {
         </div>
       </div>
       
-      <div className="p-6 bg-slate-50/50">
+      <div className="p-4 sm:p-6 bg-slate-50/50">
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={teams.map(t => t.teamId)} strategy={verticalListSortingStrategy}>
             <div className="space-y-2">
@@ -177,7 +172,7 @@ export default function DraftOrderManager() {
           className="w-full mt-6 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 text-white font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm"
         >
           {loading ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
-          {loading ? "Processing all 5 rounds..." : `Lock In ${targetDraftYear} Draft Order`}
+          {loading ? "Processing..." : `Lock In ${targetDraftYear} Draft Order`}
         </button>
       </div>
     </div>
