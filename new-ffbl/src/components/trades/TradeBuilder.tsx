@@ -115,7 +115,6 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
       return uniqueTeams;
     }
 
-    // If we launched from the Draft Room, build the blocks instantly
     if (partnerTeamId && partnerTeamId !== CURRENT_USER_TEAM_ID) {
       return [CURRENT_USER_TEAM_ID, partnerTeamId];
     }
@@ -136,7 +135,6 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
   
   const [assetFilter, setAssetFilter] = useState<'ALL' | 'MAJORS' | 'MINORS' | 'PICKS'>('ALL');
 
-  // --- DND Handlers ---
   const handleDragStart = (event: DragStartEvent) => {
     const { active } = event;
     const draggedItem = assets.find(a => a.id === active.id);
@@ -288,11 +286,11 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
     const reviewFooterControls = (
       <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
         
-        {/* 🌟 FIX: Custom Expires Dropdown */}
+        {/* Expires Dropdown - Fixed z-index safely below nav */}
         <div className="flex items-center justify-between sm:justify-start gap-3 w-full sm:w-auto bg-slate-50 sm:bg-transparent p-3 sm:p-0 rounded-xl border border-slate-200 sm:border-0 relative">
           <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">Expires:</label>
           
-          <div className="relative w-[140px] z-[60]">
+          <div className="relative w-[140px] z-[30]">
             <button 
               onClick={() => setIsExpiresOpen(!isExpiresOpen)}
               className="w-full h-11 sm:h-10 px-4 flex items-center justify-between bg-white border border-slate-300 rounded-lg outline-none text-slate-900 font-bold text-base sm:text-sm shadow-sm hover:border-blue-500 transition-colors"
@@ -303,8 +301,8 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
 
             {isExpiresOpen && (
               <>
-                <div className="fixed inset-0 z-40" onClick={() => setIsExpiresOpen(false)}></div>
-                <div className="absolute bottom-full mb-2 right-0 w-full sm:w-48 bg-white border border-slate-200 rounded-xl shadow-xl z-50 py-2 custom-scrollbar">
+                <div className="fixed inset-0 z-[25]" onClick={() => setIsExpiresOpen(false)}></div>
+                <div className="absolute bottom-full mb-2 right-0 w-full sm:w-48 bg-white border border-slate-200 rounded-xl shadow-xl z-[30] py-2 custom-scrollbar">
                   {[1, 2, 3, 4, 5, 6, 7, 14, 0].map(val => (
                     <button
                       key={val}
@@ -323,7 +321,6 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
           </div>
         </div>
 
-        {/* PROPOSE TRADE BUTTON */}
         <button 
           onClick={handleProposeClick} 
           disabled={isSubmitting}
@@ -364,14 +361,16 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
       onDragCancel={handleDragCancel}
     >
       <div className="flex flex-col h-[calc(100vh-120px)] min-h-[600px] relative">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-grow overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-grow">
           
           {/* Left Column: Master Roster Search */}
-          <div className="lg:col-span-1 bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col h-full overflow-hidden">
+          <div className="lg:col-span-1 bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col h-full">
             <h2 className="font-bold text-lg mb-2 text-slate-800 flex-shrink-0">Available Assets</h2>
             
             <div className="space-y-3 mb-4 flex-shrink-0">
-              <div className="relative z-[70]">
+              
+              {/* Viewing Team Dropdown - Fixed z-index safely beneath mobile nav */}
+              <div className="relative z-[30]">
                 <button 
                   onClick={() => setIsViewingTeamSelectOpen(!isViewingTeamSelectOpen)}
                   className="w-full h-11 sm:h-9 px-4 sm:px-3 flex items-center justify-between bg-slate-50 border border-slate-300 rounded-lg outline-none text-slate-700 font-bold text-base sm:text-sm shadow-sm hover:border-blue-500 transition-colors"
@@ -382,8 +381,8 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
 
                 {isViewingTeamSelectOpen && (
                   <>
-                    <div className="fixed inset-0 z-[65]" onClick={() => setIsViewingTeamSelectOpen(false)}></div>
-                    <div className="absolute left-0 top-full mt-2 w-full max-h-60 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl z-[70] py-2 custom-scrollbar animate-in fade-in slide-in-from-top-2">
+                    <div className="fixed inset-0 z-[25]" onClick={() => setIsViewingTeamSelectOpen(false)}></div>
+                    <div className="absolute left-0 top-full mt-2 w-full max-h-60 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl z-[30] py-2 custom-scrollbar animate-in fade-in slide-in-from-top-2">
                       {initialTeams.map(team => (
                         <button
                           key={team.id}
@@ -449,10 +448,11 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
                <h2 className="font-bold text-lg text-slate-800">Trade Blocks</h2>
                
                {involvedTeamIds.length < initialTeams.length && (
-                  <div className="relative flex items-center gap-2 z-[70]">
+                  
+                  /* Add Team Dropdown - Fixed z-index safely beneath mobile nav */
+                  <div className="relative flex items-center gap-2 z-[30]">
                     <span className="text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:inline-block">Add Team:</span>
                     
-                    {/* Custom Dropdown Trigger Button */}
                     <button 
                       onClick={() => setIsTeamSelectOpen(!isTeamSelectOpen)}
                       className="h-11 sm:h-9 px-4 sm:px-3 bg-white border border-slate-300 rounded-lg outline-none text-slate-900 font-bold shadow-sm hover:border-blue-500 hover:text-blue-600 transition-colors flex items-center gap-2"
@@ -461,14 +461,10 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                     </button>
 
-                    {/* Custom Dropdown Menu */}
                     {isTeamSelectOpen && (
                       <>
-                        {/* Invisible overlay to catch clicks outside the menu and close it */}
-                        <div className="fixed inset-0 z-[65]" onClick={() => setIsTeamSelectOpen(false)}></div>
-                        
-                        {/* The actual menu */}
-                        <div className="absolute right-0 top-full mt-2 w-64 max-h-60 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl z-[70] py-2 custom-scrollbar animate-in fade-in slide-in-from-top-2">
+                        <div className="fixed inset-0 z-[25]" onClick={() => setIsTeamSelectOpen(false)}></div>
+                        <div className="absolute right-0 top-full mt-2 w-64 max-h-60 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl z-[30] py-2 custom-scrollbar animate-in fade-in slide-in-from-top-2">
                           {initialTeams
                             .filter(team => !involvedTeamIds.includes(team.id))
                             .map(team => (
@@ -546,8 +542,8 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
           </div>
         </div>
 
-        {/* Sticky Bottom Footer on Mobile, Floating Button on Desktop */}
-        <div className="fixed bottom-0 left-0 w-full p-4 bg-white border-t border-slate-200 z-[60] lg:absolute lg:bottom-4 lg:left-auto lg:right-4 lg:w-auto lg:p-3 lg:rounded-xl lg:shadow-lg lg:border lg:border-slate-200">
+        {/* Sticky Bottom Footer - Lowered z-index below mobile menus */}
+        <div className="fixed bottom-0 left-0 w-full p-4 bg-white border-t border-slate-200 z-[30] lg:absolute lg:bottom-4 lg:left-auto lg:right-4 lg:w-auto lg:p-3 lg:rounded-xl lg:shadow-lg lg:border lg:border-slate-200">
           <button 
             onClick={() => setIsReviewing(true)}
             disabled={!isTradeValid}
@@ -567,7 +563,7 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
         {activeAsset ? <DraggableAsset asset={activeAsset} isOverlay /> : null}
       </DragOverlay>
 
-      {/* Multi-Team Mobile Destination Prompt */}
+      {/* Multi-Team Mobile Destination Prompt - Keeps high z-index to act as a true modal */}
       {mobileMoveAsset && (
         <div className="fixed inset-0 z-[100] flex flex-col justify-end bg-slate-900/40 backdrop-blur-sm sm:justify-center sm:p-4 animate-in fade-in" onClick={() => setMobileMoveAsset(null)}>
           <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-sm mx-auto overflow-hidden animate-in slide-in-from-bottom-4" onClick={e => e.stopPropagation()}>
