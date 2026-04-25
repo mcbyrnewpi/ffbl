@@ -286,7 +286,7 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
     const reviewFooterControls = (
       <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
         
-        {/* Expires Dropdown - Fixed z-index safely below nav */}
+        {/* Expires Dropdown */}
         <div className="flex items-center justify-between sm:justify-start gap-3 w-full sm:w-auto bg-slate-50 sm:bg-transparent p-3 sm:p-0 rounded-xl border border-slate-200 sm:border-0 relative">
           <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">Expires:</label>
           
@@ -361,15 +361,15 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
       onDragCancel={handleDragCancel}
     >
       <div className="flex flex-col h-[calc(100vh-120px)] min-h-[600px] relative">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-grow">
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-grow overflow-hidden">
           
           {/* Left Column: Master Roster Search */}
-          <div className="lg:col-span-1 bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col h-full">
+          <div className="lg:col-span-1 bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex flex-col h-full overflow-hidden">
             <h2 className="font-bold text-lg mb-2 text-slate-800 flex-shrink-0">Available Assets</h2>
             
             <div className="space-y-3 mb-4 flex-shrink-0">
               
-              {/* Viewing Team Dropdown - Fixed z-index safely beneath mobile nav */}
               <div className="relative z-[30]">
                 <button 
                   onClick={() => setIsViewingTeamSelectOpen(!isViewingTeamSelectOpen)}
@@ -449,7 +449,6 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
                
                {involvedTeamIds.length < initialTeams.length && (
                   
-                  /* Add Team Dropdown - Fixed z-index safely beneath mobile nav */
                   <div className="relative flex items-center gap-2 z-[30]">
                     <span className="text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:inline-block">Add Team:</span>
                     
@@ -542,7 +541,7 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
           </div>
         </div>
 
-        {/* Sticky Bottom Footer - Lowered z-index below mobile menus */}
+        {/* Sticky Bottom Footer */}
         <div className="fixed bottom-0 left-0 w-full p-4 bg-white border-t border-slate-200 z-[30] lg:absolute lg:bottom-4 lg:left-auto lg:right-4 lg:w-auto lg:p-3 lg:rounded-xl lg:shadow-lg lg:border lg:border-slate-200">
           <button 
             onClick={() => setIsReviewing(true)}
@@ -563,7 +562,7 @@ export default function TradeBuilder({ initialTeams, initialPlayers, initialPick
         {activeAsset ? <DraggableAsset asset={activeAsset} isOverlay /> : null}
       </DragOverlay>
 
-      {/* Multi-Team Mobile Destination Prompt - Keeps high z-index to act as a true modal */}
+      {/* Multi-Team Mobile Destination Prompt */}
       {mobileMoveAsset && (
         <div className="fixed inset-0 z-[100] flex flex-col justify-end bg-slate-900/40 backdrop-blur-sm sm:justify-center sm:p-4 animate-in fade-in" onClick={() => setMobileMoveAsset(null)}>
           <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-sm mx-auto overflow-hidden animate-in slide-in-from-bottom-4" onClick={e => e.stopPropagation()}>
