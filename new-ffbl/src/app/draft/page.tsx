@@ -139,7 +139,7 @@ export default function DraftRoomPage() {
     <PageContainer>
       <PageHeader 
         title={`${targetYear} FFBL Draft Room`}
-        subtitle="The war room is live. Keep track of the board and make your selections here."
+        subtitle="Once the draft kicks off, keep track of the board and make your selections here."
       />
 
       <div className="max-w-6xl mx-auto space-y-8">

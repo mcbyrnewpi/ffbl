@@ -194,7 +194,6 @@ function PlayerSearchContent() {
     }
   };
 
-  // 🌟 NEW: Submission Logic for HOF
   const submitInduction = async () => {
     if (!myTeamId || !inductingPlayer) return;
     setIsInducting(true);
@@ -233,7 +232,7 @@ function PlayerSearchContent() {
     <PageContainer>
       <PageHeader 
         title="Player Database"
-        subtitle="Browse the waiver wire, find prospects, or search the MLB for new rookies."
+        subtitle="Browse free agents, find prospects, or search the MLB database."
       />
 
       <div className="flex flex-col gap-5 mb-8 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">

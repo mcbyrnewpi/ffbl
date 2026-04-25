@@ -74,7 +74,7 @@ export default async function TradesDashboard() {
     <PageContainer>
       <PageHeader 
         title="Trade Center"
-        subtitle="Review and respond to pending offers"
+        subtitle="Review and respond to pending offers, or propose a new trade."
       >
         {/* Conditionally render the Propose Trade button based on the deadline */}
         {isDeadlinePassed ? (

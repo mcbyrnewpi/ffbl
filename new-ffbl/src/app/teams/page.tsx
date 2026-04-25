@@ -22,7 +22,7 @@ export default async function TeamsDirectoryPage() {
     <PageContainer>
       <PageHeader 
         title="League Franchises"
-        subtitle="Directory of all teams and managers in the dynasty league."
+        subtitle="Directory of all teams and managers in FFBL."
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
