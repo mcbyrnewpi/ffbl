@@ -76,14 +76,14 @@ export default async function TeamLayout({ children, params }: { children: React
 
             {/* TEAM INFO & ACTION BUTTONS */}
             <div className="flex flex-col min-w-0">
-              <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-none mb-2 truncate">
+              <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight leading-none mb-2 break-words">
                 {team.name}
               </h1>
 
               {team.motto && (
-                <span className="text-sm font-medium italic text-slate-500 flex items-center gap-1.5 mb-3 truncate">
-                  <Quote size={12} className="text-slate-400 shrink-0" /> 
-                  {team.motto}
+                <span className="text-sm font-medium italic text-slate-500 flex items-start gap-1.5 mb-3 leading-snug break-words">
+                  <Quote size={12} className="text-slate-400 shrink-0 mt-1" /> 
+                  <span className="flex-1">{team.motto}</span>
                 </span>
               )}
 
@@ -91,13 +91,13 @@ export default async function TeamLayout({ children, params }: { children: React
               <div className="flex flex-col gap-1 mb-4">
                 <p className="text-slate-600 flex items-center gap-2 text-sm">
                   <User size={14} className="text-slate-400 shrink-0" /> 
-                  <span className="font-medium truncate">Manager: <span className="font-black text-slate-800">{primaryManager?.name || 'Unmanaged'}</span></span>
+                  <span className="font-medium break-words">Manager: <span className="font-black text-slate-800">{primaryManager?.name || 'Unmanaged'}</span></span>
                 </p>
                 
                 {coManagers.length > 0 && (
-                  <p className="text-slate-500 text-xs sm:text-sm flex items-center gap-1.5 pl-[22px] truncate">
-                    <span className="italic shrink-0">Co-Managers:</span> 
-                    <span className="font-bold text-slate-700 truncate">{coManagers.map(m => m.name).join(', ')}</span>
+                  <p className="text-slate-500 text-xs sm:text-sm flex items-start gap-1.5 pl-[22px] leading-snug">
+                    <span className="italic shrink-0 mt-0.5">Co-Managers:</span> 
+                    <span className="font-bold text-slate-700 break-words">{coManagers.map(m => m.name).join(', ')}</span>
                   </p>
                 )}
               </div>

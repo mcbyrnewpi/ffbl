@@ -1,15 +1,8 @@
 // src/app/api/draft/picks/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 
 export async function GET(req: Request) {
-  // Ensure the user is logged into the FFBL
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
 
   try {
     // 1. Determine the target draft year

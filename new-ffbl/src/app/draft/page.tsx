@@ -198,6 +198,7 @@ export default function DraftRoomPage() {
                 </div>
               </div>
 
+              {/* Conditional UI based on user authentication status */}
               {userTeamId === activePick.currentOwner.id ? (
                 <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto shrink-0">
                   <button 
@@ -207,16 +208,21 @@ export default function DraftRoomPage() {
                     <UserPlus size={18} /> Make Pick
                   </button>
                   <button 
-                    onClick={handleTradePickClick} // ⬅️ Trigger new modal here
+                    onClick={handleTradePickClick}
                     className="bg-white hover:bg-slate-50 text-slate-700 border-2 border-slate-200 font-bold py-3.5 px-6 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm"
                   >
                     <ArrowRightLeft size={18} /> Trade Pick
                   </button>
                 </div>
-              ) : (
+              ) : userTeamId ? (
                 <div className="bg-slate-50 border border-slate-200 rounded-xl px-6 py-4 text-center shrink-0">
                   <p className="text-sm font-bold text-slate-900">Waiting on Selection...</p>
                   <p className="text-xs font-medium text-slate-500 mt-0.5">If you want the pick, trade for the pick.</p>
+                </div>
+              ) : (
+                <div className="bg-slate-50 border border-slate-200 rounded-xl px-6 py-4 text-center shrink-0">
+                  <p className="text-sm font-bold text-slate-900">Waiting on Selection...</p>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Spectator Mode</p>
                 </div>
               )}
             </div>
