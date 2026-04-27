@@ -15,7 +15,29 @@ export default async function RecentTradeWidget() {
   if (!trade || !trade.aiAnalysis) return null;
 
   const aiData: any = trade.aiAnalysis;
-  const snippet = aiData.theShockJock || aiData.theScout || "This deal completely shifts the balance of power in the FFBL. Let's see how it plays out.";
+
+  // 1. Gather all personas and filter out the failed/fallback generations
+  const availableSnippets = [
+    { name: 'Stats Guy', text: aiData.theStathead },
+    { name: 'Dynasty Guy', text: aiData.theScout },
+    { name: 'Family Guy', text: aiData.theShockJock },
+    { name: 'The Comedian', text: aiData.theSeinfeld }
+  ].filter(s => 
+    s.text && 
+    !s.text.includes("technical difficulties") && 
+    !s.text.includes("grabbing a hot dog") && 
+    !s.text.includes("dead air") && 
+    s.text !== "Analysis unavailable."
+  );
+
+  // 2. Pick a random persona from the successful ones
+  const randomSelection = availableSnippets.length > 0 
+    ? availableSnippets[Math.floor(Math.random() * availableSnippets.length)]
+    : { name: 'Network', text: "This deal completely shifts the balance of power in the FFBL. Let's see how it plays out." };
+
+  const snippet = randomSelection.text;
+  const personaName = randomSelection.name;
+
   const teamsInvolved = Array.from(new Set(trade.assets.map(a => a.fromTeam.name)));
 
   const formatMarkdown = (text: string) => {
@@ -36,7 +58,9 @@ export default async function RecentTradeWidget() {
           <Bot size={16} className="text-emerald-500" />
           <h2 className="font-black text-slate-900 uppercase tracking-tight">Trade Analysis</h2>
         </div>
-        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-white border border-slate-200 px-2 py-1 rounded">AI Analysis</span>
+        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest bg-white border border-slate-200 px-2 py-1 rounded">
+          {personaName}'s Take
+        </span>
       </div>
       
       <div className="p-6">
