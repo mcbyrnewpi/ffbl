@@ -1,14 +1,15 @@
+// src/app/api/ai/generate-trade-media/route.ts
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { google } from '@ai-sdk/google';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 
-export const maxDuration = 45;
+export const maxDuration = 60; 
 
 export async function POST(request: Request) {
   try {
-    const { tradeId } = await request.json();
+    const { tradeId, isManual, useFastModel } = await request.json();
 
     if (!tradeId) {
       return NextResponse.json({ error: "No tradeId provided" }, { status: 400 });
@@ -44,58 +45,62 @@ export async function POST(request: Request) {
     // ==========================================================
     // 📧 STEP 3: FIRE THE EMAIL BLAST FIRST (Reliability Mode)
     // ==========================================================
-    let recipientEmails: string[] = [];
-    if (process.env.TEST_EMAIL_OVERRIDE) {
-      console.log(`🧪 [STAGING OVERRIDE] Sending Proposal to: ${process.env.TEST_EMAIL_OVERRIDE}`);
-      recipientEmails = [process.env.TEST_EMAIL_OVERRIDE];
-    } else {
-      const allUsers = await prisma.user.findMany({
-        where: { email: { not: null } },
-        select: { email: true }
-      });
-      recipientEmails = allUsers.map(u => u.email as string).filter(e => e.length > 0);
-    }
-
-    const groupedAssets: Record<string, string[]> = {};
-    trade.assets.forEach(asset => {
-      const toTeamName = teamMap[asset.toTeamId];
-      // Format asset name with pick ownership for the email
-      const assetName = asset.player 
-        ? `${(asset.player as any).firstName} ${(asset.player as any).lastName}` 
-        : `${asset.draftPick?.year} Round ${asset.draftPick?.round} Pick (${teamMap[asset.draftPick?.originalOwnerId || ''] || 'Unknown'})`;
-        
-      if (!groupedAssets[toTeamName]) groupedAssets[toTeamName] = [];
-      groupedAssets[toTeamName].push(assetName);
-    });
-
-    const tradeDetails = Object.keys(groupedAssets).sort().map(teamName => ({
-      teamName,
-      assets: groupedAssets[teamName]
-    }));
-
-    const teamNames = Object.values(teamMap);
-    const dateString = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    const emailSubject = `${dateString} FFBL Trade: ${teamNames.join(' & ')}`;
-
-    try {
-      const { resend } = await import('@/lib/resend');
-      const { TradeAnnouncementEmail } = await import('@/emails/TradeAnnouncementEmail');
-      if (recipientEmails.length > 0) {
-        await resend.emails.send({
-          from: process.env.EMAIL_FROM || 'FFBL Commissioner <onboarding@resend.dev>',
-          to: recipientEmails,
-          subject: emailSubject,
-          react: TradeAnnouncementEmail({ 
-            subject: emailSubject, 
-            tradeDetails, 
-            tradeId, 
-            appUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000' 
-          }),
+    
+    if (!isManual) {
+      let recipientEmails: string[] = [];
+      if (process.env.TEST_EMAIL_OVERRIDE) {
+        console.log(`🧪 [STAGING OVERRIDE] Sending Proposal to: ${process.env.TEST_EMAIL_OVERRIDE}`);
+        recipientEmails = [process.env.TEST_EMAIL_OVERRIDE];
+      } else {
+        const allUsers = await prisma.user.findMany({
+          where: { email: { not: null } },
+          select: { email: true }
         });
-        console.log("✅ Trade Announcement Email dispatched.");
+        recipientEmails = allUsers.map(u => u.email as string).filter(e => e.length > 0);
       }
-    } catch (emailError) {
-      console.error("❌ Email failed to send, but proceeding to AI:", emailError);
+
+      const groupedAssets: Record<string, string[]> = {};
+      trade.assets.forEach(asset => {
+        const toTeamName = teamMap[asset.toTeamId];
+        const assetName = asset.player 
+          ? `${(asset.player as any).firstName} ${(asset.player as any).lastName}` 
+          : `${asset.draftPick?.year} Round ${asset.draftPick?.round} Pick (${teamMap[asset.draftPick?.originalOwnerId || ''] || 'Unknown'})`;
+          
+        if (!groupedAssets[toTeamName]) groupedAssets[toTeamName] = [];
+        groupedAssets[toTeamName].push(assetName);
+      });
+
+      const tradeDetails = Object.keys(groupedAssets).sort().map(teamName => ({
+        teamName,
+        assets: groupedAssets[teamName]
+      }));
+
+      const teamNames = Object.values(teamMap);
+      const dateString = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const emailSubject = `${dateString} FFBL Trade: ${teamNames.join(' & ')}`;
+
+      try {
+        const { resend } = await import('@/lib/resend');
+        const { TradeAnnouncementEmail } = await import('@/emails/TradeAnnouncementEmail');
+        if (recipientEmails.length > 0) {
+          await resend.emails.send({
+            from: process.env.EMAIL_FROM || 'FFBL Commissioner <onboarding@resend.dev>',
+            to: recipientEmails,
+            subject: emailSubject,
+            react: TradeAnnouncementEmail({ 
+              subject: emailSubject, 
+              tradeDetails, 
+              tradeId, 
+              appUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000' 
+            }),
+          });
+          console.log("✅ Trade Announcement Email dispatched.");
+        }
+      } catch (emailError) {
+        console.error("❌ Email failed to send, but proceeding to AI:", emailError);
+      }
+    } else {
+      console.log("⚙️ Manual AI generation requested: Skipping email announcement.");
     }
 
     // ==========================================================
@@ -141,32 +146,42 @@ export async function POST(request: Request) {
 
       const userPrompt = `Analyze this trade:\n\n${cleanTradeSummary}`;
 
-      const generateWithModel = async (modelId: string) => {
+      const generateWithModel = async (modelId: string, timeoutMs: number) => {
         const { object } = await generateObject({
           model: google(modelId),
           schema: aiSchema,
           system: systemPrompt,
           prompt: userPrompt,
+          abortSignal: AbortSignal.timeout(timeoutMs) 
         });
         return object;
       };
 
       let aiObject;
       try {
-        console.log("Tier 1: Trying Gemini 3.1 Pro (Preview)...");
-        aiObject = await generateWithModel('gemini-3.1-pro-preview');
+        if (useFastModel) {
+          console.log("⚡ Fast Mode Requested: Jumping straight to Gemini Flash...");
+          aiObject = await generateWithModel('gemini-2.5-flash', 25000);
+        } else {
+          console.log("Tier 1: Trying Gemini Pro (giving it 45 seconds)...");
+          aiObject = await generateWithModel('gemini-3.1-pro-preview', 45000); 
+        }
       } catch (e1) {
-        try {
-          console.warn("Tier 2 Fallback: Trying Gemini 2.5 Pro (Stable)...");
-          aiObject = await generateWithModel('gemini-2.5-pro');
-        } catch (e2) {
-          console.warn("Tier 3 Fallback: Trying Gemini 2.5 Flash (Safety)...");
-          aiObject = await generateWithModel('gemini-2.5-flash');
+        if (useFastModel) {
+          console.error("❌ Fast model failed:", e1);
+        } else {
+          console.warn("⚠️ Tier 1 Failed/Timed Out. Falling back to Gemini Flash...");
+          try {
+            // Give Flash the remaining 10-15 seconds to try and save the request
+            aiObject = await generateWithModel('gemini-2.5-flash', 10000); 
+          } catch (e2) {
+            console.error("❌ Both Pro and Flash models failed.");
+          }
         }
       }
 
       // Final cleanup check
-      if (typeof aiObject.theShockJock === 'string' && aiObject.theShockJock.trim().startsWith('{"theStathead"')) {
+      if (aiObject && typeof aiObject.theShockJock === 'string' && aiObject.theShockJock.trim().startsWith('{"theStathead"')) {
         try {
           aiObject = JSON.parse(aiObject.theShockJock);
         } catch (e) {
@@ -177,10 +192,12 @@ export async function POST(request: Request) {
       cleanAnalysis = aiObject;
 
       // Update the Trade record
-      await prisma.trade.update({
-        where: { id: tradeId },
-        data: { aiAnalysis: cleanAnalysis }
-      });
+      if (cleanAnalysis) {
+        await prisma.trade.update({
+          where: { id: tradeId },
+          data: { aiAnalysis: cleanAnalysis }
+        });
+      }
 
     } catch (aiError) {
       console.error("❌ All AI models failed. Trade completed without analysis:", aiError);

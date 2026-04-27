@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { Bot, LineChart, Glasses, MessageSquareWarning, ChevronDown, RotateCw } from 'lucide-react';
+import { Bot, LineChart, Glasses, MessageSquareWarning, ChevronDown, RotateCw, Zap } from 'lucide-react';
 
 export default function TradeMediaSection({ aiAnalysis, tradeId }: { aiAnalysis: any, tradeId: string }) {
   const { data: session } = useSession();
@@ -14,18 +14,18 @@ export default function TradeMediaSection({ aiAnalysis, tradeId }: { aiAnalysis:
   // Identify if the current user is the Commissioner
   const isCommish = (session?.user as any)?.role === 'ADMIN' || (session?.user as any)?.role === 'COMMISH';
 
-  // Manual trigger for the Commissioner to rerun analysis
-  const handleForceGenerate = async () => {
+  // Manual trigger to rerun or fast-track analysis
+  const handleForceGenerate = async (useFastModel = false) => {
     setIsGenerating(true);
     try {
       const res = await fetch('/api/ai/generate-trade-media', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tradeId })
+        body: JSON.stringify({ tradeId, isManual: true, useFastModel })
       });
       
       if (res.ok) {
-        window.location.reload(); // Refresh to pull in the newly generated data
+        window.location.reload();
       } else {
         alert("Failed to generate media. Check the server logs.");
       }
@@ -50,15 +50,26 @@ export default function TradeMediaSection({ aiAnalysis, tradeId }: { aiAnalysis:
           {!isGenerating && <p className="text-[10px] text-slate-400">Refresh the page in a few moments.</p>}
         </div>
 
-        {/* Commissioner Emergency CTA */}
         {isCommish && !isGenerating && (
-          <button 
-            onClick={handleForceGenerate}
-            className="group mt-2 flex items-center gap-2 px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-emerald-400 rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-lg active:scale-95 border border-slate-700"
-          >
-            <RotateCw size={14} className="group-hover:rotate-180 transition-transform duration-500" />
-            Commish: Force Media Analysis
-          </button>
+          <div className="flex flex-col sm:flex-row justify-center gap-3 mt-4">
+            {/* Force a full Pro run */}
+            <button 
+              onClick={() => handleForceGenerate(false)}
+              className="group flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-emerald-400 rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-lg active:scale-95 border border-slate-700"
+            >
+              <RotateCw size={14} className="group-hover:rotate-180 transition-transform duration-500" />
+              Force Pro Analysis
+            </button>
+
+            {/* Generate immediately using Flash */}
+            <button 
+              onClick={() => handleForceGenerate(true)}
+              className="group flex items-center justify-center gap-2 px-5 py-2.5 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-sm active:scale-95 border border-amber-300"
+            >
+              <Zap size={14} className="group-hover:scale-110 transition-transform duration-300" />
+              Force Fast Results
+            </button>
+          </div>
         )}
       </div>
     );
