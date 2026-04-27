@@ -160,22 +160,25 @@ export async function POST(request: Request) {
       let aiObject;
       try {
         if (useFastModel) {
-          console.log("⚡ Fast Mode Requested: Jumping straight to Gemini Flash...");
-          aiObject = await generateWithModel('gemini-2.5-flash', 25000);
+          console.log("⚡ Fast Mode Requested: Giving Gemini Flash 55 seconds...");
+          aiObject = await generateWithModel('gemini-2.5-flash', 55000);
+        } else if (isManual) {
+          console.log("👑 Manual Pro Mode Requested: Giving Gemini Pro 55 seconds...");
+          aiObject = await generateWithModel('gemini-3.1-pro-preview', 55000); 
         } else {
-          console.log("Tier 1: Trying Gemini Pro (giving it 45 seconds)...");
-          aiObject = await generateWithModel('gemini-3.1-pro-preview', 45000); 
+          console.log("🤖 Automatic Background Generation: Giving Pro 40 seconds...");
+          aiObject = await generateWithModel('gemini-3.1-pro-preview', 40000); 
         }
       } catch (e1) {
-        if (useFastModel) {
-          console.error("❌ Fast model failed:", e1);
+        if (isManual) {
+          console.error("❌ Manual model generation failed or timed out:", e1);
         } else {
-          console.warn("⚠️ Tier 1 Failed/Timed Out. Falling back to Gemini Flash...");
+          console.warn("⚠️ Tier 1 Automatic Failed/Timed Out. Falling back to Gemini Flash...");
           try {
-            // Give Flash the remaining 10-15 seconds to try and save the request
-            aiObject = await generateWithModel('gemini-2.5-flash', 10000); 
+            // Give Flash the remaining 15 seconds to try and save the automatic request
+            aiObject = await generateWithModel('gemini-2.5-flash', 15000); 
           } catch (e2) {
-            console.error("❌ Both Pro and Flash models failed.");
+            console.error("❌ Both Pro and Flash automatic models failed.");
           }
         }
       }
