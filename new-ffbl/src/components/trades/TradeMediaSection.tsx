@@ -3,18 +3,16 @@
 
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { Bot, LineChart, Glasses, MessageSquareWarning, ChevronDown, RotateCw, Zap } from 'lucide-react';
+import { Bot, LineChart, Glasses, MessageSquareWarning, ChevronDown, RotateCw, Zap, Mic, AlertCircle } from 'lucide-react';
 
 export default function TradeMediaSection({ aiAnalysis, tradeId }: { aiAnalysis: any, tradeId: string }) {
   const { data: session } = useSession();
-  const [activeTab, setActiveTab] = useState<'stathead' | 'scout' | 'shockjock'>('stathead');
+  const [activeTab, setActiveTab] = useState<'stathead' | 'scout' | 'shockjock' | 'seinfeld'>('stathead');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  // Identify if the current user is the Commissioner
   const isCommish = (session?.user as any)?.role === 'ADMIN' || (session?.user as any)?.role === 'COMMISH';
 
-  // Manual trigger to rerun or fast-track analysis
   const handleForceGenerate = async (useFastModel = false) => {
     setIsGenerating(true);
     try {
@@ -25,7 +23,7 @@ export default function TradeMediaSection({ aiAnalysis, tradeId }: { aiAnalysis:
       });
       
       if (res.ok) {
-        window.location.reload();
+        window.location.reload(); 
       } else {
         alert("Failed to generate media. Check the server logs.");
       }
@@ -37,7 +35,7 @@ export default function TradeMediaSection({ aiAnalysis, tradeId }: { aiAnalysis:
     }
   };
 
-  // State: Analysis doesn't exist yet
+  // Full Screen Loading / Empty State
   if (!aiAnalysis) {
     return (
       <div className="bg-white rounded-xl p-8 text-center border border-slate-200 flex flex-col items-center gap-4 mb-8 shadow-sm animate-in fade-in duration-500">
@@ -52,7 +50,6 @@ export default function TradeMediaSection({ aiAnalysis, tradeId }: { aiAnalysis:
 
         {isCommish && !isGenerating && (
           <div className="flex flex-col sm:flex-row justify-center gap-3 mt-4">
-            {/* Force a full Pro run */}
             <button 
               onClick={() => handleForceGenerate(false)}
               className="group flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-900 hover:bg-slate-800 text-emerald-400 rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-lg active:scale-95 border border-slate-700"
@@ -60,8 +57,6 @@ export default function TradeMediaSection({ aiAnalysis, tradeId }: { aiAnalysis:
               <RotateCw size={14} className="group-hover:rotate-180 transition-transform duration-500" />
               Force Pro Analysis
             </button>
-
-            {/* Generate immediately using Flash */}
             <button 
               onClick={() => handleForceGenerate(true)}
               className="group flex items-center justify-center gap-2 px-5 py-2.5 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-sm active:scale-95 border border-amber-300"
@@ -75,10 +70,13 @@ export default function TradeMediaSection({ aiAnalysis, tradeId }: { aiAnalysis:
     );
   }
 
+  // Fallbacks for legacy trades that might not have the new property
   let statheadText = aiAnalysis?.theStathead || "Analysis unavailable.";
   let scoutText = aiAnalysis?.theScout || "Analysis unavailable.";
   let shockjockText = aiAnalysis?.theShockJock || "Analysis unavailable.";
+  let seinfeldText = aiAnalysis?.theSeinfeld || "Analysis unavailable.";
 
+  // Legacy JSON cleanup just in case
   if (typeof shockjockText === 'string' && shockjockText.trim().startsWith('{"theStathead"')) {
     try {
       const parsedNested = JSON.parse(shockjockText);
@@ -86,28 +84,32 @@ export default function TradeMediaSection({ aiAnalysis, tradeId }: { aiAnalysis:
     } catch (e) {}
   }
 
+  // 🌟 SMART DETECTION: Check if any segment failed to generate
+  const isFailure = (text: string) => {
+    if (!text || text === "Analysis unavailable.") return true;
+    return text.includes("technical difficulties") || 
+           text.includes("grabbing a hot dog") || 
+           text.includes("dead air");
+  };
+
+  const hasFailures = isFailure(statheadText) || isFailure(scoutText) || isFailure(shockjockText) || isFailure(seinfeldText);
+
   const tabs = [
     { id: 'stathead', name: 'Stats Guy', desc: 'Advanced Analytics', icon: LineChart },
     { id: 'scout', name: 'Dynasty Guy', desc: 'Future Outlook', icon: Glasses },
     { id: 'shockjock', name: 'Family Guy', desc: 'Unfiltered Commentary', icon: MessageSquareWarning },
+    { id: 'seinfeld', name: 'Seinfeld', desc: 'A Trade About Nothing', icon: Mic },
   ] as const;
 
   const active = tabs.find(t => t.id === activeTab)!;
   const ActiveIcon = active.icon;
 
-  // Standardized AI Markdown Formatter
   const formatMarkdown = (text?: string) => {
     if (!text || text === "Analysis unavailable.") return "Analysis unavailable.";
-    
-    // Catch JSON escaped newlines
     let unescaped = text.replace(/\\n/g, '\n');
-
     return unescaped
-      // 1. Detect end of sentences followed by "**" and force a paragraph break
       .replace(/([.!?])\s+(?=\*\*)/g, '$1<br /><br />')
-      // 2. Convert **text** to high-contrast bold tags
       .replace(/\*\*(.*?)\*\*/g, '<strong class="font-black text-slate-900">$1</strong>')
-      // 3. Catch standard explicit newlines
       .replace(/\n/g, '<br />');
   };
 
@@ -115,6 +117,7 @@ export default function TradeMediaSection({ aiAnalysis, tradeId }: { aiAnalysis:
     stathead: formatMarkdown(statheadText),
     scout: formatMarkdown(scoutText),
     shockjock: formatMarkdown(shockjockText),
+    seinfeld: formatMarkdown(seinfeldText),
   };
 
   const themeStyles = {
@@ -138,6 +141,13 @@ export default function TradeMediaSection({ aiAnalysis, tradeId }: { aiAnalysis:
       header: 'bg-slate-50 border-b border-slate-100',
       headerIcon: 'text-red-600',
       text: 'text-slate-800'
+    },
+    seinfeld: {
+      iconBg: 'bg-indigo-100 text-indigo-600',
+      container: 'bg-white border-slate-200 shadow-sm',
+      header: 'bg-slate-50 border-b border-slate-100',
+      headerIcon: 'text-indigo-600',
+      text: 'text-slate-800'
     }
   };
 
@@ -145,6 +155,34 @@ export default function TradeMediaSection({ aiAnalysis, tradeId }: { aiAnalysis:
 
   return (
     <div className="mb-10 animate-in fade-in slide-in-from-top-4 duration-500 z-20 relative">
+      
+      {isCommish && hasFailures && (
+        <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
+          <div className="flex items-center gap-3 text-amber-800">
+            <AlertCircle size={20} className="shrink-0" />
+            <span className="text-sm font-bold">Some broadcast segments failed to generate.</span>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+            <button 
+              onClick={() => handleForceGenerate(false)}
+              disabled={isGenerating}
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-slate-900 hover:bg-slate-800 text-emerald-400 rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-md disabled:opacity-50"
+            >
+              <RotateCw size={14} className={isGenerating ? "animate-spin" : ""} />
+              {isGenerating ? "Broadcasting..." : "Retry Pro"}
+            </button>
+            <button 
+              onClick={() => handleForceGenerate(true)}
+              disabled={isGenerating}
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-white hover:bg-amber-100 text-amber-700 border border-amber-300 rounded-lg text-xs font-black uppercase tracking-wider transition-all shadow-sm disabled:opacity-50"
+            >
+              <Zap size={14} />
+              {isGenerating ? "Broadcasting..." : "Retry Fast"}
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-4 gap-4">
         
         <div className="flex items-center gap-3">

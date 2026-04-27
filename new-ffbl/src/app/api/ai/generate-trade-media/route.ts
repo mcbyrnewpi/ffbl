@@ -2,10 +2,9 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { google } from '@ai-sdk/google';
-import { generateObject } from 'ai';
-import { z } from 'zod';
+import { generateText } from 'ai';
 
-export const maxDuration = 60; 
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   try {
@@ -15,15 +14,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No tradeId provided" }, { status: 400 });
     }
 
-    // 1. Fetch the completed trade
     const trade = await prisma.trade.findUnique({
       where: { id: tradeId },
       include: {
         assets: {
-          include: {
-            player: true,
-            draftPick: true,
-          }
+          include: { player: true, draftPick: true }
         }
       }
     });
@@ -32,7 +27,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Trade not found or not processed." }, { status: 400 });
     }
 
-    // 2. Map team names for display
     const teamIds = [...new Set(trade.assets.flatMap(a => [a.fromTeamId, a.toTeamId]))];
     const teams = await prisma.team.findMany({
       where: { id: { in: teamIds } },
@@ -43,13 +37,12 @@ export async function POST(request: Request) {
     teams.forEach(t => teamMap[t.id] = t.name);
 
     // ==========================================================
-    // 📧 STEP 3: FIRE THE EMAIL BLAST FIRST (Reliability Mode)
+    // 📧 STEP 3: FIRE THE EMAIL BLAST FIRST
     // ==========================================================
-    
     if (!isManual) {
+      // ... (Email logic remains unchanged)
       let recipientEmails: string[] = [];
       if (process.env.TEST_EMAIL_OVERRIDE) {
-        console.log(`🧪 [STAGING OVERRIDE] Sending Proposal to: ${process.env.TEST_EMAIL_OVERRIDE}`);
         recipientEmails = [process.env.TEST_EMAIL_OVERRIDE];
       } else {
         const allUsers = await prisma.user.findMany({
@@ -87,128 +80,126 @@ export async function POST(request: Request) {
             from: process.env.EMAIL_FROM || 'FFBL Commissioner <onboarding@resend.dev>',
             to: recipientEmails,
             subject: emailSubject,
-            react: TradeAnnouncementEmail({ 
-              subject: emailSubject, 
-              tradeDetails, 
-              tradeId, 
-              appUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000' 
-            }),
+            react: TradeAnnouncementEmail({ subject: emailSubject, tradeDetails, tradeId, appUrl: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000' }),
           });
-          console.log("✅ Trade Announcement Email dispatched.");
         }
       } catch (emailError) {
-        console.error("❌ Email failed to send, but proceeding to AI:", emailError);
+        console.error("❌ Email failed:", emailError);
       }
-    } else {
-      console.log("⚙️ Manual AI generation requested: Skipping email announcement.");
     }
 
     // ==========================================================
-    // 🤖 STEP 4: GENERATE AI MEDIA (Multi-Layer Fallback)
+    // 🤖 STEP 4: GENERATE AI MEDIA (SMART BACKFILL)
     // ==========================================================
-    let cleanAnalysis = null;
+    
+    const cleanTradeSummary = trade.assets.map(asset => {
+      const from = teamMap[asset.fromTeamId];
+      const to = teamMap[asset.toTeamId];
+      if (asset.player) {
+        const p = asset.player as any;
+        return `Player: ${p.firstName} ${p.lastName} (Age: ${p.mlbRawData?.currentAge || '??'}, Level: ${p.level}, Top 100 Rank: ${p.prospectRank || 'None'}) moved from ${from} to ${to}.`;
+      } else if (asset.draftPick) {
+        return `Draft Pick: ${asset.draftPick.year} Round ${asset.draftPick.round} moved from ${from} to ${to}.`;
+      }
+      return 'Unknown';
+    }).join('\n');
 
-    try {
-      const cleanTradeSummary = trade.assets.map(asset => {
-        const from = teamMap[asset.fromTeamId];
-        const to = teamMap[asset.toTeamId];
-        if (asset.player) {
-          const p = asset.player as any;
-          return `Player: ${p.firstName} ${p.lastName} (Age: ${p.mlbRawData?.currentAge || '??'}, Level: ${p.level}, Top 100 Rank: ${p.prospectRank || 'None'}) moved from ${from} to ${to}.`;
-        } else if (asset.draftPick) {
-          return `Draft Pick: ${asset.draftPick.year} Round ${asset.draftPick.round} moved from ${from} to ${to}.`;
-        }
-        return 'Unknown';
-      }).join('\n');
+    const userPrompt = `Analyze this trade:\n\n${cleanTradeSummary}`;
 
-      const aiSchema = z.object({
-        theStathead: z.string().describe("The analytical breakdown. Format the text using markdown."),
-        theScout: z.string().describe("The dynasty outlook. Format the text using markdown."),
-        theShockJock: z.string().describe("The radio script dialogue. Format the text using markdown."),
-      });
+    const prompts = {
+      stathead: `You are a baseball stats nerd who relies entirely on advanced analytics, positional scarcity, regression, and immediate MLB impact. You despise "gut feel" and traditional scouting. Give a highly analytical but CONCISE breakdown (max 2 short paragraphs) of who won right now. Format using markdown. If draft picks are involved: 1st round = Top 100 prospect, 2nd round = Top 150, 3rd round = wild card, 4th/5th = organizational depth.`,
+      scout: `You are a grizzled, old-school minor league scout. You only care about the 2-5 year championship window, projectable frames, and prospect rankings. Tell us which franchise set themselves up for a dynasty in 1 or 2 short paragraphs. Format using markdown. If draft picks are involved: 1st round = Top 100 prospect, 2nd round = Top 150, 3rd round = wild card, 4th/5th = organizational depth.`,
+      shockjock: `You are Stewie and Brian Griffin from Family Guy broadcasting a sports talk radio show. Write a SHORT script dialogue (MAXIMUM 6 to 8 lines total). Do not use the phrases "seismic shift," "shockwaves," or "fantasy landscape". Include a unique show title and hook. Stewie should ruthlessly insult Brian's intelligence and the managers' competence based on the specific players traded. Format using markdown.`,
+      seinfeld: `You are writing a scene for the TV show Seinfeld reacting to this fantasy baseball trade. Write a SHORT script dialogue (MAXIMUM 6 to 8 lines total). Set the scene in a random iconic location (e.g., Jerry's apartment, Monk's Diner). Include 2 to 4 of the main characters. They should be arguing about the specific players and picks involved using their classic neuroses. Format using markdown.`
+    };
 
-      const systemPrompt = `You are the driving force behind a Fantasy Baseball Media Network. A trade has just occurred. You need to provide three distinct analytical reactions. 
-      
-      Personality 1 (Stats Guy): You are a baseball stats nerd who relies entirely on advanced analytics, positional scarcity, regression, and immediate MLB impact. You despise "gut feel" and traditional scouting. Give a highly analytical breakdown of who won right now. If there are draft picks involved: a first round pick is equivalent to a top 100 milb prospect. A second round pick is equivalent to a top 150 prospect. A third round pick is equivalent to a very young international signing or a relief with the potential to get a closer role. Fourth and Fifth round picks are essentially guys that were dropped in the offseason.
-      
-      Personality 2 (Dynasty Guy): You are a grizzled, old-school minor league scout. You only care about the 2-5 year championship window. You look at projectable frames, bat speed, minor league levels, and prospect rankings. Tell us which franchise set themselves up for a dynasty. If there are draft picks involved: a first round pick is equivalent to a top 100 milb prospect. A second round pick is equivalent to a top 150 prospect. A third round pick is equivalent to a very young international signing or a relief with the potential to get a closer role. Fourth and Fifth round picks are essentially guys that were dropped in the offseason.
-      
-      Personality 3 (Family Guy): You are Stewie and Brian Griffin from Family Guy broadcasting a sports talk radio show. 
-        Write this entirely as a script dialogue. 
-        CRITICAL: Do not use the phrases "seismic shift," "shockwaves," or "fantasy landscape" in the intro. 
-        Every episode must have a unique, creative show title and a different opening hook. 
-        Brian should try to be a "serious" analyst using annoying sports-talk-radio tropes, while Stewie is 
-        cynically brilliant, ruthlessly insulting Brian's intelligence and the managers' competence. 
-        Focus the banter on the specific players traded—if a player is old, made of glass, or a "never-was," 
-        Stewie should weaponize those specific facts. 
-        Occasionally, other characters like Peter (asking unrelated questions), Quagmire (distracted by a manager's 
-        team name), Cleveland, or other characters might interrupt for a single line of dialogue.`;
-
-      const userPrompt = `Analyze this trade:\n\n${cleanTradeSummary}`;
-
-      const generateWithModel = async (modelId: string, timeoutMs: number) => {
-        const { object } = await generateObject({
-          model: google(modelId),
-          schema: aiSchema,
+    // 🌟 Independent Fetcher with built-in Flash fallback
+    const fetchPersonaWithFallback = async (systemPrompt: string, primaryModel: string, timeoutMs: number, label: string) => {
+      try {
+        console.log(`🚀 Starting ${label} via ${primaryModel}...`);
+        const { text, usage } = await generateText({
+          model: google(primaryModel),
           system: systemPrompt,
           prompt: userPrompt,
-          abortSignal: AbortSignal.timeout(timeoutMs) 
+          abortSignal: AbortSignal.timeout(timeoutMs),
+          maxTokens: 1000, 
         });
-        return object;
-      };
-
-      let aiObject;
-      try {
-        if (useFastModel) {
-          console.log("⚡ Fast Mode Requested: Giving Gemini Flash 55 seconds...");
-          aiObject = await generateWithModel('gemini-2.5-flash', 55000);
-        } else if (isManual) {
-          console.log("👑 Manual Pro Mode Requested: Giving Gemini Pro 55 seconds...");
-          aiObject = await generateWithModel('gemini-3.1-pro-preview', 55000); 
-        } else {
-          console.log("🤖 Automatic Background Generation: Giving Pro 40 seconds...");
-          aiObject = await generateWithModel('gemini-3.1-pro-preview', 40000); 
-        }
-      } catch (e1) {
-        if (isManual) {
-          console.error("❌ Manual model generation failed or timed out:", e1);
-        } else {
-          console.warn("⚠️ Tier 1 Automatic Failed/Timed Out. Falling back to Gemini Flash...");
-          try {
-            // Give Flash the remaining 15 seconds to try and save the automatic request
-            aiObject = await generateWithModel('gemini-2.5-flash', 15000); 
-          } catch (e2) {
-            console.error("❌ Both Pro and Flash automatic models failed.");
-          }
-        }
-      }
-
-      // Final cleanup check
-      if (aiObject && typeof aiObject.theShockJock === 'string' && aiObject.theShockJock.trim().startsWith('{"theStathead"')) {
+        console.log(`✅ [${label}] Finished! Tokens: ${usage.totalTokens}`);
+        return text;
+      } catch (e) {
+        console.warn(`⚠️ [${label}] Primary failed. Falling back to Flash...`);
         try {
-          aiObject = JSON.parse(aiObject.theShockJock);
-        } catch (e) {
-          console.error("Failed to parse nested AI JSON", e);
+          const { text, usage } = await generateText({
+            model: google('gemini-2.5-flash'),
+            system: systemPrompt,
+            prompt: userPrompt,
+            abortSignal: AbortSignal.timeout(15000), // 15s absolute limit for fallback
+            maxTokens: 1000,
+          });
+          console.log(`✅ [${label}] Fallback Finished! Tokens: ${usage.totalTokens}`);
+          return text;
+        } catch (e2) {
+          console.error(`❌ [${label}] Both models failed.`);
+          return null; // Signals ultimate failure
         }
       }
+    };
 
-      cleanAnalysis = aiObject;
+    let primaryModel = useFastModel ? 'gemini-2.5-flash' : 'gemini-3.1-pro-preview';
+    let timeoutMs = isManual ? 40000 : 35000; // Leave 15s at the end for the Flash fallback to run!
 
-      // Update the Trade record
-      if (cleanAnalysis) {
-        await prisma.trade.update({
-          where: { id: tradeId },
-          data: { aiAnalysis: cleanAnalysis }
-        });
-      }
+    const existing = (trade.aiAnalysis as any) || {};
+    
+    // Helper to determine if a persona needs to be generated
+    const needsGen = (text: string | undefined, errorPhrase: string) => 
+      !text || text.includes(errorPhrase) || text === "Analysis unavailable.";
 
-    } catch (aiError) {
-      console.error("❌ All AI models failed. Trade completed without analysis:", aiError);
+    const needsStathead = needsGen(existing.theStathead, "technical difficulties");
+    const needsScout = needsGen(existing.theScout, "grabbing a hot dog");
+    const needsShockjock = needsGen(existing.theShockJock, "dead air");
+    const needsSeinfeld = needsGen(existing.theSeinfeld, "dead air");
+
+    const tasks = [];
+    
+    if (needsStathead) {
+      tasks.push(fetchPersonaWithFallback(prompts.stathead, primaryModel, timeoutMs, 'Stathead')
+        .then(val => ({ key: 'theStathead', val, fallback: "*The analytics department is experiencing technical difficulties.*" })));
     }
+    if (needsScout) {
+      tasks.push(fetchPersonaWithFallback(prompts.scout, primaryModel, timeoutMs, 'Scout')
+        .then(val => ({ key: 'theScout', val, fallback: "*The scouts are out grabbing a hot dog. Check back later.*" })));
+    }
+    if (needsShockjock) {
+      tasks.push(fetchPersonaWithFallback(prompts.shockjock, primaryModel, timeoutMs, 'Shockjock')
+        .then(val => ({ key: 'theShockJock', val, fallback: "*BEEEEEEP. We're experiencing dead air.*" })));
+    }
+    if (needsSeinfeld) {
+      tasks.push(fetchPersonaWithFallback(prompts.seinfeld, primaryModel, timeoutMs, 'Seinfeld')
+        .then(val => ({ key: 'theSeinfeld', val, fallback: "*What's the deal with dead air? Check back later.*" })));
+    }
+
+    if (tasks.length === 0) {
+      console.log("⚡ All personas already exist. Nothing to backfill!");
+      return NextResponse.json({ success: true, aiAnalysis: existing }, { status: 200 });
+    }
+
+    const results = await Promise.all(tasks);
+
+    // Merge new results into the existing ones
+    const cleanAnalysis = { ...existing };
+    results.forEach(res => {
+      // If it returned null (both models failed), use the funny fallback text
+      cleanAnalysis[res.key] = res.val || res.fallback;
+    });
+
+    await prisma.trade.update({
+      where: { id: tradeId },
+      data: { aiAnalysis: cleanAnalysis }
+    });
 
     return NextResponse.json({ 
       success: true, 
-      aiAnalysis: cleanAnalysis || { error: "Scouts are still debating. Check back in a few minutes!" } 
+      aiAnalysis: cleanAnalysis 
     }, { status: 200 });
 
   } catch (error) {
