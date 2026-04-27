@@ -18,7 +18,7 @@ import {
   CalendarOff
 } from 'lucide-react';
 
-// 🌟 THE SPAM FIX: A module-level cache so 40 player cards share 1 single API request
+// 🚨 THE SPAM FIX: A module-level cache so 40 player cards share 1 single API request
 let cachedSettingsPromise: Promise<any> | null = null;
 let cachedSettings: any = null;
 
@@ -53,7 +53,7 @@ export default function PlayerActionMenu({ player, isMyTeam, dropUp = false }: P
   const [showIl60Form, setShowIl60Form] = useState(false);
   const [retroDate, setRetroDate] = useState("");
 
-  // 🌟 Use the cached fetch instead of raw fetch
+  // 🚨 Use the cached fetch instead of raw fetch
   useEffect(() => {
     fetchSettings().then(settings => {
       if (settings?.tradeDeadline) {
@@ -86,7 +86,9 @@ export default function PlayerActionMenu({ player, isMyTeam, dropUp = false }: P
     }
   };
 
-  // 🌟 STATE 1: FREE AGENT (Dropdown to select level)
+  if (!myTeamId) return null;
+
+  // 🚨 STATE 1: FREE AGENT (Dropdown to select level)
   if (!player.teamId) {
     return (
       <div className="relative">
@@ -120,7 +122,7 @@ export default function PlayerActionMenu({ player, isMyTeam, dropUp = false }: P
     );
   }
 
-  // 🌟 STATE 2: SOMEONE ELSE'S TEAM (WITH DEADLINE CHECK)
+  // 🚨 STATE 2: SOMEONE ELSE'S TEAM (WITH DEADLINE CHECK)
   if (!isMyTeam) {
     if (isDeadlinePassed) {
       return (
@@ -146,7 +148,7 @@ export default function PlayerActionMenu({ player, isMyTeam, dropUp = false }: P
     );
   }
 
-  // 🌟 STATE 3: MY TEAM (Show Management Dropdown)
+  // 🚨 STATE 3: MY TEAM (Show Management Dropdown)
   const isIL60Locked = player.status === 'IL_60' && player.il60UnlockDate && new Date(player.il60UnlockDate) > new Date();
 
   return (
@@ -282,4 +284,4 @@ export default function PlayerActionMenu({ player, isMyTeam, dropUp = false }: P
       )}
     </div>
   );
-}2
+}

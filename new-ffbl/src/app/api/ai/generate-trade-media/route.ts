@@ -122,7 +122,6 @@ export async function POST(request: Request) {
           system: systemPrompt,
           prompt: userPrompt,
           abortSignal: AbortSignal.timeout(timeoutMs),
-          maxTokens: 1000, 
         });
         console.log(`✅ [${label}] Finished! Tokens: ${usage.totalTokens}`);
         return text;
@@ -133,8 +132,7 @@ export async function POST(request: Request) {
             model: google('gemini-2.5-flash'),
             system: systemPrompt,
             prompt: userPrompt,
-            abortSignal: AbortSignal.timeout(15000), // 15s absolute limit for fallback
-            maxTokens: 1000,
+            abortSignal: AbortSignal.timeout(15000),
           });
           console.log(`✅ [${label}] Fallback Finished! Tokens: ${usage.totalTokens}`);
           return text;
