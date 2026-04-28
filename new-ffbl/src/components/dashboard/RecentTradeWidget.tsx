@@ -40,14 +40,21 @@ export default async function RecentTradeWidget() {
 
   const teamsInvolved = Array.from(new Set(trade.assets.map(a => a.fromTeam.name)));
 
-  const formatMarkdown = (text: string) => {
+  const formatMarkdown = (text?: string) => {
+    if (!text || text === "Analysis unavailable.") return "Analysis unavailable.";
+    
     return text
-      // 1. Detects end of sentences followed by "**" and forces a paragraph break
-      // Matches: "." or "?" or "!" followed by space(s) and then "**"
+      // 1. Catch JSON escaped newlines
+      .replace(/\\n/g, '\n')
+      // 2. 🌟 NEW: Clean up any AI escaping of asterisks (\*\* becomes **)
+      .replace(/\\\*/g, '*')
+      // 3. Force paragraph breaks before bold text to ensure dialogue stays clean
       .replace(/([.!?])\s+(?=\*\*)/g, '$1<br /><br />')
-      // 2. Converts **text** to high-contrast bold tags
-      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-black text-slate-900">$1</strong>')
-      // 3. Catches any standard explicit newlines the AI might have actually included
+      // 4. Convert **text** to high-contrast bold tags (using [\s\S] to safely span lines)
+      .replace(/\*\*([\s\S]*?)\*\*/g, '<strong class="font-black text-slate-900">$1</strong>')
+      // 5. Convert single *text* to italic tags just in case
+      .replace(/\*([\s\S]*?)\*/g, '<em class="font-bold text-slate-700">$1</em>')
+      // 6. Catch standard explicit newlines
       .replace(/\n/g, '<br />');
   };
 
