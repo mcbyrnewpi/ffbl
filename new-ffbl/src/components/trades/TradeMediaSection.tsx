@@ -110,6 +110,7 @@ export default function TradeMediaSection({ aiAnalysis, tradeId }: { aiAnalysis:
     return unescaped
       .replace(/([.!?])\s+(?=\*\*)/g, '$1<br /><br />')
       .replace(/\*\*(.*?)\*\*/g, '<strong class="font-black text-slate-900">$1</strong>')
+      .replace(/^([A-Z][A-Z\s]+):/gm, '<strong class="font-black text-slate-900">$1:</strong>')
       .replace(/\n/g, '<br />');
   };
 

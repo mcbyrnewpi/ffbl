@@ -42,19 +42,11 @@ export default async function RecentTradeWidget() {
 
   const formatMarkdown = (text?: string) => {
     if (!text || text === "Analysis unavailable.") return "Analysis unavailable.";
-    
-    return text
-      // 1. Catch JSON escaped newlines
-      .replace(/\\n/g, '\n')
-      // 2. 🌟 NEW: Clean up any AI escaping of asterisks (\*\* becomes **)
-      .replace(/\\\*/g, '*')
-      // 3. Force paragraph breaks before bold text to ensure dialogue stays clean
+    let unescaped = text.replace(/\\n/g, '\n');
+    return unescaped
       .replace(/([.!?])\s+(?=\*\*)/g, '$1<br /><br />')
-      // 4. Convert **text** to high-contrast bold tags (using [\s\S] to safely span lines)
-      .replace(/\*\*([\s\S]*?)\*\*/g, '<strong class="font-black text-slate-900">$1</strong>')
-      // 5. Convert single *text* to italic tags just in case
-      .replace(/\*([\s\S]*?)\*/g, '<em class="font-bold text-slate-700">$1</em>')
-      // 6. Catch standard explicit newlines
+      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-black text-slate-900">$1</strong>')
+      .replace(/^([A-Z][A-Z\s]+):/gm, '<strong class="font-black text-slate-900">$1:</strong>')
       .replace(/\n/g, '<br />');
   };
 
